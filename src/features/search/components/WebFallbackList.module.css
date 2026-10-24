@@ -1,0 +1,137 @@
+/* src/features/search/components/WebFallbackList.module.css */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px;
+  overflow-y: scroll;
+  height: 100%;
+}
+
+.list > [data-item-index] {
+  scroll-margin-block: 12px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 8px 2px;
+}
+
+.sectionHeader:first-child {
+  padding-top: 2px;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: var(--text-secondary);
+}
+
+.sectionRule {
+  flex: 1;
+  height: 1px;
+  background: var(--rim-border-divider);
+}
+
+.spinner {
+  color: var(--accent-blue);
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: var(--radius-item);
+  background: transparent;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+
+.item:hover {
+  background: var(--glass-bg-hover);
+}
+
+.item.active {
+  background: var(--button-primary);
+}
+
+.item.active .iconCol,
+.item.active .label {
+  color: var(--button-primary-text);
+}
+
+.item.active .iconCol {
+  background: var(--badge-active-background);
+}
+
+.iconCol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  background: var(--surface-icon);
+}
+
+.contentCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.2px;
+}
+
+.queryText {
+  font-weight: 650;
+}
+
+.enterHint {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  padding: 2px 6px;
+  border-radius: var(--radius-keycap);
+  background: var(--surface-chip);
+}
+
+.item.active .enterHint {
+  background: var(--badge-active-background);
+  color: var(--badge-active-text);
+  box-shadow: inset 0 0 0 1px var(--badge-active-border);
+}
+
+.emptyHint {
+  padding: 10px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}

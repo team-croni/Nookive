@@ -1,0 +1,68 @@
+/* src/features/search/components/SearchHeader.module.css */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 12px;
+  position: relative;
+  /*
+   * compact(60px)와 expanded(520px) 상태에서 헤더의 세로 위치가
+   * 달라지면 검색바가 위로 튀는 flash가 생긴다.
+   * 헤더 높이를 compact 높이와 동일하게 고정해 두 상태 모두에서
+   * 입력 요소가 정확히 같은 y 위치에 있도록 한다.
+   *
+   * 단, --window-compact-height는 창 테두리까지 포함한 border-box 높이이고
+   * 헤더는 테두리 안쪽 콘텐츠 영역에 놓이므로, 테두리 두께(상/하)를 빼야
+   * 아이콘/텍스트가 창의 시각적 중앙에 정확히 정렬된다.
+   */
+  min-height: calc(
+    var(--window-compact-height) - 2 * var(--window-border-width)
+  );
+  flex-shrink: 0;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+
+.icon {
+  stroke-width: 2.2px;
+  opacity: 0.4;
+}
+
+.spinner {
+  opacity: 1;
+  animation: spin 1s linear infinite;
+  color: var(--accent-blue);
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+  caret-color: var(--accent-blue);
+}
+
+.input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.metaGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

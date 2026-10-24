@@ -1,0 +1,8 @@
+{
+  "applicationHint": "Press Enter to launch the app.",
+  "folderHint": "Press Enter to open the folder.",
+  "unsupportedImage": "This image format is unsupported or damaged",
+  "pdfLoading": "Loading PDF…",
+  "pdfBrowserUnsupported": "Local PDFs cannot be previewed in a web browser. Open the desktop app to view it.",
+  "pdfFailed": "Unable to preview this PDF. Use ‘Open’ below to launch it."
+}

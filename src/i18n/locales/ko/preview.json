@@ -1,0 +1,8 @@
+{
+  "applicationHint": "Enter 키를 누르면 앱을 실행합니다.",
+  "folderHint": "Enter 키를 누르면 폴더를 엽니다.",
+  "unsupportedImage": "미리보기를 지원하지 않거나 손상된 이미지 형식입니다",
+  "pdfLoading": "PDF를 불러오는 중…",
+  "pdfBrowserUnsupported": "웹 브라우저에서는 로컬 PDF를 미리볼 수 없습니다. 데스크톱 앱에서 확인하세요",
+  "pdfFailed": "PDF 미리보기를 불러올 수 없습니다. 하단의 ‘열기’로 실행하세요"
+}

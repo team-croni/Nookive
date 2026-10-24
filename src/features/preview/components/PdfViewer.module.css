@@ -1,0 +1,105 @@
+/* src/features/preview/components/PdfViewer.module.css */
+/* 고정 크기 뷰에 키워드 주변을 확대해 보여주는 미리보기 */
+.viewer {
+  position: relative;
+  height: var(--preview-height);
+  width: 100%;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 8px;
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* 페이지 캔버스: 확대 배율 및 오프셋으로 위치/크기 지정 */
+.canvas {
+  position: absolute;
+  display: block;
+  background: #fff;
+  /* 뷰포트(프레임) 여백 안에 페이지가 표시될 때 페이지 자체 모서리도 둥글게 */
+  border-radius: 8px;
+}
+
+/* 검색 키워드 하이라이트 오버레이 */
+.highlightLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* PDF.js 캔버스가 임베디드 폰트를 그리지 못하는 WebKit 환경의 fallback 텍스트 레이어 */
+.textLayer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  color: #111;
+  font-family: Arial, "Apple SD Gothic Neo", sans-serif;
+}
+
+.textLayer span {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  white-space: pre;
+  line-height: 1;
+  transform-origin: left top;
+}
+
+/* 검색 키워드 하이라이트: 텍스트 미리보기 뷰포트의 <mark>와 동일한 톤 */
+.highlight {
+  position: absolute;
+  background: var(--highlight-bg);
+  border-radius: 0;
+}
+
+/* 키워드가 있는 페이지 표시 배지 */
+.pageBadge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--surface-overlay);
+  border: var(--rim-border-window);
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+.stateBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--preview-height);
+  width: 100%;
+  padding: 24px 16px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  text-align: center;
+}
+
+.errorDetail {
+  display: block;
+  max-width: 100%;
+  padding: 8px 10px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 6px;
+  color: var(--error-text);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  text-align: left;
+}

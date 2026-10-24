@@ -1,0 +1,37 @@
+[package]
+name = "app"
+version = "0.1.0"
+description = "Nookive desktop application"
+authors = ["Croni"]
+license = "MIT"
+repository = "https://github.com/team-croni/Nookive"
+edition = "2024"
+rust-version = "1.90"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.2", features = [] }
+
+[dependencies]
+base64 = "0.23.1"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+sha2 = "0.10"
+log = "0.4"
+libc = "0.2"
+tauri = { version = "2.12.3", features = ["protocol-asset", "macos-private-api", "tray-icon", "image-png"] }
+tauri-plugin-log = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-dialog = "2"
+notify = "8.2.0"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3.2", default-features = false, features = ["NSWorkspace", "NSImage", "NSWindow", "NSView", "NSResponder", "NSVisualEffectView", "NSGraphics"] }
+objc2-foundation = { version = "0.3.2", default-features = false, features = ["NSData", "NSObject", "NSString", "NSGeometry"] }

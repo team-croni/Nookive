@@ -1,0 +1,265 @@
+/* src/features/onboarding/OnboardingWizard.module.css */
+/* macOS 표준 소프트웨어 설치 창(Native Installer Window) 스타일 */
+
+.installerTitlebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  -webkit-app-region: drag;
+  z-index: 10;
+  cursor: default;
+}
+
+.installerTitlebar > button {
+  cursor: default;
+}
+
+.installerTitlebar > button svg {
+  opacity: 0;
+}
+
+.installerTitlebar > button:hover svg {
+  opacity: 1;
+}
+
+.installerWindow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 40px 48px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.setupHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.installHeader {
+  width: 100%;
+}
+
+.logoWrapper {
+  margin-bottom: 24px;
+}
+
+.appLogo {
+  width: 80px;
+  height: 80px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  display: block;
+}
+
+.title {
+  margin: 0 0 20px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
+}
+
+/* 카드나 박스 테두리 없는 심플한 네이티브 프로그레스 바 */
+.progressSection {
+  width: 100%;
+  max-width: 380px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.activeProgressSection {
+  margin-top: 28px;
+}
+
+.progressInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.progressFilename {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progressPercent {
+  flex: 0 0 auto;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.nativeProgressTrack {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-chip-strong);
+  overflow: hidden;
+}
+
+.nativeProgressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-blue);
+  transition: width 150ms ease-out;
+}
+
+.installActions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.initialStartActions {
+  margin-top: 44px;
+}
+
+.statusCaption {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.completedTip {
+  margin: 0 0 32px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.completedTip kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  margin: 0 2px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  background: var(--surface-chip);
+  border: 1px solid var(--border-chip);
+  color: var(--text-primary);
+}
+
+.actionButton {
+  min-width: 160px;
+  height: 36px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.setupSection {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 30px;
+  text-align: left;
+}
+
+.setupCard {
+  overflow: hidden;
+  border: 1px solid var(--border-chip);
+  border-radius: 12px;
+  background: var(--surface-chip);
+}
+
+.setupDescription {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.setupHeader .title {
+  margin-bottom: 14px;
+}
+
+.setupOption,
+.folderSetup,
+.setupLanguage {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border-chip);
+  background: transparent;
+}
+
+.setupCard > :last-child {
+  border-bottom: 0;
+}
+
+.setupOption > span:first-child,
+.folderSetup > div,
+.setupLanguage > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.setupOption strong,
+.folderSetup strong,
+.setupLanguage strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.setupOption small,
+.folderSetup small,
+.setupLanguage small {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.setupOption > span:last-child,
+.folderSetup > button,
+.setupLanguage > :last-child {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.setupOption input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.setupActions {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.setupActions .actionButton {
+  align-self: center;
+}
+

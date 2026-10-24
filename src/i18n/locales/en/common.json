@@ -1,0 +1,6 @@
+{
+  "actions": {"open": "Open", "cancel": "Cancel", "close": "Close", "remove": "Remove", "copyPath": "Copy path", "refresh": "Refresh", "stop": "Stop", "start": "Build index", "details": "Details", "enabled": "On", "disabled": "Off"},
+  "fileTypes": {"document": "Documents", "image": "Images", "video": "Videos", "audio": "Audio", "code": "Code"},
+  "file": {"application": "Application", "folder": "Folder", "page": "Page {{count}}", "timestamp": "Timestamp {{value}}", "finder": "Show in Finder"},
+  "language": {"label": "Language", "korean": "한국어", "english": "English", "japanese": "日本語", "chineseSimplified": "简体中文", "chineseTraditional": "繁體中文", "spanish": "Español", "french": "Français", "german": "Deutsch", "portuguese": "Português (Brasil)"}
+}

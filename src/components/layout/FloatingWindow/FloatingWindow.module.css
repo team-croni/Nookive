@@ -1,0 +1,76 @@
+/* src/components/layout/FloatingWindow/FloatingWindow.module.css */
+
+/*
+ * 창 래퍼.
+ * backdrop-filter가 걸린 요소(또는 그 상위)에 opacity/transform 애니메이션을 걸면
+ * WKWebView(WebKit)에서 그룹이 생성되어 blur가 늦게(또는 안) 나타난다.
+ * 따라서 이 창에는 등장 애니메이션을 적용하지 않는다.
+ */
+.windowShell {
+  position: relative;
+  display: flex;
+}
+
+.windowFrame {
+  width: var(--window-width);
+  height: var(--window-height);
+  max-width: 100vw;
+  max-height: 100vh;
+  /* 부모 래퍼의 투명 예약 영역은 클릭을 통과시키되 창 자체는 클릭 가능하게 유지 */
+  pointer-events: auto;
+  background: var(--glass-bg-base);
+  /* macOS Tauri 네이티브 효과가 창 뒤 배경을 실시간으로 흐리게 한다. */
+  border: var(--border-search-window);
+  border-radius: var(--radius-window);
+  /* 그림자가 투명 윈도우 경계 안쪽에서 자연스럽게 사라지도록 토큰으로 관리 */
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /*
+   * overflow:hidden은 스크롤 컨테이너를 만들기 때문에 scrollIntoView/focus 등이
+   * 프로그램적으로 프레임을 스크롤시킬 수 있다. 네이티브 창 리사이즈가 끝나기 전
+   * (프레임이 compact 높이로 클램프된 순간)에 이런 스크롤이 일어나면 검색바가
+   * 위로 튀었다가 돌아오는 flash가 생긴다.
+   * overflow:clip은 스크롤 컨테이너를 만들지 않으므로 어떤 경우에도 프레임이
+   * 스크롤되지 않는다. (미지원 환경은 위의 hidden으로 폴백)
+   */
+  overflow: clip;
+  position: relative;
+}
+
+/*
+ * 초기(검색어 없음) 상태: 네이티브 창 높이와 동일한 고정 높이를 사용한다.
+ * border-box이므로 border가 이 높이 안에 포함되어 네이티브 창 경계와 정렬된다.
+ * (backdrop-filter 요소에 transition을 걸면 합성이 깨질 수 있어 애니메이션 없이 즉시 전환)
+ */
+.windowFrame.compact {
+  height: var(--window-compact-height);
+  max-height: none;
+}
+
+.innerContent {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  /*
+   * 확장 상태에서는 상단 정렬을 유지한다.
+   * 네이티브 창 리사이즈는 비동기라 확장 직후 한두 프레임 동안
+   * 프레임 높이가 `max-height: 100vh`(아직 compact 높이)로 클램프된다.
+   * 이때 center 정렬이면 내용이 위아래로 넘치며 검색바가 위로 밀렸다가
+   * 창이 커진 뒤 제자리로 돌아오는 flash가 발생한다.
+   */
+  justify-content: flex-start;
+  min-height: 0;
+}
+
+/*
+ * 초기(검색어 없음) 상태에서도 확장 상태와 동일하게 상단 정렬을 유지한다.
+ * 검색바 헤더 자체가 compact 높이(60px)를 채우므로 시각적으로는 중앙에
+ * 놓인 것처럼 보이면서, 확장 시 justify-content 변경으로 인한
+ * 검색바 y 위치 이동(flash)이 발생하지 않는다.
+ */
+.innerContent.compactContent {
+  justify-content: flex-start;
+}
