@@ -1,0 +1,6 @@
+{
+  "actions": {"open": "열기", "cancel": "취소", "close": "닫기", "remove": "제거", "copyPath": "경로 복사", "refresh": "새로고침", "stop": "중지", "start": "생성 시작", "details": "상세보기", "enabled": "사용", "disabled": "사용 안 함"},
+  "fileTypes": {"document": "문서", "image": "이미지", "video": "비디오", "audio": "오디오", "code": "코드"},
+  "file": {"application": "애플리케이션", "folder": "폴더", "page": "페이지 {{count}}", "pageOf": "페이지 {{page}}/{{total}}", "timestamp": "타임스탬프 {{value}}", "finder": "Finder에서 보기"},
+  "language": {"label": "언어", "korean": "한국어", "english": "English", "japanese": "日本語", "chineseSimplified": "简体中文", "chineseTraditional": "繁體中文", "spanish": "Español", "french": "Français", "german": "Deutsch", "portuguese": "Português (Brasil)"}
+}

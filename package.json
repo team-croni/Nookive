@@ -1,0 +1,59 @@
+{
+  "name": "nookive",
+  "private": false,
+  "version": "0.1.0",
+  "description": "On-device semantic file search for macOS",
+  "license": "MIT",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "author": "Croni",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/team-croni/Nookive.git"
+  },
+  "homepage": "https://github.com/team-croni/Nookive#readme",
+  "bugs": {
+    "url": "https://github.com/team-croni/Nookive/issues"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "index": "node scripts/index-folder.mjs",
+    "index:sample": "node scripts/index-folder.mjs sample_docs",
+    "model:download": "bash scripts/download-model.sh",
+    "asr:download": "bash scripts/download-asr-model.sh",
+    "asr": "bash scripts/run-asr.sh",
+    "media:build": "bash scripts/build-media-cli.sh",
+    "aligner:build": "bash scripts/build-aligner.sh",
+    "build:llama-metal": "bash scripts/build-llama-metal.sh",
+    "bundle:prepare": "bash scripts/prepare-bundle.sh",
+    "sidecar": "bash scripts/run-sidecar.sh",
+    "tauri": "tauri",
+    "desktop": "tauri dev"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.12.3",
+    "@tauri-apps/plugin-dialog": "^2.8.3",
+    "i18next": "^26.5.4",
+    "lucide-react": "^1.56.0",
+    "pdf-parse": "^2.4.5",
+    "pdfjs-dist": "^6.2.108",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-i18next": "^17.1.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.2",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  }
+}

@@ -1,0 +1,312 @@
+/* src/styles/tokens.css */
+
+/*
+ * 테마 정책: 설정에서 라이트/다크/시스템을 선택할 수 있다.
+ * - :root            → 라이트 값(기본)
+ * - @media dark      → 시스템 모드의 다크 값 오버라이드
+ * - [data-theme]     → 수동 선택값이 시스템 미디어 쿼리보다 우선
+ * 색상에 의존하는 모든 값은 아래 토큰을 통해서만 사용한다(컴포넌트에 하드코딩 금지).
+ */
+:root {
+  color-scheme: light dark;
+
+  /* 🪟 Surface & Glassmorphism (Light) */
+  --glass-bg-base: rgba(246, 246, 248, 0.78);
+  --glass-bg-input: rgba(0, 0, 0, 0.035);
+  --glass-bg-hover: rgba(0, 0, 0, 0.045);
+  --glass-bg-active: rgba(0, 0, 0, 0.08);
+  --glass-bg-panel: rgba(255, 255, 255, 0.55);
+  --glass-bg-footer: rgba(0, 0, 0, 0.04);
+  --surface-settings: #f6f6f8;
+  --glass-blur: blur(40px) saturate(190%);
+
+  /* 🧩 Component surfaces */
+  --surface-chip: rgba(0, 0, 0, 0.06);
+  --surface-chip-strong: rgba(0, 0, 0, 0.08);
+  --surface-icon: rgba(0, 0, 0, 0.04);
+  --surface-overlay: rgba(255, 255, 255, 0.72);
+  --surface-code: rgba(0, 0, 0, 0.05);
+  --surface-media: #000;
+  --badge-active-background: rgba(255, 255, 255, 0.2);
+  --badge-active-text: rgba(255, 255, 255, 1);
+  --badge-active-border: rgba(255, 255, 255, 0.1);
+  --button-primary: #2f6fe4;
+  --button-primary-hover: #1d4ed8;
+  --button-primary-text: #ffffff;
+  --button-secondary: #e5e7eb;
+  --button-secondary-hover: #d1d5db;
+  --surface-doc: #ffffff;
+  --text-on-doc: #1e1e1e;
+  --border-chip: rgba(0, 0, 0, 0.1);
+  --border-icon: rgba(0, 0, 0, 0.06);
+  --border-media: rgba(0, 0, 0, 0.12);
+  --text-hover-strong: #000000;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+  --highlight-bg: rgba(255, 214, 0, 0.5);
+
+  /* 💡 Border & Rim Light */
+  --rim-color-window: rgba(0, 0, 0, 0.14);
+  --rim-border-window: 1px solid var(--rim-color-window);
+  /* 창 테두리 두께. border-box 기준 높이(--window-compact-height) 안에
+     포함되므로, 내부 콘텐츠 높이를 계산할 때 이 값을 빼야 한다. */
+  --window-border-width: 1px;
+  --border-search-window: var(--window-border-width) solid rgba(0, 0, 0, 0.18);
+  --rim-border-divider: 1px solid rgba(0, 0, 0, 0.08);
+  --rim-border-focus: 1px solid rgba(0, 0, 0, 0.25);
+
+  /* 🌑 Ambient Shadows
+     투명 윈도우 경계에서 잘리지 않도록 blur/spread/offset 합이
+     윈도우 여백(약 60~70px) 안에 들어오도록 제한한다. */
+  --shadow-window:
+    0 18px 44px -12px rgba(0, 0, 0, 0.3), 0 6px 18px -6px rgba(0, 0, 0, 0.18);
+  --shadow-badge: 0 2px 6px rgba(0, 0, 0, 0.12);
+  --shadow-image: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-keycap: 0 1px 2px rgba(0, 0, 0, 0.15);
+
+  /* 🎨 Text */
+  --text-primary: #1d1d1f;
+  --text-secondary: rgba(29, 29, 31, 0.68);
+  --text-tertiary: rgba(29, 29, 31, 0.45);
+  --text-placeholder: rgba(29, 29, 31, 0.38);
+
+  /* 🎨 Semantic Accents */
+  --accent-blue: #2563eb;
+  --accent-blue-soft: rgba(37, 99, 235, 0.14);
+  --accent-blue-text: #1d4ed8;
+  --accent-emerald: #059669;
+  --accent-emerald-soft: rgba(5, 150, 105, 0.16);
+  --accent-purple: #7c3aed;
+  --accent-amber: #d97706;
+
+  /* ⚠️ Error */
+  --error-text: #b91c1c;
+  --error-bg: rgba(220, 38, 38, 0.08);
+  --error-border: rgba(220, 38, 38, 0.3);
+
+  /* 📄 File type icon colors */
+  --icon-image: #0284c7;
+  --icon-pdf: #dc2626;
+  --icon-code: #4f46e5;
+  --icon-video: #9333ea;
+  --icon-audio: #db2777;
+  --icon-sheet: #059669;
+  --icon-archive: #ea580c;
+  --icon-doc: #d97706;
+  --icon-default: #64748b;
+  --icon-muted: #64748b;
+
+  /* 📐 Geometry & Radii */
+  /* 고정 창 크기: 확장(검색 결과 표시) 시의 전체 높이를 기준으로
+     레이아웃이 예약되어 검색바 위치가 흔들리지 않도록 공유한다. */
+  --window-width: 780px;
+  --window-height: 520px;
+  /* 검색어가 없을 때의 네이티브 창 높이. border-box 기준으로
+     CSS border까지 이 높이 안에 포함되므로 네이티브 창 경계와 정확히 일치한다. */
+  --window-compact-height: 60px;
+  /* 모든 미리보기(이미지/미디어/PDF/텍스트)가 공유하는 고정 뷰 높이 */
+  --preview-height: 240px;
+  --radius-window: 18px;
+  --radius-item: 10px;
+  --radius-badge: 6px;
+  --radius-keycap: 5px;
+
+  /* ⚡ Transitions & Motion */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-bg-base: rgba(32, 32, 34, 0.72);
+    --glass-bg-input: rgba(255, 255, 255, 0.05);
+    --glass-bg-hover: rgba(255, 255, 255, 0.05);
+    --glass-bg-active: rgba(255, 255, 255, 0.08);
+    --glass-bg-panel: rgba(15, 15, 18, 0.55);
+    --glass-bg-footer: rgba(0, 0, 0, 0.25);
+    --surface-settings: #202022;
+
+    --surface-chip: rgba(255, 255, 255, 0.06);
+    --surface-chip-strong: rgba(255, 255, 255, 0.08);
+    --surface-icon: rgba(255, 255, 255, 0.05);
+    --surface-overlay: rgba(15, 15, 18, 0.62);
+    --surface-code: rgba(0, 0, 0, 0.4);
+    --button-primary: #3677e8;
+    --button-primary-hover: #60a5fa;
+    --button-primary-text: #ffffff;
+    --button-secondary: #3f4148;
+    --button-secondary-hover: #4b4e56;
+    --border-chip: rgba(255, 255, 255, 0.12);
+    --border-icon: rgba(255, 255, 255, 0.06);
+    --border-media: rgba(255, 255, 255, 0.1);
+    --text-hover-strong: #ffffff;
+    --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.28);
+    --highlight-bg: rgba(255, 255, 0, 0.4);
+
+    --rim-color-window: rgba(255, 255, 255, 0.14);
+    --window-border-width: 2px;
+    --border-search-window: var(--window-border-width) solid
+      rgba(120, 120, 123, 0.15);
+    --rim-border-divider: 1px solid rgba(255, 255, 255, 0.07);
+    --rim-border-focus: 1px solid rgba(255, 255, 255, 0.25);
+
+    --shadow-window:
+      0 18px 44px -12px rgba(0, 0, 0, 0.72), 0 6px 18px -6px rgba(0, 0, 0, 0.45);
+    --shadow-badge: 0 2px 6px rgba(0, 0, 0, 0.25);
+    --shadow-image: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-keycap: 0 1px 2px rgba(0, 0, 0, 0.35);
+
+    --text-primary: #f5f5f7;
+    --text-secondary: rgba(245, 245, 247, 0.65);
+    --text-tertiary: rgba(245, 245, 247, 0.38);
+    --text-placeholder: rgba(245, 245, 247, 0.32);
+
+    --accent-blue: #3b82f6;
+    --accent-blue-soft: rgba(59, 130, 246, 0.18);
+    --accent-blue-text: #60a5fa;
+    --accent-emerald: #10b981;
+    --accent-emerald-soft: rgba(16, 185, 129, 0.18);
+    --accent-purple: #8b5cf6;
+    --accent-amber: #f59e0b;
+
+    --error-text: #fca5a5;
+    --error-bg: rgba(0, 0, 0, 0.4);
+    --error-border: rgba(248, 113, 113, 0.3);
+
+    --icon-image: #38bdf8;
+    --icon-pdf: #f87171;
+    --icon-code: #818cf8;
+    --icon-video: #c084fc;
+    --icon-audio: #f472b6;
+    --icon-sheet: #34d399;
+    --icon-archive: #fb923c;
+    --icon-doc: #fbbf24;
+    --icon-default: #94a3b8;
+    --icon-muted: #94a3b8;
+  }
+}
+
+/* Explicit preferences override the system media query. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --glass-bg-base: rgba(246, 246, 248, 0.78);
+  --glass-bg-input: rgba(0, 0, 0, 0.035);
+  --glass-bg-hover: rgba(0, 0, 0, 0.045);
+  --glass-bg-active: rgba(0, 0, 0, 0.08);
+  --glass-bg-panel: rgba(255, 255, 255, 0.55);
+  --glass-bg-footer: rgba(0, 0, 0, 0.04);
+  --surface-settings: #f6f6f8;
+  --surface-chip: rgba(0, 0, 0, 0.06);
+  --surface-chip-strong: rgba(0, 0, 0, 0.08);
+  --surface-icon: rgba(0, 0, 0, 0.04);
+  --surface-overlay: rgba(255, 255, 255, 0.72);
+  --surface-code: rgba(0, 0, 0, 0.05);
+  --button-primary: #2f6fe4;
+  --button-primary-hover: #1d4ed8;
+  --button-primary-text: #ffffff;
+  --button-secondary: #e5e7eb;
+  --button-secondary-hover: #d1d5db;
+  --border-chip: rgba(0, 0, 0, 0.1);
+  --border-icon: rgba(0, 0, 0, 0.06);
+  --border-media: rgba(0, 0, 0, 0.12);
+  --text-hover-strong: #000000;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+  --highlight-bg: rgba(255, 214, 0, 0.5);
+  --rim-color-window: rgba(0, 0, 0, 0.14);
+  --border-search-window: var(--window-border-width) solid rgba(0, 0, 0, 0.18);
+  --rim-border-divider: 1px solid rgba(0, 0, 0, 0.08);
+  --rim-border-focus: 1px solid rgba(0, 0, 0, 0.25);
+  --window-border-width: 1px;
+  --shadow-window: 0 18px 44px -12px rgba(0, 0, 0, 0.3), 0 6px 18px -6px rgba(0, 0, 0, 0.18);
+  --shadow-badge: 0 2px 6px rgba(0, 0, 0, 0.12);
+  --shadow-image: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-keycap: 0 1px 2px rgba(0, 0, 0, 0.15);
+  --text-primary: #1d1d1f;
+  --text-secondary: rgba(29, 29, 31, 0.68);
+  --text-tertiary: rgba(29, 29, 31, 0.45);
+  --text-placeholder: rgba(29, 29, 31, 0.38);
+  --accent-blue: #2563eb;
+  --accent-blue-soft: rgba(37, 99, 235, 0.14);
+  --accent-blue-text: #1d4ed8;
+  --accent-emerald: #059669;
+  --accent-emerald-soft: rgba(5, 150, 105, 0.16);
+  --accent-purple: #7c3aed;
+  --accent-amber: #d97706;
+  --error-text: #b91c1c;
+  --error-bg: rgba(220, 38, 38, 0.08);
+  --error-border: rgba(220, 38, 38, 0.3);
+  --icon-image: #0284c7;
+  --icon-pdf: #dc2626;
+  --icon-code: #4f46e5;
+  --icon-video: #9333ea;
+  --icon-audio: #db2777;
+  --icon-sheet: #059669;
+  --icon-archive: #ea580c;
+  --icon-doc: #d97706;
+  --icon-default: #64748b;
+  --icon-muted: #64748b;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --glass-bg-base: rgba(32, 32, 34, 0.72);
+  --glass-bg-input: rgba(255, 255, 255, 0.05);
+  --glass-bg-hover: rgba(255, 255, 255, 0.05);
+  --glass-bg-active: rgba(255, 255, 255, 0.08);
+  --glass-bg-panel: rgba(15, 15, 18, 0.55);
+  --glass-bg-footer: rgba(0, 0, 0, 0.25);
+  --surface-settings: #202022;
+  --surface-chip: rgba(255, 255, 255, 0.06);
+  --surface-chip-strong: rgba(255, 255, 255, 0.08);
+  --surface-icon: rgba(255, 255, 255, 0.05);
+  --surface-overlay: rgba(15, 15, 18, 0.62);
+  --surface-code: rgba(0, 0, 0, 0.4);
+  --button-primary: #3677e8;
+  --button-primary-hover: #60a5fa;
+  --button-primary-text: #ffffff;
+  --button-secondary: #3f4148;
+  --button-secondary-hover: #4b4e56;
+  --border-chip: rgba(255, 255, 255, 0.12);
+  --border-icon: rgba(255, 255, 255, 0.06);
+  --border-media: rgba(255, 255, 255, 0.1);
+  --text-hover-strong: #ffffff;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.28);
+  --highlight-bg: rgba(255, 255, 0, 0.4);
+  --rim-color-window: rgba(255, 255, 255, 0.14);
+  --border-search-window: var(--window-border-width) solid rgba(120, 120, 123, 0.15);
+  --rim-border-divider: 1px solid rgba(255, 255, 255, 0.07);
+  --rim-border-focus: 1px solid rgba(255, 255, 255, 0.25);
+  --window-border-width: 2px;
+  --shadow-window: 0 18px 44px -12px rgba(0, 0, 0, 0.72), 0 6px 18px -6px rgba(0, 0, 0, 0.45);
+  --shadow-badge: 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-image: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-keycap: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --text-primary: #f5f5f7;
+  --text-secondary: rgba(245, 245, 247, 0.65);
+  --text-tertiary: rgba(245, 245, 247, 0.38);
+  --text-placeholder: rgba(245, 245, 247, 0.32);
+  --accent-blue: #3b82f6;
+  --accent-blue-soft: rgba(59, 130, 246, 0.18);
+  --accent-blue-text: #60a5fa;
+  --accent-emerald: #10b981;
+  --accent-emerald-soft: rgba(16, 185, 129, 0.18);
+  --accent-purple: #8b5cf6;
+  --accent-amber: #f59e0b;
+  --error-text: #fca5a5;
+  --error-bg: rgba(0, 0, 0, 0.4);
+  --error-border: rgba(248, 113, 113, 0.3);
+  --icon-image: #38bdf8;
+  --icon-pdf: #f87171;
+  --icon-code: #818cf8;
+  --icon-video: #c084fc;
+  --icon-audio: #f472b6;
+  --icon-sheet: #34d399;
+  --icon-archive: #fb923c;
+  --icon-doc: #fbbf24;
+  --icon-default: #94a3b8;
+  --icon-muted: #94a3b8;
+}

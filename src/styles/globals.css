@@ -1,0 +1,90 @@
+/* src/styles/globals.css */
+@import "./tokens.css";
+@import "./typography.css";
+@import "./animations.css";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: transparent; /* Tauri / Electron 투명 윈도우 대응 */
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+/* 🖼️ 이미지 전역 페이드인: 로드 완료 시 .img-loaded가 붙어 부드럽게 나타난다 */
+img {
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+img.img-loaded {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  img {
+    opacity: 1;
+    transition: none;
+  }
+
+  img.icon-fade-in {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* 페이드인 예외: 정적 UI 아이콘(파일 포맷 아이콘 등)은 리마운트 시 깜빡임을 막기 위해 즉시 표시 */
+img.no-fade {
+  opacity: 1;
+  transition: none;
+}
+
+/* IPC로 늦게 도착하는 앱/폴더 아이콘은 슬롯을 유지한 채 이미지만 부드럽게 노출한다. */
+img.icon-fade-in {
+  animation: fadeIn var(--duration-normal) ease-out both;
+}
+
+/* 슬림 스크롤바 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}

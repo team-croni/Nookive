@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Nookive menu bar icon">
+  <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke-width="24" d="M49 145c7 37 41 64 80 64 31 0 58-17 72-43"/>
+    <path stroke-width="24" d="M207 111c-7-37-41-64-80-64-31 0-58 17-72 43"/>
+  </g>
+  <circle cx="94" cy="155" r="16" fill="#fff"/>
+  <circle cx="162" cy="101" r="16" fill="#fff"/>
+</svg>

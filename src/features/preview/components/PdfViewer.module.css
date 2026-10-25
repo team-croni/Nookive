@@ -1,0 +1,132 @@
+/* src/features/preview/components/PdfViewer.module.css */
+/* 고정 크기 뷰에 키워드 주변을 확대해 보여주는 미리보기 */
+.viewer {
+  position: relative;
+  height: var(--preview-height);
+  width: 100%;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 8px;
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* 페이지 캔버스: 확대 배율 및 오프셋으로 위치/크기 지정 */
+.canvas {
+  position: absolute;
+  display: block;
+  background: #fff;
+  z-index: 1;
+  /* 뷰포트(프레임) 여백 안에 페이지가 표시될 때 페이지 자체 모서리도 둥글게 */
+  border-radius: 8px;
+}
+
+/* 처음 로딩한 페이지를 이미지 미리보기와 동일한 속성(280ms ease)으로 노출 */
+.canvasFadeIn {
+  animation: pdfCanvasFadeIn 280ms ease both;
+}
+
+@keyframes pdfCanvasFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvasFadeIn {
+    animation: none;
+  }
+}
+
+/* PDF.js가 투명 페이지를 반환하는 경우에도 문서 용지를 항상 표시한다. */
+.pageBackground {
+  position: absolute;
+  z-index: 0;
+  background: #fff;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* PDF.js 캔버스가 임베디드 폰트를 그리지 못하는 WebKit 환경의 fallback 텍스트 레이어 */
+.textLayer {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+  color: #111;
+  z-index: 2;
+  font-family: Arial, "Apple SD Gothic Neo", sans-serif;
+}
+
+.textLayer span {
+  position: absolute;
+  display: block;
+  /* PDF.js의 글꼴과 시스템 폰트의 폭이 다를 수 있어 span 폭으로
+     글자를 잘라내면 오른쪽 글자가 사라진다. 페이지 컨테이너가 최종
+     클리핑을 담당하도록 span 자체는 넘치는 글자를 자르지 않는다. */
+  overflow: visible;
+  white-space: pre;
+  line-height: 1;
+  transform-origin: left top;
+}
+
+/* 키워드가 있는 페이지 표시 배지 */
+.pageBadge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--surface-overlay);
+  border: var(--rim-border-window);
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.stateBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--preview-height);
+  width: 100%;
+  padding: 24px 16px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  text-align: center;
+}
+
+.errorDetail {
+  display: block;
+  max-width: 100%;
+  padding: 8px 10px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 6px;
+  color: var(--error-text);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  text-align: left;
+}
+
+.accessHint {
+  max-width: 320px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.45;
+}

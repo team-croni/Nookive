@@ -1,0 +1,54 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+bin/node
+.cache
+.roo/
+dist
+dist-ssr
+*.local
+
+# Large/generated runtime assets. Fetch or build these locally with the scripts
+# documented in README.md; they must not be committed to the source repository.
+/bin/*
+!/bin/.gitkeep
+/models/*
+!/models/.gitkeep
+
+# Local environment files and credentials
+.env
+.env.*
+!.env.example
+.envrc
+.npmrc
+.cargo/credentials*
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.mobileprovision
+*.db
+*.sqlite
+*.sqlite3
+
+# User/generated search data. The app uses the per-user runtime index.
+/public/search_index.json
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

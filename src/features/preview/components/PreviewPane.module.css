@@ -1,0 +1,207 @@
+/* src/features/preview/components/PreviewPane.module.css */
+.pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* PreviewPane이 선택 항목보다 먼저 마운트될 수 있도록 셸과 콘텐츠를 분리한다. */
+.paneContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 하단 파일 메타 정보 패널 */
+.meta {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fileName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filePath {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.actionRow {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.body {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/*
+ * 공통 미리보기 뷰포트.
+ * PDF 뷰어와 동일한 고정 크기(--preview-height), 전체 폭, 투명 배경,
+ * 8px 라운드로 이미지/미디어/텍스트 미리보기를 통일한다.
+ */
+.previewFrame {
+  position: relative;
+  width: 100%;
+  height: var(--preview-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 8px;
+}
+
+/* 이미지 미리보기 */
+.previewImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  /* 전역 이미지 페이드인(opacity)도 함께 전환되도록 유지 */
+  transition: opacity 280ms ease;
+}
+
+/* 비디오 / 오디오 미디어 플레이어 */
+.mediaPlayer {
+  width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  outline: none;
+  background: var(--surface-media);
+  border: 1px solid var(--border-media);
+}
+
+.audioPlayer {
+  width: 100%;
+  outline: none;
+}
+
+.fallbackBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 16px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  text-align: center;
+}
+
+.applicationPreview {
+  height: var(--preview-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  text-align: center;
+}
+
+.applicationPreview small {
+  font-size: 10px;
+}
+
+.applicationPreviewName {
+  max-width: 100%;
+  padding: 0 16px;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.applicationPreviewType {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+/* 상세 패널의 앱/폴더 아이콘은 동일한 크기로 맞춘다. */
+.applicationPreviewIcon {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 4px;
+}
+
+/* 본문 텍스트 스니펫: PDF 페이지처럼 흰 문서 영역으로 뷰포트를 채운다 */
+.textContent {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Pretendard Variable",
+    sans-serif;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-on-doc);
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--surface-doc);
+  padding: 14px 16px;
+  border-radius: 8px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.emptyPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-tertiary);
+  gap: 10px;
+  font-size: 10px;
+}
