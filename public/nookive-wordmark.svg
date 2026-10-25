@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" role="img" aria-labelledby="title desc">
+  <title id="title">Nookive</title>
+  <desc id="desc">Nookive temporary wordmark.</desc>
+  <defs>
+    <linearGradient id="teal" x1="24" y1="137" x2="88" y2="47" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#18A7B8"/>
+      <stop offset="1" stop-color="#38C7D6"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="72" y1="113" x2="135" y2="23" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3B52D"/>
+      <stop offset="1" stop-color="#FFD05A"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(10 10) scale(.55)">
+    <rect width="256" height="256" rx="58" fill="#101820"/>
+    <path d="M48 146.5C58.5 190.5 99 220 145.5 214.5c26.2-3.1 48.7-17.4 62.9-37.9l-36.2 8.2c-10.6 9.7-24.2 15.8-39.5 17.6-25.7 3-48.8-9.4-61.1-29.7-8-13.2-10.5-29.1-7.6-44.2L48 146.5Z" fill="url(#teal)"/>
+    <path d="M208 109.5C197.5 65.5 157 36 110.5 41.5c-26.2 3.1-48.7 17.4-62.9 37.9l36.2-8.2c10.6-9.7 24.2-15.8 39.5-17.6 25.7-3 48.8 9.4 61.1 29.7 8 13.2 10.5 29.1 7.6 44.2L208 109.5Z" fill="url(#gold)"/>
+    <circle cx="94" cy="155" r="20" fill="#38C7D6"/><circle cx="162" cy="101" r="20" fill="#FFD05A"/>
+  </g>
+  <text x="184" y="103" fill="#101820" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="74" font-weight="700" letter-spacing="-3">Nookive</text>
+  <text x="188" y="133" fill="#6B7785" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="600" letter-spacing="2.5">LOCAL SEMANTIC SEARCH</text>
+</svg>

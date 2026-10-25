@@ -1,0 +1,13 @@
+{
+  "applicationHint": "Press Enter to launch the app.",
+  "folderHint": "Press Enter to open the folder.",
+  "unsupportedImage": "This image format is unsupported or damaged",
+  "pdfLoading": "Loading PDF…",
+  "pdfBrowserUnsupported": "Local PDFs cannot be previewed in a web browser. Open the desktop app to view it.",
+  "pdfFailed": "Unable to preview this PDF. Use ‘Open’ below to launch it.",
+  "fileAccessChecking": "Checking file access…",
+  "fileAccessTitle": "File access is unavailable",
+  "fileAccessDescription": "macOS needs to allow Nookive to access this file before it can be previewed.",
+  "fileAccessHint": "If you did not see a permission prompt, check Nookive under System Settings > Privacy & Security > Files and Folders, then try again.",
+  "fileAccessRetry": "Try again"
+}

@@ -1,0 +1,22 @@
+/* src/components/ui/KeyHint/KeyHint.module.css */
+.keycap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 5px;
+  background: var(--surface-chip-strong);
+  border: 1px solid var(--border-chip);
+  border-radius: var(--radius-keycap);
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.glyph {
+  font-size: 9px;
+}
+
+.label {
+  text-transform: uppercase;
+}

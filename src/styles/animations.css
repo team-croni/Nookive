@@ -1,0 +1,25 @@
+/* src/styles/animations.css */
+/* 참고: 창(backdrop-filter 요소)에는 등장 애니메이션(opacity/transform)을 걸지 않는다.
+   애니메이션 도중 그룹이 생성되면 blur가 늦게 나타나므로 windowPop은 제거됨. */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.anim-fade-in {
+  animation: fadeIn var(--duration-fast) ease-out forwards;
+}

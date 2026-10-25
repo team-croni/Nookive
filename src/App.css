@@ -1,0 +1,96 @@
+/* src/App.css */
+.app-main {
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  user-select: none;
+  cursor: default;
+}
+
+.window-wrapper {
+  position: relative;
+  display: flex;
+  /* 검색바 위치를 고정한다: 항상 확장 시의 전체 높이만큼 공간을 예약하고
+     내용을 상단에 붙여, 결과가 아래로 생겨도 검색바가 위로 밀리지 않는다. */
+  align-items: flex-start;
+  justify-content: center;
+  height: min(var(--window-height), 100vh);
+  /* 예약된 투명 영역 클릭은 배경 클릭(창 닫기)으로 통과시킨다. */
+  pointer-events: none;
+}
+
+/* 검색중 / 빈 결과 단일 상태 */
+.search-status {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  border-top: var(--rim-border-divider);
+}
+
+/* 로컬 결과가 없을 때의 웹 검색 폴백 (전체 폭 사용) */
+.web-fallback-pane {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  border-top: var(--rim-border-divider);
+}
+
+/* 2열 분할 레이아웃 */
+.search-body-split {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  width: 100%;
+  border-top: var(--rim-border-divider);
+}
+
+/* 좌측 파일 목록 (더 넓은 가로폭 제공) */
+.results-pane {
+  flex: 10;
+  min-width: 0;
+  height: 100%;
+  /* 내부 ResultList가 선택 항목을 직접 스크롤한다. */
+  overflow: hidden;
+}
+
+/* 우측 파일 미리보기 */
+.preview-pane-wrapper {
+  flex: 12;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  /* 프리뷰 콘텐츠가 디바운스되는 동안에도 패널 자체는 결과 목록과 함께 페인트한다. */
+  background: var(--glass-bg-panel);
+  border-left: var(--rim-border-divider);
+}
+
+/* 앱 전체 하단 액션 단축키 바 */
+.app-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-top: var(--rim-border-divider);
+  flex-shrink: 0;
+}
+
+.footer-action {
+  min-height: 24px;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.footer-action:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
