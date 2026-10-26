@@ -24,7 +24,18 @@ export function useWebSuggestions(query: string, enabled: boolean) {
   }, []);
 
   useEffect(() => {
-    if (!enabled || !isPreferenceEnabled) return;
+    // 검색창이 축소되거나 웹 검색 설정이 꺼지면 이전 요청 결과를 버린다.
+    // 훅은 언마운트되지 않고 재사용되므로, 다음에 검색창이 다시 확장될 때
+    // 직전 검색어의 자동완성 목록이 잠깐 나타나지 않도록 명시적으로 초기화한다.
+    if (!enabled || !isPreferenceEnabled) {
+      // eslint-disable-next-line react/set-state-in-effect -- 축소된 검색창과 자동완성 상태를 동기화한다.
+      setState((previous) => (
+        previous.query === '' && previous.suggestions.length === 0
+          ? previous
+          : { query: '', suggestions: [] }
+      ));
+      return;
+    }
 
     let cancelled = false;
     const timer = setTimeout(async () => {
