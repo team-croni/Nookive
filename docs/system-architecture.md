@@ -29,17 +29,18 @@ flowchart TB
     subgraph Core_Engine ["⚙️ 로컬 AI & 검색 엔진 (멀티모달)"]
         Sidecar["llama-server (C++)<br/>EmbeddingGemma 2 (GGUF) + mmproj<br/>텍스트·이미지·오디오 768-dim 공통 공간"]
         MediaReaders["미디어 리더<br/>sips / afconvert / media-cli(AVFoundation)"]
-        VectorDB["sqlite-vec (로컬 search_index.db)"]
+        RuntimeIndex["JSON runtime index<br/>runtime-index.json"]
     end
 
     AppCatalog["macOS 앱 카탈로그\n이름 + Bundle ID"]
 
     SearchBar -->|1. 쿼리 텍스트| Sidecar
-    Sidecar -->|2. 768차원 질의 벡터| Shell_Layer
-    Shell_Layer -->|3. 코사인 유사도 쿼리| VectorDB
-    VectorDB -->|4. Top-K 문서 청크 및 경로| ResultList
+    Sidecar -->|2. 768차원 질의 벡터| UI_Layer
+    UI_Layer -->|3. Tauri IPC로 runtime index 로드| RuntimeIndex
+    RuntimeIndex -->|4. 레코드 반환 후 메모리 cosine + lexical hybrid ranking| UI_Layer
+    UI_Layer -->|5. 정렬된 결과| ResultList
     AppCatalog -->|앱 메타데이터 exact 검색| ResultList
-    ResultList -->|5. 선택 항목 변경 시 본문 로드| PreviewPane
+    ResultList -->|6. 선택 항목 변경 시 본문 로드| PreviewPane
 ```
 
 ---
@@ -60,7 +61,7 @@ flowchart TB
   1. 무테두리/투명 플로팅 윈도우 생성 및 OS 네이티브 블러(`hudWindow`, `acrylic`) 주입.
   2. 전역 단축키 등록 및 포커스 분실(`blur`) 시 윈도우 숨김(`hide`).
   3. 앱 실행 시 `llama-server` 자동 실행, 앱 종료 시 자식 프로세스 자동 파살(Kill).
-  4. 로컬 파일 디스크 I/O 및 SQLite 트랜잭션 관리.
+  4. 로컬 파일 디스크 I/O, manifest 및 runtime JSON 인덱스 관리.
   5. macOS 앱 카탈로그(`/Applications`, `/System/Applications`, `~/Applications`)를 런타임에 수집.
 
 ### 2.3. AI 추론 및 벡터 엔진 (멀티모달)
@@ -75,12 +76,12 @@ flowchart TB
   - 텍스트: `{ input: "..." }`
   - 이미지: `{ input: [{ content: [{ type: "image_url", image_url: { url: "data:image/jpeg;base64,..." } }] }] }`
   - 오디오: `{ input: [{ content: [{ type: "input_audio", input_audio: { data: "<wav b64>", format: "wav" } }] }] }`
-- **미디어 리더**: `sips`(이미지→JPEG 1024px), `afconvert`(오디오→16k mono WAV 30초 윈도우), `bin/media-cli`(비디오 프레임, AVFoundation)
-- **저장소**: SQLite + `sqlite-vec` 확장 (단일 로컬 파일로 백업/이동 간편)
+- **미디어 리더**: `sips`(이미지→JPEG 1024px), `afconvert`(오디오→16k mono WAV), `bin/media-cli`(비디오 프레임, AVFoundation)
+- **저장소**: 사용자별 `index-manifest.json`과 `runtime-index.json`. 벡터 검색은 runtime 인덱스를 메모리에 로드한 뒤 프론트엔드에서 cosine similarity와 lexical 점수를 결합한다. SQLite/sqlite-vec는 현재 구현에 사용하지 않는다.
 
-앱 카탈로그는 파일 내용 임베딩 대상이 아니다. 앱 이름과 Bundle ID는 별도 메타데이터 레코드로 exact 검색하고,
-실행은 macOS `open`으로 위임한다. 설치/삭제 변경은 앱 시작 시 재스캔하며, 장기적으로는 파일 변경 감시 이벤트로
-카탈로그만 갱신한다.
+앱 카탈로그는 파일 내용 임베딩 대상이 아니다. 검색 인덱스를 처음 로드하거나 새로고침할 때
+`/Applications`, `/System/Applications`, `~/Applications`를 스캔해 앱 이름과 Bundle ID를 별도
+메타데이터 레코드로 exact/lexical 검색한다. 실행은 macOS `open`으로 위임한다.
 
 ### 2.4. 미디어 세그먼트 & 이동
 

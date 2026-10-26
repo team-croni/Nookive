@@ -20,7 +20,7 @@ path + sizeBytes + modifiedAtMs + extension + status
 
 상태는 `pending → processing → ready | failed`로 확장한다. 텍스트/코드는 React 증분 worker가 처리하고,
 이미지/PDF/오디오/비디오는 Tauri `index_pending_media` 브리지가 기존 Node 멀티모달 인덱서를 호출해
-`pending → ready`로 전환한다. 기존 `search_index.json`과 사용자별 runtime 인덱스를 병행해 회귀 위험을 낮춘다.
+`pending → ready`로 전환한다. 현재는 사용자별 `runtime-index.json`을 사용하며, 기존 샘플 인덱스와 분리해 회귀 위험을 낮춘다.
 
 ## 다음 단계: SQLite authoritative store
 

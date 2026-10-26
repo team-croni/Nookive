@@ -82,7 +82,7 @@ flowchart TD
     B -->|"PDF"| C["pdf-parse<br/>페이지별 텍스트"]
     B -->|"문서/코드"| E["500자 슬라이딩 윈도우 청킹 (라인 번호 포함)"]
     B -->|"이미지"| D1["sips → JPEG 1024px<br/>+ 썸네일 160px 생성"]
-    B -->|"오디오"| D2["afconvert → WAV 16k mono<br/>30초 겹침 윈도우 분할"]
+    B -->|"오디오"| D2["afconvert → WAV 16k mono<br/>5초 임베딩 창 / 2.5초 step"]
     B -->|"비디오"| D3["media-cli → 프레임 추출<br/>+ afconvert → 사운드트랙 윈도우"]
 
     C --> G
@@ -93,7 +93,7 @@ flowchart TD
 
     D1 -.-> V["Apple Vision 라벨/OCR<br/>(표시·키워드용)"]
     V -.-> H
-    G --> H["search_index.json 저장<br/>(vector + pageNumber/lineStart/timestampSeconds)"]
+    G --> H["runtime-index.json 저장<br/>(vector + pageNumber/lineStart/timestampSeconds)"]
 ```
 
 ### 3.1. 이미지 — 네이티브 이미지 임베딩
@@ -127,12 +127,12 @@ flowchart TD
   - ASR 서버: `npm run asr` (Qwen3-ASR-0.6B Q8_0, 포트 8081). 모델: `npm run asr:download`.
   - 설정 창의 **음성 검색 (STT)** 토글로 켜고 끌 수 있다. 켜면 Rust가 인덱싱 시작 시 ASR 서버를 자동 기동하고, 끝나면 자동 종료한다.
   - A/B 실측(한국어 TTS 42문장): Q8_0+Q8_0 CER 6.09%, Q8_0+bf16 mmproj 6.25%, bf16+bf16 6.13%. Q8_0이 가장 빠르고 작아 기본값으로 선택.
-- 매우 긴 오디오도 순차 윈도우로 처리하며, 멀티모달 토큰 여유가 더 필요하면 `NOOKIVE_UBATCH_SIZE=2048`로 상향할 수 있다.
+- 오디오 임베딩은 5초 창을 2.5초 간격으로 순차 처리한다. ASR과 강제 정렬은 별도로 30초 비겹침 chunk 단위로 처리한다. 멀티모달 토큰 여유가 더 필요하면 `NOOKIVE_UBATCH_SIZE`를 조정할 수 있다.
 
 ### 3.3. 비디오 — 프레임 + 사운드트랙
 
 - `bin/media-cli`(AVFoundation)로 **N초 간격 프레임**을 JPEG로 추출 → 각 프레임을 **이미지 임베딩**(+`timestampSeconds`).
-- 사운드트랙은 오디오와 동일하게 **30초 윈도우**로 임베딩(+`timestampSeconds`).
+- 사운드트랙은 오디오와 동일하게 **5초 창, 2.5초 간격**으로 임베딩(+`timestampSeconds`). ASR이 활성화된 경우 전사와 강제 정렬은 30초 비겹침 chunk로 수행한다.
 - 첫 프레임은 `sips`로 160px/720px 파생 이미지를 만들어 검색 결과 썸네일과 상세 미리보기용으로 캐시한다.
 - 미리보기에서 오디오/비디오는 검색된 시점으로 자동 `seek`.
 

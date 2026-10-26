@@ -56,11 +56,12 @@ Download the latest macOS Apple Silicon DMG from [GitHub Releases](https://githu
 and move Nookive to Applications. Until Apple Developer signing and
 notarization are added, a downloaded release may show a macOS security warning;
 users may need to use Control-click → Open or approve it in Privacy & Security.
-On first launch, Nookive opens the in-app installer if the local model bundle
-is missing. The current installer prepares the search and speech model
-components together; speech transcription and word-level timestamps remain
-optional features at runtime. No terminal command is needed. Models are stored
-in macOS Application Support and remain on your Mac.
+On first launch, Nookive opens the in-app installer when the required search
+model is missing. The search and speech model bundles are downloaded
+separately: the search model is required for semantic search, while the speech
+bundle is optional and enables transcription and word-level timestamps for
+audio/video indexing. No terminal command is needed. Models are stored in
+macOS Application Support and remain on your Mac.
 The source repository and DMG exclude model weights; check the release notes
 and [third-party notices](THIRD_PARTY_NOTICES.md) before redistribution.
 
@@ -126,8 +127,9 @@ the app if necessary. The supported user-folder scopes include:
 No `.env` file is required. Nookive is a local desktop app rather than a web
 service, so runtime settings are passed as ordinary process environment
 variables when needed. Copying `.env.example` is optional and does not add any
-secrets. Supported tuning variables include `NOOKIVE_PORT`,
-`NOOKIVE_CPU_ONLY`, and `NOOKIVE_CTX_SIZE`.
+secrets. Supported tuning variables include `NOOKIVE_PORT`, `NOOKIVE_CPU_ONLY`,
+`NOOKIVE_ALLOW_CPU_FALLBACK`, `NOOKIVE_CTX_SIZE`, `NOOKIVE_BATCH_SIZE`,
+`NOOKIVE_UBATCH_SIZE`, `NOOKIVE_PARALLEL`, and `NOOKIVE_ASR_PORT`.
 
 Never put API keys, signing credentials, Apple notarization passwords, or
 personal file paths in a committed environment file. Use your shell, macOS
@@ -135,13 +137,15 @@ Keychain, or CI secret storage for those values.
 
 ## Privacy and data handling
 
-Nookive reads only folders selected by the user and stores its local index in
-the application data directory. It does not upload indexed file contents. If
-you use autocomplete or web search, the typed query is sent to Google and the
-selected URL is opened in your browser. The temporary embedding server listens
-on loopback (`127.0.0.1`) and should not be exposed publicly. Local indexes,
-logs, model caches, and selected paths may be sensitive and should be handled
-accordingly.
+Nookive reads file contents only from folders selected by the user and stores
+its local index in the application data directory. It also scans the standard
+macOS application folders for installed app names and bundle identifiers; app
+bundle contents are not indexed. Nookive does not upload indexed file
+contents. If you use autocomplete or web search, the typed query is sent to
+Google and the selected URL is opened in your browser. The temporary
+embedding server listens on loopback (`127.0.0.1`) and should not be exposed
+publicly. Local indexes, logs, model caches, and selected paths may be
+sensitive and should be handled accordingly.
 
 ## Documentation
 
