@@ -109,15 +109,44 @@ export function App() {
     // 검색어가 바뀌는 동안에도 확장된 웹 폴백 화면을 유지한다.
     // 이 순간 localWebMode만 false로 바꾸면 훅이 기존 목록을 []로
     // 반환해 결과 영역이 매 입력마다 사라졌다가 다시 나타난다.
-    localWebMode || (isWindowExpanded && !isSettled && orderedResults.length === 0),
+    localWebMode || (isWindowExpanded && !isSettled),
   );
   const webMode = localWebMode && isWebSearchEnabled;
+  const [webFallbackWasVisible, setWebFallbackWasVisible] = useState(false);
 
   // 확장된 창에서 새 검색을 입력하는 동안에는 이전 웹 폴백을 유지한다.
   // 최초 축소 상태에서는 결과가 준비되기 전까지 검색 상태만 보여준다.
+  // 앱 결과가 먼저 도착한 중간 렌더에서도 웹 폴백을 유지해 빈 화면을 방지한다.
+  const keepWebFallbackDuringSearch =
+    isWindowExpanded && isLoading && webFallbackWasVisible;
   const showWebFallback =
-    orderedResults.length === 0 &&
-    (webMode || (isWindowExpanded && !isSettled));
+    (orderedResults.length === 0 && (webMode || (isWindowExpanded && !isSettled)))
+    || keepWebFallbackDuringSearch;
+
+  // 웹 폴백에서 새 로컬 검색으로 전환할 때, 앱 결과가 확정될 때까지
+  // 웹 폴백을 유지할 수 있도록 마지막 표시 상태를 기억한다.
+  useEffect(() => {
+    if (!isWindowExpanded || !hasQuery) {
+      if (webFallbackWasVisible) {
+        // eslint-disable-next-line react/set-state-in-effect -- 축소된 검색창과 전환 상태를 동기화한다.
+        setWebFallbackWasVisible(false);
+      }
+      return;
+    }
+
+    if (isSettled && orderedResults.length > 0) {
+      if (webFallbackWasVisible) {
+        // eslint-disable-next-line react/set-state-in-effect -- 로컬 결과 확정 시 웹 폴백 전환 상태를 종료한다.
+        setWebFallbackWasVisible(false);
+      }
+      return;
+    }
+
+    if (showWebFallback && !webFallbackWasVisible) {
+      // eslint-disable-next-line react/set-state-in-effect -- 마지막 웹 폴백 표시 상태를 검색 전환에 전달한다.
+      setWebFallbackWasVisible(true);
+    }
+  }, [hasQuery, isSettled, isWindowExpanded, orderedResults.length, showWebFallback, webFallbackWasVisible]);
   const webItemCount = showWebFallback ? 1 + webSuggestions.length : 0;
 
   // 웹 폴백으로 전환되면 선택 인덱스를 첫 항목(Google 검색)으로 되돌린다.
