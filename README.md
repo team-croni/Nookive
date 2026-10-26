@@ -1,5 +1,9 @@
 # Nookive
 
+<p align="center">
+  <img src="public/nookive-wordmark.svg" alt="Nookive" width="360">
+</p>
+
 **Describe it. Find it.**
 
 Maintained by [Croni](https://github.com/team-croni). Source code and releases

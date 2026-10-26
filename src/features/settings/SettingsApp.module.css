@@ -612,8 +612,9 @@ h2 {
   width: 28px;
   height: 28px;
   margin-top: 1px;
-  border-radius: 7px;
   flex-shrink: 0;
+  display: block;
+  object-fit: contain;
 }
 .aboutInfo {
   display: flex;
