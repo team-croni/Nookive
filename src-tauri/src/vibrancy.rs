@@ -10,23 +10,15 @@
 // 모서리 반경을 유지한 채 늘려주며, 창 그림자도 이 마스크 모양을 따른다.
 use std::time::Duration;
 
-use objc2::AllocAnyThread;
-use objc2::rc::Retained;
 use objc2_app_kit::{
-    NSAutoresizingMaskOptions, NSImage, NSImageResizingMode, NSVisualEffectBlendingMode,
-    NSVisualEffectMaterial, NSVisualEffectState, NSVisualEffectView, NSWindow,
-    NSWindowOrderingMode,
+    NSAutoresizingMaskOptions, NSVisualEffectBlendingMode, NSVisualEffectMaterial,
+    NSVisualEffectState, NSVisualEffectView, NSWindow, NSWindowOrderingMode,
 };
-use objc2_foundation::{MainThreadMarker, NSData, NSEdgeInsets, NSSize};
-
-use crate::mask_png::rounded_mask_png;
+use objc2_foundation::MainThreadMarker;
+use objc2_quartz_core::kCACornerCurveContinuous;
 
 /// 창 모서리 반경(pt). CSS `--radius-window`(18px)와 반드시 같아야 한다.
-const CORNER_RADIUS_PT: u32 = 18;
-/// 마스크를 3배 해상도로 만들어 Retina에서도 모서리가 부드럽게 보이게 한다.
-const MASK_SCALE: u32 = 3;
-/// NSImageResizingModeStretch
-const RESIZING_MODE_STRETCH: isize = 1;
+const CORNER_RADIUS_PT: f64 = 18.0;
 
 /// 블러 뷰를 만들어 창 콘텐츠 뷰 맨 아래(웹뷰 뒤)에 붙인다.
 /// 어느 스레드에서 호출해도 되며 실제 작업은 메인 스레드에서 수행한다.
@@ -46,6 +38,21 @@ fn install_on_main_thread(window: &tauri::WebviewWindow) -> Result<(), String> {
         .contentView()
         .ok_or("NSWindow.contentView가 없습니다")?;
 
+    // CSS의 원형 border-radius와 PNG 마스크는 macOS 창의 continuous corner와
+    // 곡선이 미세하게 달라 이중 외곽선처럼 보일 수 있다. 콘텐츠 전체를
+    // AppKit의 continuous corner로 자른다. 외곽선과 그림자는 웹뷰의 CSS 토큰으로
+    // 그리므로 native shadow와 별도의 경계가 생기지 않게 한다.
+    content_view.setWantsLayer(true);
+    let content_layer = content_view
+        .layer()
+        .ok_or("NSWindow.contentView layer가 없습니다")?;
+    content_layer.setCornerRadius(CORNER_RADIUS_PT);
+    content_layer.setCornerCurve(unsafe { kCACornerCurveContinuous });
+    content_layer.setMasksToBounds(true);
+    // 외곽선은 설정하지 않는다. CALayer border와 NSWindow shadow를 함께 사용하면
+    // native 외곽선이 이중으로 보이므로, 이 레이어는 continuous clipping만 담당한다.
+    content_layer.setBorderWidth(0.0);
+
     let blur = NSVisualEffectView::new(mtm);
     blur.setFrame(content_view.bounds());
     blur.setMaterial(NSVisualEffectMaterial::HUDWindow);
@@ -54,34 +61,9 @@ fn install_on_main_thread(window: &tauri::WebviewWindow) -> Result<(), String> {
     blur.setAutoresizingMask(
         NSAutoresizingMaskOptions::ViewWidthSizable | NSAutoresizingMaskOptions::ViewHeightSizable,
     );
-    let mask = rounded_mask_image()?;
-    blur.setMaskImage(Some(&*mask));
-
     content_view.addSubview_positioned_relativeTo(&blur, NSWindowOrderingMode::Below, None);
     ns_window.invalidateShadow();
     Ok(())
-}
-
-/// 늘어나는 둥근 모서리 마스크 이미지를 만든다.
-fn rounded_mask_image() -> Result<Retained<NSImage>, String> {
-    let (size_px, png) = rounded_mask_png(CORNER_RADIUS_PT * MASK_SCALE, MASK_SCALE);
-    let data = NSData::with_bytes(&png);
-    let image = NSImage::initWithData(NSImage::alloc(), &data)
-        .ok_or("마스크 PNG를 NSImage로 디코딩하지 못했습니다")?;
-
-    // 픽셀은 3배 해상도지만 논리 크기(pt)를 지정해 @3x 이미지로 취급되게 한다.
-    let size_pt = size_px as f64 / MASK_SCALE as f64;
-    image.setSize(NSSize::new(size_pt, size_pt));
-
-    let inset = CORNER_RADIUS_PT as f64;
-    image.setCapInsets(NSEdgeInsets {
-        top: inset,
-        left: inset,
-        bottom: inset,
-        right: inset,
-    });
-    image.setResizingMode(NSImageResizingMode(RESIZING_MODE_STRETCH));
-    Ok(image)
 }
 
 /// 창 리사이즈 직후 네이티브 그림자를 다시 계산하게 한다.
