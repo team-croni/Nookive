@@ -86,8 +86,9 @@ fn show_search_window_at_cursor(window: tauri::WebviewWindow) {
         if ns_window.isMiniaturized() {
             ns_window.deminiaturize(None);
         }
-        ns_window.makeKeyAndOrderFront(None);
         let _ = window_for_show.set_always_on_top(true);
+        let _ = window_for_show.show();
+        let _ = window_for_show.unminimize();
         let _ = window_for_show.set_focus();
     });
 }
