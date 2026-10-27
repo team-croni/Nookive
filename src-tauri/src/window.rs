@@ -40,11 +40,23 @@ pub fn show_main_window(app: &AppHandle) {
         // macOS에서 다른 데스크톱 앱이 활성화된 뒤에는 설정 파일의
         // alwaysOnTop만으로 창 레벨이 복원되지 않는 경우가 있다.
         center_search_window(&window);
-        let _ = window.set_always_on_top(true);
-        let _ = window.show();
-        let _ = window.unminimize();
-        let _ = window.set_focus();
+        show_search_window_after_position(window);
     }
+}
+
+/// 위치 변경이 적용된 뒤 검색 창을 표시한다.
+///
+/// macOS의 `set_position`은 메인 스레드에 위치 변경을 비동기로 예약한다.
+/// 바로 `show`를 호출하면 이전 모니터의 위치가 한 프레임 먼저 그려질 수
+/// 있으므로, 표시 작업도 같은 메인 스레드 큐에 넣어 순서를 보장한다.
+fn show_search_window_after_position(window: tauri::WebviewWindow) {
+    let window_for_show = window.clone();
+    let _ = window.run_on_main_thread(move || {
+        let _ = window_for_show.set_always_on_top(true);
+        let _ = window_for_show.show();
+        let _ = window_for_show.unminimize();
+        let _ = window_for_show.set_focus();
+    });
 }
 
 fn show_settings_window_with_mode(app: &AppHandle, onboarding: bool) {
@@ -536,10 +548,7 @@ pub fn toggle_search_window(app: &AppHandle) {
             let _ = window.hide();
         } else {
             center_search_window(&window);
-            let _ = window.set_always_on_top(true);
-            let _ = window.show();
-            let _ = window.unminimize();
-            let _ = window.set_focus();
+            show_search_window_after_position(window);
         }
     }
 }
