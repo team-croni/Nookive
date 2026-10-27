@@ -12,6 +12,11 @@ use tauri::{
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
+#[cfg(target_os = "macos")]
+use objc2_app_kit::{NSEvent, NSScreen, NSWindow};
+#[cfg(target_os = "macos")]
+use objc2_foundation::{MainThreadMarker, NSPoint};
+
 /// 설치 중 트레이 상태 아이템을 저장: set_text로 라벨만 교체해 메뉴가 닫히는 것을 방지한다.
 fn installing_status_item() -> &'static Mutex<Option<MenuItem<tauri::Wry>>> {
     static ITEM: OnceLock<Mutex<Option<MenuItem<tauri::Wry>>>> = OnceLock::new();
@@ -36,20 +41,60 @@ pub const MAIN_WINDOW_COMPACT_HEIGHT: f64 = 60.0;
 
 pub fn show_main_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
-        // 창을 다시 표시할 때도 네이티브 floating 레벨을 재확인한다.
-        // macOS에서 다른 데스크톱 앱이 활성화된 뒤에는 설정 파일의
-        // alwaysOnTop만으로 창 레벨이 복원되지 않는 경우가 있다.
-        center_search_window(&window);
-        show_search_window_after_position(window);
+        show_search_window_at_cursor(window);
     }
 }
 
-/// 위치 변경이 적용된 뒤 검색 창을 표시한다.
-///
-/// macOS의 `set_position`은 메인 스레드에 위치 변경을 비동기로 예약한다.
-/// 바로 `show`를 호출하면 이전 모니터의 위치가 한 프레임 먼저 그려질 수
-/// 있으므로, 표시 작업도 같은 메인 스레드 큐에 넣어 순서를 보장한다.
-fn show_search_window_after_position(window: tauri::WebviewWindow) {
+/// 커서가 위치한 모니터에 검색 창을 배치한 뒤 표시한다.
+#[cfg(target_os = "macos")]
+fn show_search_window_at_cursor(window: tauri::WebviewWindow) {
+    let window_for_show = window.clone();
+    let _ = window.run_on_main_thread(move || {
+        let Some(main_thread) = MainThreadMarker::new() else {
+            return;
+        };
+        let cursor = NSEvent::mouseLocation();
+        let screens = NSScreen::screens(main_thread);
+        let screen = screens
+            .iter()
+            .find(|screen| {
+                let frame = screen.frame();
+                cursor.x >= frame.origin.x
+                    && cursor.x < frame.origin.x + frame.size.width
+                    && cursor.y >= frame.origin.y
+                    && cursor.y < frame.origin.y + frame.size.height
+            })
+            .or_else(|| screens.iter().next());
+
+        let Some(screen) = screen else {
+            return;
+        };
+        let Ok(ptr) = window_for_show.ns_window() else {
+            return;
+        };
+        if ptr.is_null() {
+            return;
+        }
+
+        let ns_window = unsafe { &*(ptr as *mut NSWindow) };
+        let frame = screen.frame();
+        let x = frame.origin.x + (frame.size.width - MAIN_WINDOW_WIDTH) / 2.0;
+        // NSWindow의 top-left 좌표는 AppKit의 좌하단 원점 좌표계다.
+        // 확장 상태의 상단을 기준으로 잡아 검색어 입력 시 위치가 튀지 않게 한다.
+        let y = frame.origin.y + (frame.size.height + MAIN_WINDOW_EXPANDED_HEIGHT) / 2.0;
+        ns_window.setFrameTopLeftPoint(NSPoint::new(x, y));
+        if ns_window.isMiniaturized() {
+            ns_window.deminiaturize(None);
+        }
+        ns_window.makeKeyAndOrderFront(None);
+        let _ = window_for_show.set_always_on_top(true);
+        let _ = window_for_show.set_focus();
+    });
+}
+
+#[cfg(not(target_os = "macos"))]
+fn show_search_window_at_cursor(window: tauri::WebviewWindow) {
+    center_search_window(&window);
     let window_for_show = window.clone();
     let _ = window.run_on_main_thread(move || {
         let _ = window_for_show.set_always_on_top(true);
@@ -547,8 +592,7 @@ pub fn toggle_search_window(app: &AppHandle) {
         if is_visible {
             let _ = window.hide();
         } else {
-            center_search_window(&window);
-            show_search_window_after_position(window);
+            show_search_window_at_cursor(window);
         }
     }
 }
