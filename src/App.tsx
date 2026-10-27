@@ -241,7 +241,7 @@ export function App() {
 
           {/* 2. 본문 영역: 결과가 있으면 항상 2열(로딩 중에도 유지),
                  표시할 결과가 없을 때는 Google 자동완성 폴백을 노출 */}
-          {hasQuery && (
+          {hasQuery && isWindowExpanded && (
             showWebFallback ? (
               <div className="web-fallback-pane">
                 <WebFallbackList
