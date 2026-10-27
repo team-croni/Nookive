@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileWarning, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from '../../../components/ui/Button/Button';
 import styles from './PdfViewer.module.css';
 import { useTranslation } from 'react-i18next';
@@ -22,12 +22,10 @@ export const FileAccessState: React.FC<FileAccessStateProps> = ({ checking = fal
 
   return (
     <div className={styles.stateBox} role="alert">
-      <FileWarning size={26} style={{ color: 'var(--icon-muted)' }} />
-      <strong>{t('fileAccessTitle')}</strong>
-      <span>{t('fileAccessDescription')}</span>
-      <small className={styles.accessHint}>{t('fileAccessHint')}</small>
+      <span className={styles.fileAccessTitle}>{t('fileAccessTitle')}</span>
+      <span className={styles.fileAccessDescription}>{t('fileAccessDescription')}</span>
       {onRetry && (
-        <Button variant="secondary" size="xs" onClick={onRetry}>
+        <Button variant="ghost" size="xs" onClick={onRetry}>
           <RefreshCw size={12} />
           <span>{t('fileAccessRetry')}</span>
         </Button>

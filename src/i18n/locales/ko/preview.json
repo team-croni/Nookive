@@ -7,7 +7,6 @@
   "pdfFailed": "PDF 미리보기를 불러올 수 없습니다. 하단의 ‘열기’로 실행하세요",
   "fileAccessChecking": "파일 접근 권한을 확인하는 중…",
   "fileAccessTitle": "파일에 접근할 수 없습니다",
-  "fileAccessDescription": "이 파일을 미리보려면 macOS에서 Nookive의 파일 접근을 허용해야 합니다.",
-  "fileAccessHint": "권한 안내가 보이지 않으면 시스템 설정 > 개인정보 보호 및 보안 > 파일 및 폴더에서 Nookive를 확인한 뒤 다시 시도하세요.",
+  "fileAccessDescription": "macOS 설정에서 Nookive의 파일 접근을 허용해 주세요.",
   "fileAccessRetry": "다시 시도"
 }
