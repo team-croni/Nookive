@@ -5,7 +5,7 @@ mod embedding;
 mod files;
 mod folders;
 mod index;
-#[cfg(target_os = "macos")]
+#[cfg(all(target_os = "macos", test))]
 mod mask_png;
 mod models;
 mod paths;

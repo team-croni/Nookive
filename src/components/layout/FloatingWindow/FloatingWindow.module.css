@@ -19,10 +19,9 @@
   /* 부모 래퍼의 투명 예약 영역은 클릭을 통과시키되 창 자체는 클릭 가능하게 유지 */
   pointer-events: auto;
   background: var(--glass-bg-base);
-  /* macOS Tauri 네이티브 효과가 창 뒤 배경을 실시간으로 흐리게 한다. */
-  border: var(--border-search-window);
-  border-radius: var(--radius-window);
-  /* 그림자가 투명 윈도우 경계 안쪽에서 자연스럽게 사라지도록 토큰으로 관리 */
+  /* 외곽선은 native CALayer가 continuous radius에 맞춰 그린다. */
+  border: 0;
+  border-radius: 0;
   box-shadow: none;
   display: flex;
   flex-direction: column;
