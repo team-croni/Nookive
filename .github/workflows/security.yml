@@ -3,9 +3,26 @@ name: Security
 on:
   push:
     branches: [main]
+    paths: &security-paths
+      - 'src/**'
+      - 'scripts/**'
+      - '**/*.js'
+      - '**/*.mjs'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'src-tauri/Cargo.toml'
+      - 'src-tauri/Cargo.lock'
+      - '.github/workflows/security.yml'
   pull_request:
+    paths: *security-paths
   schedule:
     - cron: '23 3 * * 1'
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

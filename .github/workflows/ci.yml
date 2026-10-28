@@ -13,8 +13,47 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Jobs are skipped (not the workflow) so required status checks still report.
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      rust: ${{ steps.filter.outputs.rust }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Filter changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            web:
+              - 'src/**'
+              - 'public/**'
+              - 'index.html'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig*.json'
+              - 'vite.config.ts'
+              - '.oxlintrc.json'
+              - '.github/workflows/ci.yml'
+            rust:
+              - 'src-tauri/**'
+              - 'bin/**'
+              - 'scripts/index-folder.mjs'
+              - 'package.json'
+              - 'package-lock.json'
+              - '.github/workflows/ci.yml'
+
   web:
     name: Web checks
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
@@ -37,11 +76,14 @@ jobs:
 
   rust:
     name: Rust checks (macOS)
-    runs-on: macos-14
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
+    runs-on: macos-15
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
 
+      # tauri-build validates bundle resources that live in node_modules.
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
@@ -53,15 +95,20 @@ jobs:
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Check Rust formatting
         run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 
-      - name: Run Rust tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
-
       - name: Run Clippy
         run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets --all-features
 
-      - name: Check Rust code
-        run: cargo check --manifest-path src-tauri/Cargo.toml --locked
+      - name: Run Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
