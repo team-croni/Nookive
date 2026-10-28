@@ -1,7 +1,7 @@
 // src/features/settings/indexing/record.ts
 // 인덱싱 결과 레코드 생성.
 import type { SearchResultItem } from '../../../types/search';
-import { CODE_EXTENSIONS, basename, extensionOf, lineAt } from './textChunks';
+import { basename, extensionOf, lineAt } from './textChunks';
 
 export function makeRecord(
   filePath: string,
@@ -31,7 +31,7 @@ export function makeRecord(
       lineStart,
       lineEnd,
     },
-    category: CODE_EXTENSIONS.has(extension) ? 'code' : 'document',
+    category: 'document',
     vector,
   };
 }

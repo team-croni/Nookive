@@ -1,5 +1,6 @@
 // src-tauri/src/index.rs
 // 인덱스 도메인 커맨드 진입점. 실제 구현은 `index/*` 하위 모듈에 있다.
+pub(crate) mod file_class;
 pub(crate) mod manifest;
 pub(crate) mod media;
 pub(crate) mod runtime;

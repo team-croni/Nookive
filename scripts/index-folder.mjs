@@ -37,14 +37,9 @@ const ALIGNER_ENABLED =
   fs.existsSync(ALIGNER_MODEL);
 // 📂 지원 확장자
 const SUPPORTED_EXTS = [
-  // 문서 및 코드
+  // 문서 (코드는 기본 임베딩 대상이 아니다 — src-tauri/src/index/file_class.rs 참고)
   ".md",
   ".txt",
-  ".json",
-  ".ts",
-  ".tsx",
-  ".js",
-  ".py",
   ".rtf",
   ".pdf",
   // 이미지
@@ -71,6 +66,11 @@ const SUPPORTED_EXTS = [
   ".webm",
   ".m4v",
 ];
+
+// 앱은 Rust manifest가 거른 파일만 넘기며, 이 목록은 CLI 폴더 스캔용이다.
+const EXCLUDED_DIRS = new Set([
+  "node_modules", "vendor", "dist", "build", "out", "target", "coverage", "__pycache__",
+]);
 
 const CHUNK_SIZE = 500;
 const CHUNK_OVERLAP = 50;
@@ -817,8 +817,7 @@ function scanDirectory(dirPath, fileList = []) {
   const items = fs.readdirSync(dirPath);
 
   for (const item of items) {
-    if (item.startsWith(".") || item === "node_modules" || item === "dist")
-      continue;
+    if (item.startsWith(".") || EXCLUDED_DIRS.has(item)) continue;
     const fullPath = path.join(dirPath, item);
     let stat;
     try {
@@ -952,18 +951,12 @@ async function runIndexer() {
         }
 
         const ext = file.ext.toLowerCase();
-        let category = "document";
-        if (
+        const category =
           IMAGE_EXTS.includes(ext) ||
           AUDIO_EXTS.includes(ext) ||
           VIDEO_EXTS.includes(ext)
-        ) {
-          category = "media";
-        } else if (
-          ["ts", "tsx", "js", "jsx", "py", "json", "rs", "go"].includes(ext)
-        ) {
-          category = "code";
-        }
+            ? "media"
+            : "document";
 
         const bestChunk = { chunkIndex: i, textSnippet: snippet };
         if (chunk.pageNumber !== undefined)

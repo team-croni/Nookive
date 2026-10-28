@@ -10,6 +10,7 @@ use std::time::{Duration, Instant};
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use tauri::{AppHandle, Emitter, Manager};
 
+use super::file_class::is_relevant_change;
 use super::manifest::{load_manifest, sync_index_manifest};
 use super::media::{MediaIndexState, index_pending_media_sync};
 
@@ -76,12 +77,32 @@ pub fn start_index_watcher(app: AppHandle) {
     let stop_for_thread = stop.clone();
     let (tx, rx) = channel::<()>();
 
+    let manifest = match load_manifest(&app) {
+        Ok(manifest) => manifest,
+        Err(error) => {
+            log::warn!("감시할 검색 폴더를 읽지 못했습니다: {error}");
+            return;
+        }
+    };
+    let roots: Vec<PathBuf> = manifest.roots.iter().map(PathBuf::from).collect();
+    let event_roots = roots.clone();
+
     let mut watcher = match notify::recommended_watcher(move |result: notify::Result<Event>| {
-        if let Ok(event) = result
-            && matches!(
-                event.kind,
-                EventKind::Create(_) | EventKind::Modify(_) | EventKind::Remove(_)
-            )
+        let Ok(event) = result else {
+            return;
+        };
+        let removal = matches!(event.kind, EventKind::Remove(_));
+        if !matches!(
+            event.kind,
+            EventKind::Create(_) | EventKind::Modify(_) | EventKind::Remove(_)
+        ) {
+            return;
+        }
+        // 빌드 출력/의존성 폴더나 색인 대상이 아닌 파일의 변경은 전체 재스캔을 일으키지 않는다.
+        if event
+            .paths
+            .iter()
+            .any(|path| is_relevant_change(path, &event_roots, removal))
         {
             let _ = tx.send(());
         }
@@ -93,18 +114,9 @@ pub fn start_index_watcher(app: AppHandle) {
         }
     };
 
-    let manifest = match load_manifest(&app) {
-        Ok(manifest) => manifest,
-        Err(error) => {
-            log::warn!("감시할 검색 폴더를 읽지 못했습니다: {error}");
-            return;
-        }
-    };
-
-    for root in &manifest.roots {
-        let path = PathBuf::from(root);
+    for path in &roots {
         if path.is_dir()
-            && let Err(error) = watcher.watch(&path, RecursiveMode::Recursive)
+            && let Err(error) = watcher.watch(path, RecursiveMode::Recursive)
         {
             log::warn!("검색 폴더 감시 실패 ({}): {error}", path.display());
         }
@@ -165,12 +177,6 @@ fn auto_index(app: &AppHandle) {
     }
     let _busy_guard = IndexingBusyGuard(busy_state.inner());
 
-    // 앱 시작 직후 임베딩 서버가 아직 준비되지 않았을 수 있다.
-    if !crate::embedding::wait_until_ready(Duration::from_secs(60)) {
-        log::warn!("임베딩 서버가 준비되지 않아 자동 색인을 건너뜁니다.");
-        return;
-    }
-
     let manifest = match load_manifest(app) {
         Ok(manifest) => manifest,
         Err(_) => return,
@@ -179,7 +185,8 @@ fn auto_index(app: &AppHandle) {
         return;
     }
 
-    // 새 파일/수정/삭제를 manifest에 반영한다.
+    // 새 파일/수정/삭제를 manifest에 반영한다. 임베딩 서버 없이도 가능하므로 먼저 수행해
+    // 삭제되거나 제외 규칙에 걸린 파일이 서버 준비 여부와 무관하게 검색에서 빠지게 한다.
     let status = match sync_index_manifest(app.clone(), manifest.roots.clone()) {
         Ok(status) => status,
         Err(error) => {
@@ -187,7 +194,16 @@ fn auto_index(app: &AppHandle) {
             return;
         }
     };
+    if status.removed_files > 0 {
+        let _ = app.emit("index-updated", ());
+    }
     if status.pending_paths.is_empty() {
+        return;
+    }
+
+    // 앱 시작 직후 임베딩 서버가 아직 준비되지 않았을 수 있다.
+    if !crate::embedding::wait_until_ready(Duration::from_secs(60)) {
+        log::warn!("임베딩 서버가 준비되지 않아 자동 색인을 건너뜁니다.");
         return;
     }
 
