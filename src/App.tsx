@@ -285,8 +285,8 @@ export function App() {
             )
           )}
 
-          {/* 3. 앱 전체 하단 액션 단축키 바 (검색 중에도 항상 노출) */}
-          {hasQuery && (
+          {/* 3. 앱 전체 하단 액션 단축키 바 (확장된 검색 화면에서만 노출) */}
+          {hasQuery && isWindowExpanded && (
             <AppFooter
               canOpen={showWebFallback ? webItemCount > 0 : Boolean(currentSelected)}
               canCopyPath={!showWebFallback && Boolean(currentSelected)}
