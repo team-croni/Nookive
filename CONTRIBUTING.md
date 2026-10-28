@@ -11,9 +11,26 @@ to review.
 3. Fetch local models with `npm run model:download` when working on indexing.
 4. Run the web UI with `npm run dev` or the desktop app with `npm run desktop`.
 
-Before opening a pull request, run `npm run build` and `npm run lint`. Changes
-to Rust code should also be checked with `cargo check --manifest-path
-src-tauri/Cargo.toml`.
+Before opening a pull request, run `npm run build`, `npm run lint`, and
+`npm test`. Changes to Rust code should also be checked with `cargo check
+--manifest-path src-tauri/Cargo.toml`.
+
+### Search evaluation set
+
+`npm test` includes a ranking regression test
+(`src/features/search/evaluation/ranking.test.ts`). It runs the real ranking
+pipeline on a synthetic corpus with precomputed vectors and fails when
+Recall@5/10, MRR, location accuracy, or the no-answer false-positive rate get
+worse than `baseline.json`.
+
+- Changing ranking on purpose: run `npm run eval:baseline` and commit the
+  updated `baseline.json` with an explanation in the pull request.
+- Adding queries to `queries.json` or changing `scripts/eval/corpus.mjs`: start
+  the embedding server with `npm run sidecar`, then run `npm run eval:fixture`
+  (macOS only; it also starts the ASR server if needed) and update the
+  baseline.
+- Changing the embedding model or indexer output: regenerate the fixture the
+  same way.
 
 Do not commit model files, generated binaries, build output, local indexes,
 `.env` files, credentials, or personal documents.

@@ -1,0 +1,49 @@
+{
+  "description": "Labeled queries for the search evaluation set. `relevant` lists every expected path; an empty list marks a no-answer query that should return nothing. `location` checks the badge position of the first relevant result. Run `npm run eval:fixture` after adding a query so its vector is generated.",
+  "queries": [
+    { "query": "slack", "tags": ["lookup", "application"], "relevant": ["/Applications/Slack.app"] },
+    { "query": "safari", "tags": ["lookup", "application"], "relevant": ["/Applications/Safari.app"] },
+    { "query": "카카오톡", "tags": ["lookup", "application", "ko"], "relevant": ["/Applications/카카오톡.app"] },
+    { "query": "시스템 설정", "tags": ["lookup", "application", "ko"], "relevant": ["/Applications/시스템 설정.app"] },
+    { "query": "visual studio", "tags": ["lookup", "application"], "relevant": ["/Applications/Visual Studio Code.app"] },
+    { "query": "receipts", "tags": ["lookup", "folder"], "relevant": ["/eval/Receipts"] },
+    { "query": "세금 서류", "tags": ["lookup", "folder", "ko"], "relevant": ["/eval/세금 서류"] },
+    { "query": "invoice 1042", "tags": ["lookup", "pdf"], "relevant": ["/eval/Documents/invoice-1042.pdf"] },
+    { "query": "ERR_CONN_TIMEOUT", "tags": ["lookup", "document", "error-code"], "relevant": ["/eval/Work/incident-postmortem-db-outage.md"] },
+
+    { "query": "3분기 마케팅 예산", "tags": ["semantic", "document", "ko"], "relevant": ["/eval/Work/회의록_2026_3분기_마케팅.md"] },
+    { "query": "제주도 여행 계획", "tags": ["semantic", "document", "ko"], "relevant": ["/eval/Personal/제주도_여행_일정.md"] },
+    { "query": "김치찌개 만드는 법", "tags": ["semantic", "document", "video", "ko"], "relevant": ["/eval/Personal/김치찌개_레시피.txt", "/eval/Videos/김치찌개_요리_브이로그.mp4"] },
+    { "query": "이사 준비할 것", "tags": ["semantic", "document", "ko"], "relevant": ["/eval/Personal/이사_체크리스트.md"] },
+    { "query": "보증금 돌려받는 조건", "tags": ["semantic", "pdf", "ko", "location"], "relevant": ["/eval/Documents/임대차_계약서.pdf"], "location": { "pageNumber": 2 } },
+    { "query": "해외 매출 실적", "tags": ["semantic", "pdf", "ko", "location"], "relevant": ["/eval/Documents/2025_연간_보고서.pdf"], "location": { "pageNumber": 3 } },
+    { "query": "양자 컴퓨팅 오류 정정", "tags": ["semantic", "document", "ko", "location"], "relevant": ["/eval/Work/연구_기록_2026.md"], "location": { "lineStart": 45, "tolerance": 3 } },
+    { "query": "장 볼 목록", "tags": ["semantic", "audio", "ko"], "relevant": ["/eval/Recordings/장보기_음성메모.m4a"] },
+    { "query": "훈민정음 창제", "tags": ["semantic", "audio", "ko", "location"], "relevant": ["/eval/Recordings/역사_강의_조선.m4a"], "location": { "timestampSeconds": 12, "tolerance": 2.5 } },
+    { "query": "결제 실패 스크린샷", "tags": ["semantic", "image", "ko"], "relevant": ["/eval/Screenshots/payment-error.png"] },
+    { "query": "카페 영수증", "tags": ["semantic", "image", "ko"], "relevant": ["/eval/Receipts/cafe-receipt.png"] },
+    { "query": "바닷가 노을 사진", "tags": ["semantic", "image", "ko"], "relevant": ["/eval/Photos/sunset-beach.png"] },
+    { "query": "밤 도시 빌딩 야경", "tags": ["semantic", "image", "video", "ko"], "relevant": ["/eval/Photos/night-city.png", "/eval/Videos/city-timelapse.mp4"] },
+
+    { "query": "how to set up vpn for new employees", "tags": ["semantic", "document", "en"], "relevant": ["/eval/Work/onboarding-guide.md"] },
+    { "query": "database outage root cause", "tags": ["semantic", "document", "en"], "relevant": ["/eval/Work/incident-postmortem-db-outage.md"] },
+    { "query": "quarterly revenue bar chart", "tags": ["semantic", "image", "en"], "relevant": ["/eval/Work/quarterly-revenue-chart.png"] },
+    { "query": "sprint planning board", "tags": ["semantic", "image", "en"], "relevant": ["/eval/Work/sprint-whiteboard.png"] },
+    { "query": "dentist appointment reminder", "tags": ["semantic", "audio", "en"], "relevant": ["/eval/Recordings/dentist-reminder.m4a"] },
+    { "query": "podcast about language models", "tags": ["semantic", "audio", "en"], "relevant": ["/eval/Recordings/podcast-intro-ai.m4a"] },
+    { "query": "demo adding a folder in settings", "tags": ["semantic", "video", "en"], "relevant": ["/eval/Videos/nookive-product-demo.mp4"] },
+    { "query": "habit tracking tips", "tags": ["semantic", "document", "en"], "relevant": ["/eval/Personal/reading-notes-habits.txt"] },
+
+    { "query": "음성 메모 장보기", "tags": ["kind-hint", "audio", "ko"], "relevant": ["/eval/Recordings/장보기_음성메모.m4a"] },
+    { "query": "screenshot of card declined", "tags": ["kind-hint", "image", "en"], "relevant": ["/eval/Screenshots/payment-error.png"] },
+    { "query": "김치찌개 영상", "tags": ["kind-hint", "video", "ko"], "relevant": ["/eval/Videos/김치찌개_요리_브이로그.mp4"] },
+
+    { "query": "ㅋㅋ", "tags": ["no-answer", "low-signal"], "relevant": [] },
+    { "query": "ㅎ", "tags": ["no-answer", "low-signal"], "relevant": [] },
+    { "query": "asdf", "tags": ["no-answer", "low-signal"], "relevant": [] },
+    { "query": "aaaa", "tags": ["no-answer", "low-signal"], "relevant": [] },
+    { "query": "현재 sota 모델을 알려줘", "tags": ["no-answer", "ko"], "relevant": [] },
+    { "query": "주식 시세 알려줘", "tags": ["no-answer", "ko"], "relevant": [] },
+    { "query": "how tall is mount everest", "tags": ["no-answer", "en"], "relevant": [] }
+  ]
+}
