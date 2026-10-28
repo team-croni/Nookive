@@ -471,7 +471,7 @@ fn download_bundle_sync(app: &AppHandle, kind: &str) -> Result<ModelBundleStatus
         .lock()
         .map_err(|_| "모델 다운로드 잠금을 획득하지 못했습니다.".to_string())?;
     let client = Client::builder()
-        .user_agent("Nookive/0.1.1 model installer")
+        .user_agent("Nookive/0.1.2 model installer")
         .build()
         .map_err(|error| format!("모델 다운로드 클라이언트 생성 실패: {error}"))?;
     let overall_total: u64 = files.iter().map(|file| file.size).sum();
