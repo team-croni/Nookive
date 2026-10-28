@@ -3,15 +3,9 @@
 const CHUNK_SIZE = 500;
 const CHUNK_OVERLAP = 50;
 
-export const TEXT_EXTENSIONS = new Set([
-  'md', 'txt', 'json', 'ts', 'tsx', 'js', 'jsx', 'py', 'rtf',
-  'rs', 'go', 'java', 'html', 'css', 'scss', 'yaml', 'yml', 'toml', 'sh',
-]);
-
-export const CODE_EXTENSIONS = new Set([
-  'ts', 'tsx', 'js', 'jsx', 'py', 'rs', 'go', 'java', 'html', 'css', 'scss',
-  'yaml', 'yml', 'toml', 'sh',
-]);
+// 어떤 파일을 임베딩할지는 Rust manifest(src-tauri/src/index/file_class.rs)가 결정한다.
+// 여기서는 manifest가 넘긴 pending 중 텍스트 worker가 처리할 문서만 고른다.
+export const TEXT_EXTENSIONS = new Set(['md', 'txt', 'rtf']);
 
 export const basename = (filePath: string): string =>
   filePath.split(/[\\/]/).pop() || filePath;
