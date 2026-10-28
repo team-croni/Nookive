@@ -154,22 +154,28 @@ export function App() {
     if (webMode) setSelectedIndex(0);
   }, [webMode, query, setSelectedIndex]);
 
+  // 선택 항목 열기 (Enter / 하단 열기 버튼)
+  // 열린 앱이 포커스를 가져가 blur가 발생할 때까지 기다리지 않고 창을 바로 숨긴다.
+  const openSelectedAt = (idx: number) => {
+    if (showWebFallback) {
+      const target = idx === 0 ? webQuery : webSuggestions[idx - 1];
+      if (!target) return;
+      void hideDesktopWindow();
+      void openGoogleSearch(target);
+      return;
+    }
+    const selected = deferredResults[idx];
+    if (!selected) return;
+    void hideDesktopWindow();
+    openFileInOS(selected.file.path);
+  };
+
   // 키보드 네비게이션 등록
   useKeyboardNav({
     itemCount: showWebFallback ? webItemCount : deferredResults.length,
     selectedIndex,
     setSelectedIndex,
-    onEnter: (idx) => {
-      if (showWebFallback) {
-        const target = idx === 0 ? webQuery : webSuggestions[idx - 1];
-        if (target) void openGoogleSearch(target);
-        return;
-      }
-      const selected = deferredResults[idx];
-      if (selected) {
-        openFileInOS(selected.file.path);
-      }
-    },
+    onEnter: openSelectedAt,
     onEscape: () => {
       if (query) {
         setQuery('');
@@ -291,14 +297,7 @@ export function App() {
               canOpen={showWebFallback ? webItemCount > 0 : Boolean(currentSelected)}
               canCopyPath={!showWebFallback && Boolean(currentSelected)}
               openLabel={showWebFallback ? t('footer.webOpen') : t('common:actions.open')}
-              onOpen={() => {
-                if (showWebFallback) {
-                  const target = selectedIndex === 0 ? webQuery : webSuggestions[selectedIndex - 1];
-                  if (target) void openGoogleSearch(target);
-                  return;
-                }
-                if (currentSelected) handleOpenFile(currentSelected.file.path);
-              }}
+              onOpen={() => openSelectedAt(selectedIndex)}
               onCopyPath={handleCopyPath}
             />
           )}
