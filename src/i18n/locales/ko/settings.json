@@ -30,6 +30,8 @@
     "cancel": "설치 중단",
     "start": "설치 시작",
     "retry": "다시 시도",
+    "modelLicenseNotice": "모델은 Hugging Face에서 내려받습니다: EmbeddingGemma 2(Google), Qwen3-ASR·Qwen3-ForcedAligner(Qwen, Alibaba Cloud) — Apache License 2.0.",
+    "modelLicenseLink": "모델 라이선스 보기",
     "error": "설치 중 오류가 발생했습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.",
     "setupTitle": "설치 완료",
     "setupDescription": "Nookive를 사용하기 전에 검색 환경을 설정해 주세요.",

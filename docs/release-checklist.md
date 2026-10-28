@@ -11,7 +11,9 @@ audited consistently.
 - [ ] Confirm that the app name, icon, screenshots, sample documents, and
       bundled fonts/assets can be redistributed.
 - [ ] Review `THIRD_PARTY_NOTICES.md` against the exact model, binary, and
-      dependency versions shipped in the release.
+      dependency versions shipped in the release (Node.js, llama.cpp revision,
+      pinned qwen3-asr.cpp commit, `package-lock.json`, `Cargo.lock`, and the
+      model URLs/hashes in `src-tauri/src/models.rs`).
 - [ ] Run secret scanning over the complete history before making the first
       push (`gitleaks`, GitHub secret scanning, or an equivalent tool).
 - [ ] Verify that `.gitignore` excludes models, binaries, caches, indexes,
@@ -46,5 +48,12 @@ audited consistently.
       publish SHA-256 checksums, and document the macOS first-launch warning.
 - [ ] If Apple Developer signing is added later, switch this step to a
       Developer ID-signed and notarized artifact.
+- [ ] Confirm `npm run bundle:prepare` generated
+      `bin/licenses/THIRD_PARTY_LICENSES.txt` without warnings, and that
+      Settings → About → Open-source licenses opens it from the installed app
+      while offline.
+- [ ] If a model, model source, or helper binary changed, update
+      `THIRD_PARTY_NOTICES.md`, `licenses/vendor/`, and the installer's model
+      license notice (`installer.modelLicenseNotice`).
 - [ ] Create release notes with known limits, supported macOS versions, and
       model/dependency changes.

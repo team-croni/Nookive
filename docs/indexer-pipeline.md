@@ -1,6 +1,6 @@
 ---
-date: 2026-10-14
-version: 1.4.0
+date: 2026-10-28
+version: 1.4.1
 ---
 
 # Local Indexer & Embedding Pipeline
@@ -15,8 +15,8 @@ EmbeddingGemma 2는 **텍스트·이미지·오디오를 하나의 768차원 공
 
 ## 2. 네이티브 바이너리 및 실행 체계
 
-- **텍스트/이미지/오디오 임베딩 바이너리**: `bin/llama-server` (Apple Silicon Metal GPU, v0.6.0)
-  - **멀티모달 프로젝터(mmproj)** 필수: `models/mmproj-embeddinggemma-2-Q8_0.gguf`
+- **텍스트/이미지/오디오 임베딩 바이너리**: `bin/llama-server` (llama.cpp, Apple Silicon Metal GPU — `scripts/build-llama-metal.sh`로 빌드하며 소스 리비전은 `bin/licenses/upstream/llama.cpp/VERSION`에 기록). 같은 바이너리를 Qwen3-ASR 음성 인식 사이드카(포트 8081)로도 사용한다.
+  - **멀티모달 프로젝터(mmproj)** 필수: Application Support의 `models/mmproj-embeddinggemma-2-Q8_0.gguf` (개발 환경은 저장소 `models/` 폴백)
 - **이미지 비전 바이너리**: `bin/vision-cli` (Apple Vision 사물 분류 + OCR — 텍스트 태그/키워드 보강용)
 - **비디오 프레임 추출 바이너리**: `bin/media-cli` (AVFoundation `AVAssetImageGenerator` — Swift, 신규)
 - **오디오/사운드 변환**: macOS 내장 `afconvert` (16kHz mono WAV)

@@ -1,6 +1,7 @@
 // src/features/onboarding/OnboardingWizard.tsx
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { Pause, Play, RefreshCw, Square, X, XCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
@@ -329,12 +330,25 @@ export function OnboardingWizard({
             }`}
           >
             {!hasDownloadStarted && !isDownloadCancelled ? (
-              <div className={`${wizardStyles.installActions} ${wizardStyles.initialStartActions}`}>
-                <Button variant="primary" size="sm" onClick={() => void runDownload()}>
-                  <Play size={14} fill="currentColor" />
-                  {t('installer.start')}
-                </Button>
-              </div>
+              <>
+                <div className={`${wizardStyles.installActions} ${wizardStyles.initialStartActions}`}>
+                  <Button variant="primary" size="sm" onClick={() => void runDownload()}>
+                    <Play size={14} fill="currentColor" />
+                    {t('installer.start')}
+                  </Button>
+                </div>
+                {/* 다운로드 전 모델 출처와 라이선스 고지 */}
+                <p className={wizardStyles.modelLicenseNotice}>
+                  {t('installer.modelLicenseNotice')}{' '}
+                  <button
+                    type="button"
+                    className={wizardStyles.modelLicenseLink}
+                    onClick={() => void invoke('open_license_document', { kind: 'thirdPartyNotices' })}
+                  >
+                    {t('installer.modelLicenseLink')}
+                  </button>
+                </p>
+              </>
             ) : isDownloadCancelled ? (
               <div className={wizardStyles.installActions}>
                 <Button variant="ghost" size="sm" onClick={() => void runDownload()}>

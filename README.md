@@ -101,9 +101,12 @@ The exact script names available in this checkout can be listed with
 npm run tauri -- build --bundles dmg
 ```
 
-The bundle preparation step expects the helper binaries to be present. Models
-are intentionally downloaded after installation rather than committed to this
-repository or embedded in the DMG; see
+The bundle preparation step expects the helper binaries to be present. It also
+generates `bin/licenses/THIRD_PARTY_LICENSES.txt`, the full license texts of
+every third-party component shipped in the app, and fails if a native
+component's license is missing. Run `npm run licenses` to generate it during
+development. Models are intentionally downloaded after installation rather
+than committed to this repository or embedded in the DMG; see
 `THIRD_PARTY_NOTICES.md`.
 
 The DMG intentionally contains no model weights. On first launch, the app
@@ -173,3 +176,5 @@ their respective owners.
 
 Nookive's original source code is available under the [MIT License](LICENSE).
 Third-party components and downloaded model files remain under their own terms.
+The app includes their full license texts under Settings → About →
+Open-source licenses.
