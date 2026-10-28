@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::{AppHandle, Manager};
 
+use super::file_class::{embeddable_extension, is_excluded_directory_name};
 use crate::paths::resolve_home;
 
 const INDEX_MANIFEST_VERSION: u32 = 1;
@@ -42,7 +43,7 @@ pub struct IndexSyncStatus {
     pending_files: usize,
     pub(crate) pending_paths: Vec<String>,
     changed_files: usize,
-    removed_files: usize,
+    pub(crate) removed_files: usize,
     last_sync_at_ms: Option<u128>,
 }
 
@@ -103,20 +104,6 @@ fn modified_at_ms(metadata: &std::fs::Metadata) -> u128 {
         })
 }
 
-fn supported_extension(path: &Path) -> Option<String> {
-    let ext = path.extension()?.to_string_lossy().to_lowercase();
-    let supported = [
-        "md", "txt", "json", "ts", "tsx", "js", "py", "rtf", "pdf", "png", "jpg", "jpeg", "webp",
-        "heic", "bmp", "gif", "mp3", "m4a", "wav", "flac", "aac", "ogg", "wma", "mp4", "mov",
-        "mkv", "avi", "webm", "m4v",
-    ];
-    supported.contains(&ext.as_str()).then_some(ext)
-}
-
-fn should_skip_directory(name: &str) -> bool {
-    name.starts_with('.') || matches!(name, "node_modules" | "dist" | "target" | "build")
-}
-
 fn scan_indexable_files(dir: &Path, out: &mut Vec<FileFingerprint>, directories: &mut Vec<String>) {
     directories.push(dir.to_string_lossy().to_string());
     let Ok(entries) = std::fs::read_dir(dir) else {
@@ -131,7 +118,7 @@ fn scan_indexable_files(dir: &Path, out: &mut Vec<FileFingerprint>, directories:
             if !path
                 .file_name()
                 .and_then(|v| v.to_str())
-                .is_some_and(should_skip_directory)
+                .is_some_and(is_excluded_directory_name)
             {
                 scan_indexable_files(&path, out, directories);
             }
@@ -140,7 +127,7 @@ fn scan_indexable_files(dir: &Path, out: &mut Vec<FileFingerprint>, directories:
         if !file_type.is_file() {
             continue;
         }
-        let Some(extension) = supported_extension(&path) else {
+        let Some(extension) = embeddable_extension(&path) else {
             continue;
         };
         let Ok(metadata) = entry.metadata() else {
@@ -157,6 +144,34 @@ fn scan_indexable_files(dir: &Path, out: &mut Vec<FileFingerprint>, directories:
             status: "pending".to_string(),
         });
     }
+}
+
+/// 이전 manifest와 현재 스캔을 비교해 (pending, removed) 경로를 돌려준다.
+/// 변경 없는 ready 파일은 ready 상태를 유지한다.
+fn diff_fingerprints(
+    previous: &HashMap<String, FileFingerprint>,
+    current: &mut [FileFingerprint],
+) -> (Vec<String>, Vec<String>) {
+    let mut pending = Vec::new();
+    for file in current.iter_mut() {
+        let unchanged = previous.get(&file.path).is_some_and(|old| {
+            old.size_bytes == file.size_bytes
+                && old.modified_at_ms == file.modified_at_ms
+                && old.status == "ready"
+        });
+        if unchanged {
+            file.status = "ready".to_string();
+        } else {
+            pending.push(file.path.clone());
+        }
+    }
+    let current_paths: HashSet<&str> = current.iter().map(|file| file.path.as_str()).collect();
+    let removed = previous
+        .keys()
+        .filter(|path| !current_paths.contains(path.as_str()))
+        .cloned()
+        .collect();
+    (pending, removed)
 }
 
 /// 선택된 루트만 스캔해 파일 fingerprint를 갱신한다. 실제 임베딩은 별도 작업 큐에서
@@ -186,29 +201,10 @@ pub(crate) fn sync_index_manifest(
         scan_indexable_files(&resolved, &mut current, &mut directories);
     }
 
-    let mut pending = Vec::new();
-    for file in &mut current {
-        let unchanged = previous.get(&file.path).is_some_and(|old| {
-            old.size_bytes == file.size_bytes
-                && old.modified_at_ms == file.modified_at_ms
-                && old.status == "ready"
-        });
-        if unchanged {
-            file.status = "ready".to_string();
-        } else {
-            pending.push(file.path.clone());
-        }
-    }
-    let current_paths: HashSet<&str> = current.iter().map(|file| file.path.as_str()).collect();
-    let removed_files = previous
-        .keys()
-        .filter(|path| !current_paths.contains(path.as_str()))
-        .count();
-    let removed_paths: Vec<String> = previous
-        .keys()
-        .filter(|path| !current_paths.contains(path.as_str()))
-        .cloned()
-        .collect();
+    // 제외 규칙에 새로 걸린 기존 파일(코드, 비밀 파일 등)도 removed로 분류되어
+    // 아래에서 runtime 레코드가 함께 정리된다.
+    let (pending, removed_paths) = diff_fingerprints(&previous, &mut current);
+    let removed_files = removed_paths.len();
     let changed_files = pending.len();
 
     // 빈 roots는 사용자가 모든 검색 폴더를 제거한 경우로 처리한다.
@@ -272,4 +268,80 @@ pub(crate) fn get_index_status(app: AppHandle) -> Result<IndexSyncStatus, String
 pub(crate) fn sync_saved_index_manifest(app: AppHandle) -> Result<IndexSyncStatus, String> {
     let roots = load_manifest(&app)?.roots;
     sync_index_manifest(app, roots)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fingerprint(path: &str, status: &str) -> FileFingerprint {
+        FileFingerprint {
+            path: path.to_string(),
+            size_bytes: 10,
+            modified_at_ms: 1,
+            extension: "md".to_string(),
+            status: status.to_string(),
+        }
+    }
+
+    #[test]
+    fn scan_skips_code_sensitive_and_excluded_directories() {
+        let root = std::env::temp_dir().join(format!("nookive-scan-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        for relative in [
+            "notes.md",
+            "photo.png",
+            "src/main.rs",
+            "package.json",
+            "package-lock.json",
+            ".env",
+            "aws-credentials.txt",
+            "node_modules/pkg/readme.md",
+            "vendor/lib/readme.txt",
+            ".git/description.txt",
+            "docs/guide.txt",
+        ] {
+            let path = root.join(relative);
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+            std::fs::write(&path, b"x").unwrap();
+        }
+
+        let mut files = Vec::new();
+        let mut directories = Vec::new();
+        scan_indexable_files(&root, &mut files, &mut directories);
+        let mut names: Vec<String> = files
+            .iter()
+            .map(|file| {
+                Path::new(&file.path)
+                    .strip_prefix(&root)
+                    .unwrap()
+                    .to_string_lossy()
+                    .to_string()
+            })
+            .collect();
+        names.sort();
+        std::fs::remove_dir_all(&root).unwrap();
+
+        assert_eq!(names, vec!["docs/guide.txt", "notes.md", "photo.png"]);
+    }
+
+    #[test]
+    fn previously_indexed_code_is_reported_as_removed() {
+        let previous: HashMap<String, FileFingerprint> = [
+            fingerprint("/r/notes.md", "ready"),
+            fingerprint("/r/main.ts", "ready"),
+            fingerprint("/r/credentials.json", "ready"),
+        ]
+        .into_iter()
+        .map(|file| (file.path.clone(), file))
+        .collect();
+        let mut current = vec![fingerprint("/r/notes.md", "pending")];
+
+        let (pending, mut removed) = diff_fingerprints(&previous, &mut current);
+        removed.sort();
+
+        assert!(pending.is_empty());
+        assert_eq!(current[0].status, "ready");
+        assert_eq!(removed, vec!["/r/credentials.json", "/r/main.ts"]);
+    }
 }

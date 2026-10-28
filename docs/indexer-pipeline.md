@@ -7,7 +7,7 @@ version: 1.4.1
 
 ## 1. 개요 (Overview)
 
-로컬 파일(문서/코드, PDF, 이미지, 오디오, 비디오)을 읽어와 **내용 추출 → 청크/세그먼트 분할 → 멀티모달 EmbeddingGemma 2 추론 → 하이브리드 랭킹**으로 이어지는 온디바이스 색인 명세입니다.
+로컬 파일(문서, PDF, 이미지, 오디오, 비디오)을 읽어와 **내용 추출 → 청크/세그먼트 분할 → 멀티모달 EmbeddingGemma 2 추론 → 하이브리드 랭킹**으로 이어지는 온디바이스 색인 명세입니다.
 
 EmbeddingGemma 2는 **텍스트·이미지·오디오를 하나의 768차원 공간**에 임베딩합니다. 따라서 이미지 "내용", 오디오/영상의 "그 순간"을 텍스트 쿼리로 통합 검색할 수 있습니다(DigUp 방식).
 
@@ -55,9 +55,9 @@ Nookive는 Tauri 시작 시 `/Applications`, `/System/Applications`, `~/Applicat
 검색 결과의 기존 JSON 벡터를 깨뜨리지 않도록 사용자별 runtime 인덱스를 별도로 사용한다. 설정 화면의
 `지금 색인`이 `pending_paths`를 소비하며, 파일 삭제는 다음 동기화에서 현재 목록에서 제거된다.
 
-### 2.3 텍스트/코드 증분 worker
+### 2.3 텍스트 문서 증분 worker
 
-설정 창에서 폴더를 추가하면 `indexingWorker.ts`가 pending 중 텍스트/코드 파일을 우선 처리한다.
+설정 창에서 폴더를 추가하면 `indexingWorker.ts`가 pending 중 텍스트 문서(md/txt/rtf)를 우선 처리한다.
 500자 청크(50자 overlap)를 만들고, 각 청크를 로컬 `llama-server`의 `/v1/embeddings`에 보내 768차원 벡터를
 사용자별 `runtime-index.json`에 atomic replace 방식으로 저장한다. 성공한 파일만 manifest에서 `ready`로 바뀌며,
 서버가 꺼져 있거나 파일을 읽지 못하면 pending을 유지한다.
@@ -71,16 +71,31 @@ Nookive는 Tauri 시작 시 `/Applications`, `/System/Applications`, `~/Applicat
 만드는 처리 계층을 뜻한다. 현재 구현에서는 Node 인덱서가 이 역할까지 겸하며, 향후 SQLite/백그라운드 큐로
 분리할 때 독립 worker로 추출할 수 있다.
 
+### 2.4 파일 분류와 기본 제외 규칙
+
+임베딩 대상은 Rust의 `src-tauri/src/index/file_class.rs` 한 곳에서 결정한다. manifest 스캔이 이 규칙으로
+거른 파일만 pending에 올리므로 React 텍스트 worker와 Node 인덱서 모두 같은 기준을 따른다.
+
+- **코드/설정 파일**(`ts`, `js`, `py`, `rs`, `json`, `yaml` 등)은 기본 임베딩에서 제외한다. 코드 검색은 별도
+  lexical 인덱스로 다룬다(#10).
+- **제외 디렉터리**: 점으로 시작하는 디렉터리, `node_modules`, `vendor`, `dist`, `build`, `out`, `target`,
+  `coverage`, `__pycache__`.
+- **제외 파일**: 숨김 파일(`.env*`, `.npmrc` 등), SSH 키(`id_rsa*` 등), 키/인증서 확장자(`pem`, `p12`, `pfx`,
+  `crt`, `kdbx` 등), lock·minified·source map 파일. 텍스트 문서는 이름에 `credential`, `secret`, `password`,
+  `service-account`가 들어가면 제외한다(이미지·미디어에는 적용하지 않는다).
+- 규칙에 새로 걸린 기존 파일은 다음 manifest 동기화에서 removed로 처리되어 runtime 인덱스에서도 삭제된다.
+- 파일 감시자는 제외 디렉터리 아래 변경이나 색인 대상이 아닌 파일 변경으로는 재스캔하지 않는다.
+
 ---
 
 ## 3. 파이프라인 단계
 
 ```mermaid
 flowchart TD
-    A["로컬 파일 탐색<br/>(문서/코드, PDF, 이미지, 오디오, 비디오)"] --> B{"파일 유형 판별"}
+    A["로컬 파일 탐색<br/>(문서, PDF, 이미지, 오디오, 비디오)"] --> B{"파일 유형 판별"}
 
     B -->|"PDF"| C["pdf-parse<br/>페이지별 텍스트"]
-    B -->|"문서/코드"| E["500자 슬라이딩 윈도우 청킹 (라인 번호 포함)"]
+    B -->|"문서"| E["500자 슬라이딩 윈도우 청킹 (라인 번호 포함)"]
     B -->|"이미지"| D1["sips → JPEG 1024px<br/>+ 썸네일 160px 생성"]
     B -->|"오디오"| D2["afconvert → WAV 16k mono<br/>5초 임베딩 창 / 2.5초 step"]
     B -->|"비디오"| D3["media-cli → 프레임 추출<br/>+ afconvert → 사운드트랙 윈도우"]
@@ -138,7 +153,7 @@ flowchart TD
 
 ### 3.4. 위치 메타데이터
 
-- PDF: `pageNumber`, 텍스트/코드: `lineStart`/`lineEnd`, 오디오/비디오: `timestampSeconds`.
+- PDF: `pageNumber`, 텍스트 문서: `lineStart`/`lineEnd`, 오디오/비디오: `timestampSeconds`.
 - 결과 목록의 파일명 옆 뱃지(p.{n} / L{n} / m:ss)와 미리보기 이동에 사용.
 
 ### 3.5. 하이브리드 검색 랭킹 (Hybrid Search Ranking)
