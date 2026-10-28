@@ -40,6 +40,7 @@ jobs:
               - 'package-lock.json'
               - 'tsconfig*.json'
               - 'vite.config.ts'
+              - 'vitest.config.ts'
               - '.oxlintrc.json'
               - '.github/workflows/ci.yml'
             rust:
@@ -70,6 +71,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Test
+        run: npm test
 
       - name: Build frontend
         run: npm run build

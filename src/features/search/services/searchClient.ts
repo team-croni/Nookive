@@ -2,13 +2,8 @@
 import type { SearchResultItem } from '../../../types/search';
 import { listApplications, listIndexedFolders, loadRuntimeIndex } from '../../../utils/tauriBridge';
 import { requestQueryEmbedding } from './embeddingClient';
-import {
-  groupAndDeduplicate,
-  rankResults,
-  scoreRecords,
-  type ScoredSearchResult,
-} from './scoring';
-import { expandKeywords, nfc, tokenizeKeywords } from './textUtils';
+import { isLowSignalQuery, rankQuery } from './rankQuery';
+import { nfc, tokenizeKeywords } from './textUtils';
 
 export class SearchClient {
   private abortController: AbortController | null = null;
@@ -131,21 +126,7 @@ export class SearchClient {
     }
     this.abortController = new AbortController();
 
-    // 자음/모음만 있거나 1글자인 쿼리는 임베딩이 의미 없는 방향으로 쏠려
-    // (짧은 입력은 대부분의 문서/영상과 높은 코사인 유사도를 보임) 무관한 결과가 쏟아진다.
-    // 같은 이유로 "aaaaaaaaa", "zzzzzz" 같은 반복 문자열과 "asdf..." 같은
-    // 키보드 연타도 임베딩이 우연히 높은 유사도를 만들 수 있어 시맨틱 검색에서 제외한다.
-    const trimmedQuery = nfc(query).trim();
-    const compactQuery = trimmedQuery.replace(/\s+/g, '');
-    const jamoOnly = /^[\u3131-\u318E\s]+$/.test(trimmedQuery);
-    const repeatedChar =
-      compactQuery.length >= 3 && new Set(compactQuery).size === 1;
-    const keyboardMash = /^(asdf|qwer|zxcv|1234|hjkl)/i.test(compactQuery);
-    const lowSignal =
-      jamoOnly ||
-      compactQuery.length < 2 ||
-      repeatedChar ||
-      keyboardMash;
+    const lowSignal = isLowSignalQuery(query);
 
     // 1. llama-server (EmbeddingGemma 2)로 쿼리 임베딩 시도
     let queryVector: number[] | null = null;
@@ -162,31 +143,7 @@ export class SearchClient {
         );
       }
     }
-    const semanticMode = queryVector !== null;
-
-    const qLower = nfc(query).toLowerCase().trim();
-    const baseKeywords = tokenizeKeywords(qLower);
-    const queryKeywords = expandKeywords(baseKeywords);
-
-    // 2. 하이브리드 검색 점수 계산
-    //    (모달리티별 z-score 정규화 + 렉시컬 키워드 coverage 부스트)
-    const scored: ScoredSearchResult[] = scoreRecords(records, {
-      queryVector,
-      semanticMode,
-      baseKeywords,
-      queryKeywords,
-      query,
-    });
-
-    // 3. 파일 단위 그룹화 (동일 파일의 다수 청크를 하나로 통합)
-    //    baseKeywords를 넘겨 단어 단위 타임스탬프로 뱃지를 보정한다.
-    const deduplicated = groupAndDeduplicate(scored, baseKeywords);
-
-    // 4. z-score 게이트 통과 결과만 정렬해 반환
-    const sorted = deduplicated.sort(
-      (a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0),
-    );
-    return rankResults(sorted, query);
+    return rankQuery(records, query, queryVector);
   }
 }
 
