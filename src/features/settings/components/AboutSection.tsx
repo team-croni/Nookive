@@ -17,6 +17,11 @@ export function AboutSection() {
     void invoke('open_url', { url });
   };
 
+  // 앱에 동봉된 라이선스 문서를 연다 (개발 빌드는 GitHub 버전 태그 문서로 대체).
+  const openLicense = (kind: 'license' | 'thirdPartyLicenses') => {
+    void invoke('open_license_document', { kind });
+  };
+
   return (
     <section className={styles.aboutSection}>
       <img
@@ -34,10 +39,10 @@ export function AboutSection() {
           <button type="button" onClick={() => openLink('https://github.com/team-croni/Nookive')}>
             {t('about.github')}
           </button>
-          <button type="button" onClick={() => openLink('https://github.com/team-croni/Nookive/blob/main/LICENSE')}>
+          <button type="button" onClick={() => openLicense('license')}>
             {t('about.license')}
           </button>
-          <button type="button" onClick={() => openLink('https://github.com/team-croni/Nookive/blob/main/THIRD_PARTY_NOTICES.md')}>
+          <button type="button" onClick={() => openLicense('thirdPartyLicenses')}>
             {t('about.thirdParty')}
           </button>
           <button type="button" onClick={() => openLink('https://github.com/team-croni/Nookive/issues')}>

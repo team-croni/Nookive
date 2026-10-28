@@ -16,8 +16,12 @@ to Rust code should also be checked with `cargo check --manifest-path
 src-tauri/Cargo.toml`.
 
 Do not commit model files, generated binaries, build output, local indexes,
-`.env` files, credentials, or personal documents. See
-`THIRD_PARTY_NOTICES.md` before changing bundled dependencies.
+`.env` files, credentials, or personal documents.
+
+When you add, remove, or upgrade a bundled dependency, helper binary, or
+downloaded model, update `THIRD_PARTY_NOTICES.md` and run `npm run licenses`
+to check that the generated license file still covers it. See the "Updating
+this file" section of `THIRD_PARTY_NOTICES.md`.
 
 ## Pull requests
 

@@ -167,6 +167,7 @@ const SPEECH_FILES: &[DownloadFile] = &[
         size: 994_404_608,
         sha256: "5de69a8cfc49c95a6520f50f2f15cfce9af35bc4723a10c56fc64e51dc966b3a",
     },
+    // scripts/build-aligner.sh의 ALIGNER_REF와 같은 qwen3-asr.cpp 커밋에 고정한다.
     DownloadFile {
         relative: "asr/assets/korean_dict_jieba.dict",
         url: "https://raw.githubusercontent.com/femelo/qwen3-asr.cpp/73295783e5c588139f0f15a17a18e8c7c161fc5f/assets/korean_dict_jieba.dict",

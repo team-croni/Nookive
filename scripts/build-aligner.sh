@@ -7,6 +7,9 @@ set -e
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="${NOOKIVE_ALIGNER_BUILD_DIR:-${TMPDIR:-/tmp}/nookive-qwen3-asr}"
 REPO_URL="https://github.com/femelo/qwen3-asr.cpp.git"
+# 배포 바이너리의 출처를 고정한다. src-tauri/src/models.rs의 한국어 사전 URL과
+# 같은 커밋을 사용해야 CLI와 사전 버전이 일치한다.
+ALIGNER_REF="${NOOKIVE_ALIGNER_REF:-73295783e5c588139f0f15a17a18e8c7c161fc5f}"
 MODEL_URL="https://huggingface.co/OpenVoiceOS/qwen3-forced-aligner-0.6b-q8-0/resolve/main/qwen3-forced-aligner-0.6b-q8_0.gguf?download=true"
 
 if [ ! -d "$BUILD_DIR/.git" ]; then
@@ -15,6 +18,10 @@ if [ ! -d "$BUILD_DIR/.git" ]; then
 fi
 
 cd "$BUILD_DIR"
+if ! git cat-file -e "$ALIGNER_REF^{commit}" 2>/dev/null; then
+  git fetch origin "$ALIGNER_REF"
+fi
+git checkout --quiet "$ALIGNER_REF"
 git submodule update --init --recursive
 
 if ! command -v cmake >/dev/null 2>&1; then
@@ -42,6 +49,20 @@ for runtime_lib in \
   "$BUILD_DIR/build/ggml/src/ggml-metal/libggml-metal.0.dylib"; do
   cp "$runtime_lib" "$PROJECT_DIR/bin/qwen3-asr-libs/"
 done
+
+echo "📜 업스트림 라이선스 복사"
+# femelo/qwen3-asr.cpp 포크는 LICENSE 파일이 없다 (README에 MIT 표기).
+# 그 경우 generate-licenses.mjs가 licenses/vendor/qwen3-asr.cpp.LICENSE
+# (원본 predict-woo/qwen3-asr.cpp의 LICENSE)를 사용한다.
+LICENSE_DIR="$PROJECT_DIR/bin/licenses/upstream/qwen3-asr.cpp"
+rm -rf "$LICENSE_DIR"
+mkdir -p "$LICENSE_DIR/ggml"
+if [ -f "$BUILD_DIR/LICENSE" ]; then
+  cp "$BUILD_DIR/LICENSE" "$LICENSE_DIR/LICENSE"
+fi
+cp "$BUILD_DIR/ggml/LICENSE" "$LICENSE_DIR/ggml/LICENSE"
+git -C "$BUILD_DIR" rev-parse HEAD > "$LICENSE_DIR/VERSION"
+git -C "$BUILD_DIR/ggml" rev-parse HEAD > "$LICENSE_DIR/ggml/VERSION"
 
 echo "📖 한국어 사전 복사"
 mkdir -p "$PROJECT_DIR/models/asr/assets"

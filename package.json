@@ -31,6 +31,7 @@
     "aligner:build": "bash scripts/build-aligner.sh",
     "build:llama-metal": "bash scripts/build-llama-metal.sh",
     "bundle:prepare": "bash scripts/prepare-bundle.sh",
+    "licenses": "node scripts/generate-licenses.mjs",
     "sidecar": "bash scripts/run-sidecar.sh",
     "tauri": "tauri",
     "desktop": "tauri dev"
