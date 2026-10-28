@@ -30,6 +30,8 @@
     "cancel": "Cancel installation",
     "start": "Start installation",
     "retry": "Retry",
+    "modelLicenseNotice": "Models are downloaded from Hugging Face: EmbeddingGemma 2 (Google) and Qwen3-ASR / Qwen3-ForcedAligner (Qwen, Alibaba Cloud), licensed under the Apache License 2.0.",
+    "modelLicenseLink": "View model licenses",
     "error": "An error occurred during installation. Please check your network connection.",
     "setupTitle": "Installation complete",
     "setupDescription": "Set up your search preferences before using Nookive.",

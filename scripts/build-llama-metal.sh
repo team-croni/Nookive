@@ -73,6 +73,21 @@ for backend in "$PROJECT_DIR"/bin/libggml-*.so; do
   mv "$backend" "$STALE_BACKEND_DIR/"
 done
 
+# 배포 번들에 동봉할 업스트림 라이선스와 소스 버전을 기록한다.
+# scripts/generate-licenses.mjs가 이 파일들로 THIRD_PARTY_LICENSES.txt를 만든다.
+LICENSE_DIR="$PROJECT_DIR/bin/licenses/upstream/llama.cpp"
+rm -rf "$LICENSE_DIR"
+mkdir -p "$LICENSE_DIR"
+cp "$SOURCE_DIR/LICENSE" "$LICENSE_DIR/LICENSE"
+if [ -f "$SOURCE_DIR/ggml/LICENSE" ]; then
+  cp "$SOURCE_DIR/ggml/LICENSE" "$LICENSE_DIR/LICENSE-ggml"
+fi
+if [ -d "$SOURCE_DIR/licenses" ]; then
+  cp -R "$SOURCE_DIR/licenses" "$LICENSE_DIR/licenses"
+fi
+git -C "$SOURCE_DIR" describe --tags --always --dirty > "$LICENSE_DIR/VERSION" 2>/dev/null \
+  || echo "unknown" > "$LICENSE_DIR/VERSION"
+
 # llama-server는 버전이 붙은 .0 dylib를 참조하므로, 같은 빌드의 파일을
 # 프로젝트 실행 디렉터리의 로더 이름으로도 맞춰 둔다. 기존 버전과 섞이지 않게 한다.
 echo "✅ Metal llama-server 설치 완료"

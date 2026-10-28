@@ -135,6 +135,25 @@
   margin-top: 44px;
 }
 
+.modelLicenseNotice {
+  margin: 16px auto 0;
+  max-width: 360px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.modelLicenseLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .statusCaption {
   margin-top: 10px;
   font-size: 11px;

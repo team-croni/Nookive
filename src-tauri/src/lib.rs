@@ -5,6 +5,7 @@ mod embedding;
 mod files;
 mod folders;
 mod index;
+mod licenses;
 #[cfg(all(target_os = "macos", test))]
 mod mask_png;
 mod models;
@@ -105,6 +106,7 @@ pub fn run() {
             files::render_pdf_page_native,
             web::google_suggest,
             web::open_url,
+            licenses::open_license_document,
             window::hide_window,
             window::hide_settings_window,
             window::hide_installer_window,
