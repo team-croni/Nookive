@@ -11,6 +11,9 @@ use serde::Serialize;
 use sha2::{Digest, Sha256};
 use tauri::{AppHandle, Emitter, Manager};
 
+/// 다운로드 취소 오류 코드. 프론트엔드가 문구가 아니라 이 코드로 취소를 구분한다.
+pub const DOWNLOAD_CANCELLED: &str = "download-cancelled";
+
 fn cancel_flag() -> &'static AtomicBool {
     static FLAG: OnceLock<AtomicBool> = OnceLock::new();
     FLAG.get_or_init(|| AtomicBool::new(false))
@@ -351,12 +354,12 @@ fn download_file(
     loop {
         while pause_flag().load(Ordering::Relaxed) {
             if cancel_flag().load(Ordering::Relaxed) {
-                return Err("다운로드가 취소되었습니다.".to_string());
+                return Err(DOWNLOAD_CANCELLED.to_string());
             }
             thread::sleep(Duration::from_millis(100));
         }
         if cancel_flag().load(Ordering::Relaxed) {
-            return Err("다운로드가 취소되었습니다.".to_string());
+            return Err(DOWNLOAD_CANCELLED.to_string());
         }
         let mut request = client.get(file.url);
         if completed > 0 && completed < file.size {
@@ -398,7 +401,7 @@ fn download_file(
         loop {
             if cancel_flag().load(Ordering::Relaxed) {
                 let _ = output.flush();
-                return Err("다운로드가 취소되었습니다.".to_string());
+                return Err(DOWNLOAD_CANCELLED.to_string());
             }
             if pause_flag().load(Ordering::Relaxed) {
                 let _ = output.flush();
@@ -481,7 +484,7 @@ fn download_bundle_sync(app: &AppHandle, kind: &str) -> Result<ModelBundleStatus
     let mut overall_completed = 0;
     for file in files {
         if cancel_flag().load(Ordering::Relaxed) {
-            return Err("다운로드가 취소되었습니다.".to_string());
+            return Err(DOWNLOAD_CANCELLED.to_string());
         }
         download_file(
             app,

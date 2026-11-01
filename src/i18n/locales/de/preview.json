@@ -1,0 +1,12 @@
+{
+  "applicationHint": "Drücke die Eingabetaste, um die App zu öffnen.",
+  "folderHint": "Drücke die Eingabetaste, um den Ordner zu öffnen.",
+  "unsupportedImage": "Dieses Bildformat wird nicht unterstützt oder ist beschädigt",
+  "pdfLoading": "PDF wird geladen…",
+  "pdfBrowserUnsupported": "Lokale PDFs können im Webbrowser nicht angezeigt werden. Öffne die Desktop-App.",
+  "pdfFailed": "Dieses PDF kann nicht angezeigt werden. Nutze unten „Öffnen“.",
+  "fileAccessChecking": "Dateizugriff wird geprüft…",
+  "fileAccessTitle": "Kein Zugriff auf die Datei",
+  "fileAccessDescription": "Erlaube Nookive in den macOS-Einstellungen den Zugriff auf Dateien.",
+  "fileAccessRetry": "Erneut versuchen"
+}

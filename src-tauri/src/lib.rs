@@ -10,6 +10,7 @@ mod licenses;
 mod mask_png;
 mod models;
 mod paths;
+mod tray_labels;
 #[cfg(target_os = "macos")]
 mod vibrancy;
 mod web;

@@ -56,7 +56,8 @@ pub fn list_indexed_folders(app: AppHandle) -> Result<Vec<FolderSearchResult>, S
                     extension: "folder",
                     kind: "folder",
                     size_bytes: 0,
-                    modified_at: "폴더".to_string(),
+                    // 표시 문구는 프론트엔드가 종류(kind)를 보고 번역해 보여준다.
+                    modified_at: String::new(),
                 },
                 similarity_score: 0.0,
                 best_chunk: ApplicationChunk {

@@ -34,7 +34,7 @@ export async function readFileBytes(path: string): Promise<Uint8Array> {
   if (result instanceof ArrayBuffer) return new Uint8Array(result);
   if (Array.isArray(result)) return Uint8Array.from(result);
   throw new Error(
-    `readFileBytes: 예상치 못한 응답 형식 (${Object.prototype.toString.call(result)})`,
+    `readFileBytes: unexpected response type (${Object.prototype.toString.call(result)})`,
   );
 }
 
@@ -68,7 +68,7 @@ export async function renderNativePdfPage(
       ? new Uint8Array(result)
       : Uint8Array.from(result);
   if (bytes.byteLength < 8) {
-    throw new Error('PDF 렌더 응답이 올바르지 않습니다.');
+    throw new Error('Unexpected PDF render response.');
   }
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const width = view.getUint32(0, true);

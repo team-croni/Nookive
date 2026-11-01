@@ -138,7 +138,7 @@ export class SearchClient {
       } catch (err) {
         if ((err as Error)?.name === 'AbortError') return [];
         console.warn(
-          '[SearchClient] 임베딩 서버(127.0.0.1:8080) 연결 실패 → 키워드 전용 검색으로 폴백합니다. ./scripts/run-sidecar.sh 실행 여부를 확인하세요.',
+          '[SearchClient] Could not reach the embedding server (127.0.0.1:8080); falling back to keyword search. Check that ./scripts/run-sidecar.sh is running.',
           err,
         );
       }

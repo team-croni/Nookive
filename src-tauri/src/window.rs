@@ -3,6 +3,8 @@
 use crate::models;
 use std::sync::{Mutex, OnceLock};
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+
+use crate::tray_labels::{installing_label, tray_labels};
 use tauri::tray::TrayIconBuilder;
 #[cfg(not(target_os = "macos"))]
 use tauri::window::{Effect, EffectState, EffectsBuilder};
@@ -132,7 +134,7 @@ fn show_settings_window_with_mode(app: &AppHandle, onboarding: bool) {
             .into(),
         ),
     )
-    .title("Nookive 설정")
+    .title("Nookive Settings")
     .inner_size(window_width, window_height)
     .resizable(false)
     .decorations(false)
@@ -162,41 +164,18 @@ fn build_tray_menu<M: Manager<tauri::Wry>>(
     app: &M,
     language: &str,
 ) -> tauri::Result<Menu<tauri::Wry>> {
-    let is_korean = language.starts_with("ko");
+    let labels = tray_labels(language);
     let search_item = MenuItem::with_id(
         app,
         "show-search",
-        if is_korean {
-            "검색 열기"
-        } else {
-            "Open search"
-        },
+        labels.open_search,
         true,
         Some("CmdOrCtrl+Shift+Space"),
     )?;
-    let settings_item = MenuItem::with_id(
-        app,
-        "show-settings",
-        if is_korean {
-            "설정…"
-        } else {
-            "Settings…"
-        },
-        true,
-        None::<&str>,
-    )?;
+    let settings_item =
+        MenuItem::with_id(app, "show-settings", labels.settings, true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
-    let quit_item = MenuItem::with_id(
-        app,
-        "quit",
-        if is_korean {
-            "Nookive 종료"
-        } else {
-            "Quit Nookive"
-        },
-        true,
-        None::<&str>,
-    )?;
+    let quit_item = MenuItem::with_id(app, "quit", labels.quit, true, None::<&str>)?;
     Menu::with_items(app, &[&search_item, &settings_item, &separator, &quit_item])
 }
 
@@ -207,47 +186,25 @@ pub fn build_and_store_installing_menu(
     language: &str,
     percent: u32,
 ) -> tauri::Result<Menu<tauri::Wry>> {
-    let is_korean = language.starts_with("ko");
-    let label = if is_korean {
-        format!("설치 중… ({percent}%)")
-    } else {
-        format!("Installing… ({percent}%)")
-    };
+    let labels = tray_labels(language);
+    let label = installing_label(language, percent);
     let status_item = MenuItem::with_id(app, "installing-status", &label, false, None::<&str>)?;
     let pause_item = MenuItem::with_id(
         app,
         "installing-pause",
-        if is_korean {
-            "설치 일시정지"
-        } else {
-            "Pause installation"
-        },
+        labels.pause_installation,
         true,
         None::<&str>,
     )?;
     let cancel_item = MenuItem::with_id(
         app,
         "installing-cancel",
-        if is_korean {
-            "설치 중단"
-        } else {
-            "Cancel installation"
-        },
+        labels.cancel_installation,
         true,
         None::<&str>,
     )?;
     let separator = PredefinedMenuItem::separator(app)?;
-    let quit_item = MenuItem::with_id(
-        app,
-        "quit",
-        if is_korean {
-            "Nookive 종료"
-        } else {
-            "Quit Nookive"
-        },
-        true,
-        None::<&str>,
-    )?;
+    let quit_item = MenuItem::with_id(app, "quit", labels.quit, true, None::<&str>)?;
     let menu = Menu::with_items(
         app,
         &[
@@ -276,41 +233,23 @@ pub fn build_install_required_menu(
     app: &AppHandle,
     language: &str,
 ) -> tauri::Result<Menu<tauri::Wry>> {
-    let is_korean = language.starts_with("ko");
+    let labels = tray_labels(language);
     let status_item = MenuItem::with_id(
         app,
         "installation-required",
-        if is_korean {
-            "설치 필요"
-        } else {
-            "Installation required"
-        },
+        labels.installation_required,
         false,
         None::<&str>,
     )?;
     let start_item = MenuItem::with_id(
         app,
         "installing-start",
-        if is_korean {
-            "설치 시작"
-        } else {
-            "Start installation"
-        },
+        labels.start_installation,
         true,
         None::<&str>,
     )?;
     let separator = PredefinedMenuItem::separator(app)?;
-    let quit_item = MenuItem::with_id(
-        app,
-        "quit",
-        if is_korean {
-            "Nookive 종료"
-        } else {
-            "Quit Nookive"
-        },
-        true,
-        None::<&str>,
-    )?;
+    let quit_item = MenuItem::with_id(app, "quit", labels.quit, true, None::<&str>)?;
     Menu::with_items(app, &[&status_item, &start_item, &separator, &quit_item])
 }
 
@@ -430,12 +369,7 @@ pub fn set_tray_installing(app: AppHandle, language: String, percent: u32) -> Re
     if let Ok(guard) = installing_status_item().lock()
         && let Some(item) = guard.as_ref()
     {
-        let is_korean = language.starts_with("ko");
-        let label = if is_korean {
-            format!("설치 중… ({percent}%)")
-        } else {
-            format!("Installing… ({percent}%)")
-        };
+        let label = installing_label(&language, percent);
         let _ = item.set_text(&label);
         return Ok(());
     }

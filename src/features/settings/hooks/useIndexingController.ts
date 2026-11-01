@@ -127,13 +127,15 @@ export function useIndexingController() {
     if (!acquired) {
       abortRef.current = null;
       setIsBusy(false);
-      setIndexMessage('이미 다른 검색 데이터 생성 작업이 진행 중입니다. 잠시 후 다시 시도해 주세요.');
+      setIndexMessage(i18n.t('messages.indexBusy', { ns: 'settings' }));
       return;
     }
     try {
       const engine = await waitForEmbeddingServer();
       if (!engine?.ready) {
-        setIndexMessage(engine?.message || i18n.t('messages.indexFailed', { ns: 'settings' }));
+        // Rust가 보내는 엔진 상태 문구는 번역되지 않으므로 화면에는 번역된 안내만 보여준다.
+        console.warn('[Settings] 임베딩 엔진 준비 실패:', engine?.message);
+        setIndexMessage(i18n.t(engine ? 'messages.engineNotReady' : 'messages.indexFailed', { ns: 'settings' }));
         return;
       }
       let indexedCount = 0;
