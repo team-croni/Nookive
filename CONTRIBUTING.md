@@ -58,3 +58,18 @@ Describe the user-visible change, test commands, platform assumptions, and any
 privacy or licensing implications. Keep unrelated formatting changes out of
 the same pull request. Follow the commit message rules in
 `.github/COMMIT_CONVENTION.md`.
+
+Set a label, an assignee, and the upcoming release milestone on every pull
+request and issue. Labels follow the commit type and drive the release-note
+categories in `.github/release.yml`:
+
+| Commit type | Label |
+|---|---|
+| `feat` | `enhancement` |
+| `fix` | `bug` |
+| `test` | `test` |
+| `docs` | `documentation` |
+| `chore`, `build` | `chore` |
+| `ci` | `ci` |
+
+Add `rust`, `javascript`, or `dependencies` when they apply.
