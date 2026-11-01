@@ -97,3 +97,44 @@ describe('semantic statistics', () => {
     expect(names([...documents, ...apps])).toEqual(names(documents));
   });
 });
+
+describe('semantic gate', () => {
+  // 쿼리 벡터 [1, 0, 0]과 코사인이 정확히 cosine인 벡터
+  const withCosine = (cosine: number) => [cosine, Math.sqrt(1 - cosine * cosine), 0];
+  const image = (name: string, cosine: number) => file(name, 'png', '[사진 이미지]', withCosine(cosine));
+  // 의미 점수 분포의 바탕이 되는, 쿼리와 무관한 문서들
+  const background = Array.from({ length: 40 }, (_, index) =>
+    file(`note-${index}.md`, 'md', `unrelated note ${index}`, withCosine(0.3 + (index % 5) * 0.02)),
+  );
+  const search = (items: SearchResultItem[], query: string) =>
+    rankQuery(items, query, QUERY_VECTOR).map((item) => item.file.name);
+
+  it('drops semantic results far below the best match of the same kind', () => {
+    const results = search([...background, image('best.png', 0.9), image('close.png', 0.86), image('far.png', 0.8)], '바닷가 노을');
+    expect(results).toEqual(expect.arrayContaining(['best.png', 'close.png']));
+    expect(results).not.toContain('far.png');
+  });
+
+  it('requires a stronger semantic match when the query is exactly an app name', () => {
+    // 바탕 문서의 코사인 폭을 넓혀 스크린샷의 z가 2~3 사이가 되게 한다.
+    // 일반 검색어에서는 통과하지만 앱 이름 검색에서는 걸러진다.
+    const widerBackground = Array.from({ length: 40 }, (_, index) =>
+      file(`memo-${index}.md`, 'md', `unrelated memo ${index}`, withCosine(0.3 + (index % 5) * 0.05)),
+    );
+    const items = [
+      ...widerBackground,
+      image('screenshot.png', 0.7),
+      image('photo.png', 0.69),
+      app('카카오톡', 'com.kakao.KakaoTalkMac', 'KakaoTalk', ['KakaoTalk']),
+    ];
+    expect(search(items, '휴대폰 화면')).toContain('screenshot.png');
+    expect(search(items, '카카오톡')).toEqual(['카카오톡']);
+  });
+
+  it('rescues the top match just below the floor only when nothing else is found', () => {
+    const items = [...background, image('almost.png', 0.62)];
+    expect(search(items, '바닷가 노을')).toEqual(['almost.png']);
+    const withKeywordMatch = [...items, file('바닷가 노을 메모.md', 'md', '바닷가 노을', withCosine(0.3))];
+    expect(search(withKeywordMatch, '바닷가 노을')).toEqual(['바닷가 노을 메모.md']);
+  });
+});

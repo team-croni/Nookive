@@ -3,6 +3,7 @@
 import type { SearchResultItem } from '../../../types/search';
 import {
   groupAndDeduplicate,
+  normalizeRank,
   rankResults,
   scoreRecords,
   type ScoredSearchResult,
@@ -53,6 +54,24 @@ export function rankQuery(
     query,
   });
 
+  const results = groupAndRank(scored, baseKeywords, query);
+  if (results.length > 0 || !scored.some((item) => item.rescuePass)) return results;
+
+  // 4. 결과가 하나도 없으면, 절대 하한 바로 아래의 모달리티 1위만 살려 다시 정렬한다.
+  //    다른 결과가 있을 때는 적용하지 않아 잡음을 늘리지 않는다.
+  const rescued = scored.map((item) =>
+    item.rescuePass
+      ? { ...item, rankScore: item.ungatedRankScore, similarityScore: normalizeRank(item.ungatedRankScore) }
+      : item,
+  );
+  return groupAndRank(rescued, baseKeywords, query);
+}
+
+function groupAndRank(
+  scored: ScoredSearchResult[],
+  baseKeywords: string[],
+  query: string,
+): SearchResultItem[] {
   // 2. 파일 단위 그룹화 (동일 파일의 다수 청크를 하나로 통합)
   //    baseKeywords를 넘겨 단어 단위 타임스탬프로 뱃지를 보정한다.
   const deduplicated = groupAndDeduplicate(scored, baseKeywords);
