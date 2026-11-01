@@ -1,0 +1,12 @@
+{
+  "applicationHint": "Appuyez sur Entrée pour lancer l’application.",
+  "folderHint": "Appuyez sur Entrée pour ouvrir le dossier.",
+  "unsupportedImage": "Ce format d’image est incompatible ou endommagé",
+  "pdfLoading": "Chargement du PDF…",
+  "pdfBrowserUnsupported": "Les PDF locaux ne peuvent pas être prévisualisés dans un navigateur. Ouvrez l’application de bureau.",
+  "pdfFailed": "Impossible de prévisualiser ce PDF. Utilisez « Ouvrir » ci-dessous.",
+  "fileAccessChecking": "Vérification de l’accès au fichier…",
+  "fileAccessTitle": "Impossible d’accéder au fichier",
+  "fileAccessDescription": "Autorisez Nookive à accéder aux fichiers dans les réglages de macOS.",
+  "fileAccessRetry": "Réessayer"
+}

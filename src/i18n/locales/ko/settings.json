@@ -1,5 +1,7 @@
 {
-  "title": "검색 설정", "subtitle": "검색할 폴더와 파일을 이곳에서 관리합니다.", "close": "설정 닫기",
+  "title": "검색 설정",
+  "subtitle": "검색할 폴더와 파일을 이곳에서 관리합니다.",
+  "close": "설정 닫기",
   "language": {"title": "언어 설정", "description": "Nookive에서 사용할 언어를 선택합니다."},
   "theme": {"title": "화면 모드", "description": "Nookive의 화면 모드를 선택합니다.", "options": {"light": "라이트모드", "dark": "다크모드", "system": "시스템"}},
   "folders": {"title": "검색될 폴더", "description": "검색 시, 선택한 폴더 내의 내용들이 검색됩니다.", "add": "폴더 추가", "empty": "아직 선택한 폴더가 없습니다."},
@@ -12,7 +14,7 @@
   "dataManagement": {"title": "앱 데이터 관리", "description": "다운로드한 모델과 Nookive가 만든 검색 데이터를 삭제합니다.", "sourceFilesHint": "선택한 폴더와 원본 파일은 삭제되지 않습니다.", "confirm": "정말 삭제하시겠습니까?", "button": "모델 및 앱 데이터 삭제", "hint": "모델, 검색 결과와 앱 설정을 모두 삭제합니다.", "error": "앱 데이터를 삭제하지 못했습니다. 앱을 다시 실행한 뒤 다시 시도해 주세요."},
   "webSearch": {"title": "웹 검색", "description": "로컬 검색 결과가 없을 때 Google 자동완성과 웹 검색을 사용합니다.", "option": "Google 검색 사용", "privacyNotice": "웹 검색을 사용하면 입력한 검색어가 Google로 전송될 수 있습니다. 파일 내용과 로컬 검색 데이터는 전송되지 않습니다."},
   "dynamic": {"documentsAndMedia": "문서 {{documents}}개와 이미지·오디오·비디오 {{media}}개에서 검색 데이터를 만들 수 있습니다.", "documents": "문서 {{count}}개에서 검색 데이터를 만들 수 있습니다.", "media": "이미지·오디오·비디오 {{count}}개에서 검색 데이터를 만들 수 있습니다.", "action": "파일 {{count}}개의 검색 데이터를 만듭니다.", "refreshHint": "폴더 변경사항을 확인하거나 검색 상태를 새로 확인할 수 있습니다."},
-  "messages": {"shortcutChanged": "바로가기 키를 변경했습니다.", "shortcutFailed": "바로가기 키를 변경하지 못했습니다. 다른 키를 선택해 주세요.", "shortcutModifier": "command, option, control, shift 중 하나와 함께 눌러 주세요.", "indexFailed": "검색 데이터를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.", "autoIndexFailed": "백그라운드 검색 데이터 생성을 완료하지 못했습니다. 설정에서 다시 시도해 주세요.", "storageFull": "저장 공간이 부족해 검색 데이터 생성을 중단했습니다. 여유 공간을 확보한 뒤 다시 시도해 주세요.", "asrFailed": "음성 검색 구성 요소를 불러오지 못했습니다. 앱을 다시 설치하거나 잠시 후 다시 시도해 주세요.", "indexed": "{{count}}개 파일을 검색할 수 있게 만들었습니다.", "errors": "{{count}}개 파일을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.", "skipped": "{{count}}개 파일을 건너뛰었습니다. 파일 크기나 형식을 확인해 주세요.", "aborted": "검색 데이터 생성을 중단했습니다.", "completed": "검색 데이터를 만들었습니다.", "reset": "검색 데이터를 초기화했습니다.", "resetFailed": "검색 데이터를 초기화하지 못했습니다. 앱을 다시 실행한 뒤 다시 시도해 주세요."},
+  "messages": {"shortcutChanged": "바로가기 키를 변경했습니다.", "shortcutFailed": "바로가기 키를 변경하지 못했습니다. 다른 키를 선택해 주세요.", "shortcutModifier": "command, option, control, shift 중 하나와 함께 눌러 주세요.", "indexFailed": "검색 데이터를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.", "autoIndexFailed": "백그라운드 검색 데이터 생성을 완료하지 못했습니다. 설정에서 다시 시도해 주세요.", "storageFull": "저장 공간이 부족해 검색 데이터 생성을 중단했습니다. 여유 공간을 확보한 뒤 다시 시도해 주세요.", "asrFailed": "음성 검색 구성 요소를 불러오지 못했습니다. 앱을 다시 설치하거나 잠시 후 다시 시도해 주세요.", "indexed": "{{count}}개 파일을 검색할 수 있게 만들었습니다.", "errors": "{{count}}개 파일을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.", "skipped": "{{count}}개 파일을 건너뛰었습니다. 파일 크기나 형식을 확인해 주세요.", "aborted": "검색 데이터 생성을 중단했습니다.", "completed": "검색 데이터를 만들었습니다.", "reset": "검색 데이터를 초기화했습니다.", "resetFailed": "검색 데이터를 초기화하지 못했습니다. 앱을 다시 실행한 뒤 다시 시도해 주세요.", "indexBusy": "이미 다른 검색 데이터 생성 작업이 진행 중입니다. 잠시 후 다시 시도해 주세요.", "engineNotReady": "검색 모델이 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요."},
   "installer": {
     "title": "Nookive 설치",
     "subtitle": "빠르고 안전한 온디바이스 검색을 위해 필수 AI 구성 요소를 준비하고 있습니다.",
@@ -43,7 +45,12 @@
     "folderSelect": "폴더 선택",
     "languageTitle": "언어",
     "languageDescription": "macOS 시스템 언어를 기본값으로 사용합니다.",
-    "finishAction": "설정 완료"
+    "finishAction": "설정 완료",
+    "windowTitle": "Nookive 설치",
+    "windowTitleDone": "Nookive 설치 완료",
+    "preparing": "준비 중…",
+    "downloadingModel": "모델 다운로드 중…"
   },
-  "about": {"version": "버전 {{version}}", "maintainer": "Croni OpenSource Project", "github": "GitHub", "license": "MIT 라이선스", "thirdParty": "오픈소스 라이선스", "issues": "이슈 신고"}
+  "about": {"version": "버전 {{version}}", "maintainer": "Croni OpenSource Project", "github": "GitHub", "license": "MIT 라이선스", "thirdParty": "오픈소스 라이선스", "issues": "이슈 신고"},
+  "windowTitle": "Nookive 설정"
 }

@@ -1,0 +1,7 @@
+{
+  "placeholder": "コンピューターを検索",
+  "searching": "検索中…",
+  "webSearch": "ウェブ検索",
+  "googleSearch": "Googleで「{{query}}」を検索",
+  "footer": {"webOpen": "ウェブで開く"}
+}

@@ -114,7 +114,7 @@ export default function SettingsApp() {
 
   useEffect(() => {
     if (showOnboarding === false) {
-      document.title = t('title');
+      document.title = t('windowTitle');
     }
   }, [showOnboarding, t]);
 

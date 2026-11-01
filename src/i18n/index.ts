@@ -2,30 +2,24 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { invoke } from '@tauri-apps/api/core';
 import { emit, listen } from '@tauri-apps/api/event';
-import koCommon from './locales/ko/common.json';
-import koSearch from './locales/ko/search.json';
-import koPreview from './locales/ko/preview.json';
-import koSettings from './locales/ko/settings.json';
-import enCommon from './locales/en/common.json';
-import enSearch from './locales/en/search.json';
-import enPreview from './locales/en/preview.json';
-import enSettings from './locales/en/settings.json';
-import { additionalResources } from './additionalResources';
+// 모든 언어의 번역은 locales/<언어>/<네임스페이스>.json에 둔다.
+// 키 구성은 en과 같아야 하며 i18n.test.ts가 확인한다.
+const localeFiles = import.meta.glob<{ default: Record<string, unknown> }>('./locales/*/*.json', { eager: true });
 
-export const supportedLocales = ['ko', 'en', 'ja', 'zh-CN', 'zh-TW', 'es', 'fr', 'de', 'pt-BR'] as const;
-export type SupportedLocale = (typeof supportedLocales)[number];
+import { supportedLocales, type SupportedLocale } from './supportedLocales';
 
-const resources = {
-  ko: { common: koCommon, search: koSearch, preview: koPreview, settings: koSettings },
-  en: { common: enCommon, search: enSearch, preview: enPreview, settings: enSettings },
-  ja: { ...additionalResources.ja },
-  'zh-CN': { ...additionalResources['zh-CN'] },
-  'zh-TW': { ...additionalResources['zh-TW'] },
-  es: { ...additionalResources.es },
-  fr: { ...additionalResources.fr },
-  de: { ...additionalResources.de },
-  'pt-BR': { ...additionalResources['pt-BR'] },
-} as const;
+export { supportedLocales, type SupportedLocale };
+
+const namespaces = ['common', 'search', 'preview', 'settings'] as const;
+
+export const resources = Object.fromEntries(
+  supportedLocales.map((locale) => [
+    locale,
+    Object.fromEntries(
+      namespaces.map((namespace) => [namespace, localeFiles[`./locales/${locale}/${namespace}.json`].default]),
+    ),
+  ]),
+) as Record<SupportedLocale, Record<(typeof namespaces)[number], Record<string, unknown>>>;
 
 function getInitialLocale(): SupportedLocale {
   const saved = localStorage.getItem('nookive.locale');

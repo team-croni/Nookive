@@ -42,8 +42,8 @@ const formatBytes = (bytes: number) => {
   return `${Math.round(bytes / 1024 ** 2)} MB`;
 };
 
-const formatModelFilename = (filePath?: string): string => {
-  if (!filePath) return '모델 다운로드 중…';
+const formatModelFilename = (filePath: string | undefined, fallback: string): string => {
+  if (!filePath) return fallback;
   const normalized = filePath.replace(/\\/g, '/');
   return normalized.substring(normalized.lastIndexOf('/') + 1);
 };
@@ -89,7 +89,8 @@ export function OnboardingWizard({
       await restoreTrayMenu(i18n.language);
     } catch (err: unknown) {
       const errStr = String(err);
-      if (!errStr.includes('취소')) {
+      // 취소는 오류로 보여주지 않는다. (Rust의 DOWNLOAD_CANCELLED 코드)
+      if (!errStr.includes('download-cancelled')) {
         console.error('[Installer] 모델 자동 다운로드 실패:', err);
         setDownloadError(t('installer.error'));
         // 실패 시에도 트레이를 복원한다
@@ -222,8 +223,8 @@ export function OnboardingWizard({
 
 
   useEffect(() => {
-    document.title = isModelReady ? 'Nookive 설치 완료' : 'Nookive 설치';
-  }, [isModelReady]);
+    document.title = isModelReady ? t('installer.windowTitleDone') : t('installer.windowTitle');
+  }, [isModelReady, t]);
 
   const progressText = useMemo(() => {
     if (!progress) return '';
@@ -363,10 +364,10 @@ export function OnboardingWizard({
                     className={wizardStyles.progressFilename}
                     title={progress?.file || undefined}
                   >
-                    {formatModelFilename(progress?.file)}
+                    {formatModelFilename(progress?.file, t('installer.downloadingModel'))}
                   </span>
                   <span className={wizardStyles.progressPercent}>
-                    {progressText || '준비 중…'}
+                    {progressText || t('installer.preparing')}
                   </span>
                 </div>
 

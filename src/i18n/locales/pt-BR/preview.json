@@ -1,0 +1,12 @@
+{
+  "applicationHint": "Pressione Enter para iniciar o aplicativo.",
+  "folderHint": "Pressione Enter para abrir a pasta.",
+  "unsupportedImage": "Este formato de imagem não é compatível ou está danificado",
+  "pdfLoading": "Carregando PDF…",
+  "pdfBrowserUnsupported": "PDFs locais não podem ser visualizados em um navegador. Abra o aplicativo para computador.",
+  "pdfFailed": "Não foi possível visualizar este PDF. Use “Abrir” abaixo.",
+  "fileAccessChecking": "Verificando o acesso ao arquivo…",
+  "fileAccessTitle": "Não é possível acessar o arquivo",
+  "fileAccessDescription": "Permita que o Nookive acesse os arquivos nos Ajustes do macOS.",
+  "fileAccessRetry": "Tentar novamente"
+}

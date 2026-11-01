@@ -5,7 +5,7 @@ const EMBEDDING_TIMEOUT_MS = 15_000;
 
 export class EmbeddingTimeoutError extends Error {
   constructor() {
-    super(`EmbeddingGemma 응답 시간 초과 (${EMBEDDING_TIMEOUT_MS / 1000}초)`);
+    super(`EmbeddingGemma timed out after ${EMBEDDING_TIMEOUT_MS / 1000}s`);
     this.name = 'EmbeddingTimeoutError';
   }
 }
@@ -33,11 +33,11 @@ export async function embedTextBatch(
       }),
       signal: requestController.signal,
     });
-    if (!response.ok) throw new Error(`EmbeddingGemma 응답 오류: ${response.status}`);
+    if (!response.ok) throw new Error(`EmbeddingGemma request failed: ${response.status}`);
     const json = await response.json() as { data?: Array<{ embedding?: number[] }> };
     const vectors = json.data?.map((item) => item.embedding ?? []) ?? [];
     if (vectors.length !== texts.length || vectors.some((vector) => vector.length === 0)) {
-      throw new Error(`EmbeddingGemma 벡터 개수 불일치 (${vectors.length}/${texts.length})`);
+      throw new Error(`EmbeddingGemma returned ${vectors.length} vectors for ${texts.length} inputs`);
     }
     return vectors;
   } catch (error) {
