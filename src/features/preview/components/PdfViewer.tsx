@@ -135,11 +135,10 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         let matched = false;
         try {
           if ((query || '').trim()) {
-            // 기준은 "선택된 결과의 인덱스 페이지"가 아니라 "검색어가 실제로
-            // 발견된 페이지"다. findMatchRects는 문서 첫 페이지부터 훑어
-            // 첫 매칭 페이지를 찾는다. 따라서 미리보기와 목록 뱃지가 항상
-            // 같은 매칭 페이지를 가리킨다.
-            const matchResult = await findMatchRects(path, doc, query || '');
+            // 검색어가 가장 많이 발견된 페이지로 이동한다. 같으면 검색 결과(인덱스)가
+            // 가리킨 페이지를 우선한다. 목록 뱃지(usePdfMatchScan)도 같은 기준이라
+            // 미리보기와 뱃지가 항상 같은 페이지를 가리킨다.
+            const matchResult = await findMatchRects(path, doc, query || '', pageNumber);
             if (cancelled) return;
             targetPage = matchResult.targetPage;
             rects = matchResult.rects;

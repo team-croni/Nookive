@@ -38,7 +38,7 @@ export function usePdfMatchScan(
       try {
         const doc = await loadPdfDoc(item.file.path);
         if (isCancelled()) return;
-        const result = await findMatchRects(item.file.path, doc, trimmed);
+        const result = await findMatchRects(item.file.path, doc, trimmed, item.bestChunk.pageNumber);
         if (isCancelled()) return;
         setMap((prev) => {
           const existing = prev[item.id];
