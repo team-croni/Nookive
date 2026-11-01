@@ -380,21 +380,60 @@ export const videos = [
 // 파일 내용 없이 이름/경로로만 검색되는 레코드. 실제 앱의 list_indexed_folders/list_applications 형식과 같다.
 export const folders = ["Work", "Personal", "Receipts", "세금 서류", "Photos", "Recordings"];
 
-// 앱 이름은 실제 앱 목록처럼 Info.plist의 CFBundleDisplayName(없으면 CFBundleName)을 쓴다.
-// 번들 파일명과 다른 경우 bundleFile로 경로를 지정한다. (예: "Code" → Visual Studio Code.app)
-// Info.plist 이름은 현지화되지 않으므로 "카카오톡", "메모" 같은 한국어 이름은 레코드에 없다.
+// 앱 레코드는 실제 앱 목록(applications.rs)과 같은 규칙으로 만든다.
+// - name: Info.plist의 CFBundleDisplayName(없으면 CFBundleName). 현지화되지 않은 영문 이름이다.
+// - localizedName: 한국어 환경에서 앱 리소스(InfoPlist.strings / .loctable)에 있는 현지화 이름.
+//   있으면 결과에 이 이름을 표시하고 Info.plist 이름은 검색용 이름(alternateNames)으로 남긴다.
+// - bundleFile: 번들 파일명이 이름과 다른 경우 (예: "Code" → Visual Studio Code.app)
 export const applications = [
   { name: "Slack", bundleId: "com.tinyspeck.slackmacgap" },
   { name: "Safari", bundleId: "com.apple.Safari" },
-  { name: "Notes", bundleId: "com.apple.Notes" },
-  { name: "Calendar", bundleId: "com.apple.iCal" },
+  { name: "Notes", localizedName: "메모", bundleId: "com.apple.Notes" },
+  { name: "Calendar", localizedName: "캘린더", bundleId: "com.apple.iCal" },
   { name: "Code", bundleFile: "Visual Studio Code", bundleId: "com.microsoft.VSCode" },
-  { name: "KakaoTalk", bundleId: "com.kakao.KakaoTalkMac" },
-  { name: "System Settings", bundleId: "com.apple.systempreferences" },
+  { name: "KakaoTalk", localizedName: "카카오톡", bundleId: "com.kakao.KakaoTalkMac" },
+  { name: "System Settings", localizedName: "시스템 설정", bundleId: "com.apple.systempreferences" },
   { name: "Finder", bundleId: "com.apple.finder" },
   // 이름 일부가 겹치는 앱(hard negative)
   { name: "Android Studio", bundleId: "com.google.android.studio" },
   { name: "Microsoft Excel", bundleId: "com.microsoft.Excel" },
   { name: "Microsoft Word", bundleId: "com.microsoft.Word" },
-  { name: "Photos", bundleId: "com.apple.Photos" },
+  { name: "Photos", localizedName: "사진", bundleId: "com.apple.Photos" },
+];
+
+// 실제 Mac에는 보통 앱이 100~300개 설치되어 있다. 앱 레코드는 벡터가 없어 의미 점수 통계에
+// 섞이면 결과가 달라질 수 있으므로, 평가에서도 실제와 비슷한 수의 앱을 넣는다.
+// 흔히 쓰는 macOS 기본 앱과 공개 앱 이름이며, 특정 사용자의 앱 목록이 아니다.
+export const commonApplications = [
+  // macOS 기본 앱
+  "App Store", "Automator", "Books", "Calculator", "Chess", "Clock", "Contacts", "Dictionary",
+  "FaceTime", "Find My", "Font Book", "Freeform", "Home", "Image Capture", "Journal", "Launchpad",
+  "Mail", "Maps", "Messages", "Mission Control", "Music", "News", "Passwords", "Photo Booth",
+  "Podcasts", "Preview", "QuickTime Player", "Reminders", "Shortcuts", "Siri", "Stickies", "Stocks",
+  "TextEdit", "Time Machine", "TV", "Voice Memos", "Weather", "Activity Monitor", "AirPort Utility",
+  "Audio MIDI Setup", "Bluetooth File Exchange", "Boot Camp Assistant", "ColorSync Utility", "Console",
+  "Digital Color Meter", "Disk Utility", "Grapher", "Keychain Access", "Migration Assistant",
+  "Screenshot", "Screen Sharing", "Script Editor", "System Information", "Terminal", "VoiceOver Utility",
+  // 개발 도구
+  "Xcode", "Cursor", "IntelliJ IDEA", "PyCharm", "WebStorm", "GoLand", "DataGrip", "Sublime Text",
+  "Nova", "BBEdit", "iTerm", "Warp", "Ghostty", "Docker", "Postman", "Insomnia", "TablePlus",
+  "Sequel Ace", "GitHub Desktop", "Sourcetree", "Fork", "Tower", "Dash", "Simulator", "Instruments",
+  "SF Symbols", "Proxyman", "Charles", "Wireshark", "UTM",
+  // 생산성
+  "Pages", "Numbers", "Keynote", "Microsoft PowerPoint", "Microsoft Outlook", "Microsoft OneNote",
+  "Microsoft Teams", "OneDrive", "Notion", "Obsidian", "Bear", "Craft", "Evernote", "Things 3",
+  "Todoist", "OmniFocus", "Fantastical", "Raycast", "Alfred", "1Password", "Bitwarden", "Dropbox",
+  "Google Drive", "Box", "Zoom", "Webex", "Discord", "Telegram", "WhatsApp", "LINE", "Signal",
+  "Skype", "Spark", "Airmail", "Readdle Documents", "PDF Expert", "Adobe Acrobat Reader",
+  "Naver Whale", "Google Chrome", "Firefox", "Microsoft Edge", "Arc", "Brave Browser",
+  "Opera", "Vivaldi", "ChatGPT", "Claude", "Perplexity",
+  // 디자인·미디어
+  "Figma", "Sketch", "Adobe Photoshop", "Adobe Illustrator", "Adobe Lightroom", "Adobe Premiere Pro",
+  "Adobe After Effects", "Final Cut Pro", "Logic Pro", "GarageBand", "iMovie", "DaVinci Resolve",
+  "Affinity Photo", "Affinity Designer", "Pixelmator Pro", "Blender", "OBS", "VLC", "IINA", "Spotify",
+  "Audacity", "HandBrake", "ImageOptim", "Kap", "CleanShot X",
+  // 유틸리티
+  "The Unarchiver", "Keka", "AppCleaner", "Rectangle", "Magnet", "Bartender 5", "Amphetamine",
+  "Stats", "iStat Menus", "BetterTouchTool", "Hammerspoon", "AlDente", "Hidden Bar", "Itsycal", "Maccy", "KeepingYouAwake", "Transmit", "Cyberduck",
+  "NordVPN", "Tailscale", "WireGuard", "Steam", "Battle.net", "Minecraft",
 ];

@@ -88,6 +88,9 @@ pub struct ApplicationFile {
     pub kind: &'static str,
     #[serde(rename = "bundleId", skip_serializing_if = "Option::is_none")]
     pub bundle_id: Option<String>,
+    /// 표시 이름 외에 검색에 함께 쓰는 이름 (예: 현지화 이름 "카카오톡"의 영문 이름 "KakaoTalk")
+    #[serde(rename = "alternateNames", skip_serializing_if = "Vec::is_empty")]
+    pub alternate_names: Vec<String>,
     #[serde(rename = "sizeBytes")]
     pub size_bytes: u64,
     #[serde(rename = "modifiedAt")]
