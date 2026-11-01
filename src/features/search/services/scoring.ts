@@ -47,6 +47,16 @@ const KIND_HINT_BONUS = 4.0;
 // 종류 힌트가 있으면 해당 섹션의 z 게이트를 완화해, 작은 데이터셋에서도
 // "음악", "녹음" 같은 쿼리가 관련 오디오를 놓치지 않게 한다.
 const HINTED_Z_GATE = Z_GATE * 0.6;
+// 의미 유사도만으로 통과한 결과는 같은 모달리티의 최고 코사인에서 이 범위 안이어야 한다.
+// z-score와 절대 하한만으로는 잡음과 정답이 잘 갈리지 않는다(둘 다 z가 높고 하한 근처에 몰려 있다).
+// 공개 벤치마크에서 0.06은 재현율을 유지하면서 P@5를 크게 올렸다. (docs/search-evaluation.md)
+const SEMANTIC_TOP_MARGIN = 0.06;
+// 검색어가 앱/폴더 이름과 정확히 같으면 실행 의도로 보고, 의미 유사도만으로 통과하는 결과에
+// 더 높은 z를 요구한다. ("카카오톡" → 휴대폰 스크린샷이 앱 이름과 의미상 가깝게 나오는 문제)
+const NAME_INTENT_Z_GATE = 3;
+// 결과가 하나도 없을 때만, 절대 하한 바로 아래의 모달리티 1위를 살린다 (#27).
+const RESCUE_Z_GATE = 3;
+const RESCUE_BELOW_FLOOR = 0.03;
 
 export type MediaSegmentKind = 'audio' | 'visual';
 
@@ -59,6 +69,14 @@ export type ScoredSearchResult = SearchResultItem & {
   /** @deprecated keywordCoverage 사용 */
   keywordScore: number;
   rankScore: number;
+  /** 의미 게이트(z-score + 절대 하한) 통과 여부. 평가·분석용 */
+  semanticPass: boolean;
+  /** 키워드 게이트 통과 여부 (오프라인 키워드 검색 포함). 평가·분석용 */
+  keywordPass: boolean;
+  /** 다른 결과가 하나도 없을 때만 쓰는 보조 게이트 통과 여부 (rankQuery가 적용) */
+  rescuePass: boolean;
+  /** 게이트 적용 전 순위 점수. 보조 게이트와 게이트 조건 분석에 쓴다 */
+  ungatedRankScore: number;
   mediaSegmentKind?: MediaSegmentKind;
 };
 
@@ -243,7 +261,7 @@ function isLookupQuery(baseKeywords: string[]): boolean {
 }
 
 /** z 기반 rankScore를 0~1 표시/정렬용 점수로 단조 변환한다. */
-function normalizeRank(rankScore: number): number {
+export function normalizeRank(rankScore: number): number {
   if (rankScore <= 0) return 0;
   return Math.min(0.99, 1 - Math.exp(-rankScore / 3));
 }
@@ -333,6 +351,18 @@ export function scoreRecords(
   const koreanBodyShortQuery =
     shortQuery && /^[가-힣]{2}$/.test(baseKeywords[0]);
 
+  const topCosine = new Map<FileSection, number>();
+  for (const i of vectorIndexes) {
+    const section = modalityOf(items[i]);
+    topCosine.set(section, Math.max(topCosine.get(section) ?? 0, cosines[i]));
+  }
+  const normalizedQuery = nfc(query).toLowerCase().trim();
+  const exactNameMatch = items.some(
+    (item) =>
+      (item.file.kind === 'application' || item.file.kind === 'folder')
+      && searchableNames(item).includes(normalizedQuery),
+  );
+
   const coverages = items.map((item) => keywordCoverage(item, baseKeywords, queryKeywords));
   // 여러 단어 검색어가 어떤 파일명과 모두 일치하면(예: "microsoft word" → Microsoft Word)
   // 일부 단어만 겹친 항목(Microsoft Excel)은 키워드만으로 통과시키지 않는다.
@@ -386,11 +416,22 @@ export function scoreRecords(
       : MIN_SEMANTIC_SIMILARITY[section];
     const absolutePass = cosines[i] >= similarityFloor;
     const lexicalPass = !shortQuery || shortQueryMatched;
+    const topInModality = topCosine.get(section) ?? 0;
     const semanticPass =
       semanticMode &&
       absolutePass &&
       lexicalPass &&
-      (zScore >= Z_GATE || (hinted && zScore >= HINTED_Z_GATE));
+      (zScore >= Z_GATE || (hinted && zScore >= HINTED_Z_GATE)) &&
+      cosines[i] >= topInModality - SEMANTIC_TOP_MARGIN &&
+      (!exactNameMatch || zScore >= NAME_INTENT_Z_GATE);
+    const rescuePass =
+      semanticMode &&
+      hasVector[i] &&
+      lexicalPass &&
+      !exactNameMatch &&
+      cosines[i] === topInModality &&
+      zScore >= RESCUE_Z_GATE &&
+      cosines[i] >= similarityFloor - RESCUE_BELOW_FLOOR;
     // 여러 단어 중 일부만 일치하면 그 단어가 우연히 겹쳤을 수 있다.
     // ("visual studio" → Android Studio, "세금 서류" → Vision 라벨 "문서 서류"가 붙은 사진)
     // 이 경우에는 의미 유사도도 절대 하한을 넘거나, 파일명이 검색어의 첫 단어로 시작해야 통과한다.
@@ -415,6 +456,10 @@ export function scoreRecords(
       contentCoverage,
       keywordScore: coverage,
       rankScore: pass ? rankScore : 0,
+      semanticPass,
+      keywordPass: keywordPass || offlinePass,
+      rescuePass,
+      ungatedRankScore: rankScore,
       similarityScore: pass ? normalizeRank(rankScore) : 0,
       mediaSegmentKind: getMediaSegmentKind(item),
     };
