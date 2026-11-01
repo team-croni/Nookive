@@ -39,6 +39,10 @@ top 10), location accuracy, or the no-answer false-positive rate.
   baseline.
 - Changing the embedding model or indexer output: regenerate the fixture the
   same way.
+- Before changing gates or thresholds, also run the public benchmarks
+  (`npm run eval:public:prepare -- mixed`, then `npm run eval:public -- mixed`)
+  and compare the results with `docs/search-evaluation.md`. They run locally
+  only and download public datasets into `~/Library/Caches/nookive-eval/`.
 
 Do not commit model files, generated binaries, build output, local indexes,
 `.env` files, credentials, or personal documents.
