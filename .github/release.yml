@@ -1,0 +1,32 @@
+# GitHub 릴리즈 노트 자동 생성 분류. PR 라벨로 항목을 나눈다.
+# 라벨 규칙은 커밋 타입을 따른다: feat → enhancement, fix → bug, test → test,
+# docs → documentation, chore/build → chore, ci → ci.
+changelog:
+  exclude:
+    labels:
+      - duplicate
+      - invalid
+      - wontfix
+  categories:
+    - title: New Features
+      labels:
+        - enhancement
+    - title: Bug Fixes
+      labels:
+        - bug
+    - title: Tests and Evaluation
+      labels:
+        - test
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Dependencies
+      labels:
+        - dependencies
+    - title: Maintenance and CI
+      labels:
+        - chore
+        - ci
+    - title: Other Changes
+      labels:
+        - "*"
