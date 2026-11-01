@@ -19,10 +19,18 @@ Before opening a pull request, run `npm run build`, `npm run lint`, and
 
 `npm test` includes a ranking regression test
 (`src/features/search/evaluation/ranking.test.ts`). It runs the real ranking
-pipeline on a synthetic corpus with precomputed vectors and fails when
-Recall@5/10, MRR, location accuracy, or the no-answer false-positive rate get
-worse than `baseline.json`.
+pipeline on a synthetic corpus with precomputed vectors and fails when any
+metric gets worse than `baseline.json`, overall or in either split:
+Recall@5/10, MRR, nDCG@10, Precision@5, noise rate (unexpected results in the
+top 10), location accuracy, or the no-answer false-positive rate.
 
+- Each query in `queries.json` lists `relevant` paths (must appear) and
+  optional `acceptable` paths (may appear without counting as noise).
+- Queries are split into `dev` and `test`. Tune ranking while looking at `dev`
+  results, then check that `test` improves too; a change that helps only `dev`
+  is likely overfitting.
+- The test output lists every query and a per-tag table (lookup, paraphrase,
+  image, audio, …) so a weak area is not hidden in the average.
 - Changing ranking on purpose: run `npm run eval:baseline` and commit the
   updated `baseline.json` with an explanation in the pull request.
 - Adding queries to `queries.json` or changing `scripts/eval/corpus.mjs`: start

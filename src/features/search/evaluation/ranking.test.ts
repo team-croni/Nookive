@@ -3,16 +3,20 @@
 //
 // - 쿼리 추가/코퍼스 변경 후: `npm run eval:fixture` (임베딩 서버 필요, macOS)
 // - 순위 로직을 의도적으로 바꾼 뒤: `npm run eval:baseline`으로 기준선을 갱신하고 PR에 포함한다.
+// - 순위 로직은 dev 쿼리를 보며 조정하고, test 쿼리로 과적합 여부를 확인한다.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { SearchResultItem } from '../../../types/search';
 import { isLowSignalQuery, rankQuery } from '../services/rankQuery';
 import { orderResultsBySection } from '../utils/orderResults';
 import {
-  aggregate,
+  aggregateWhere,
   evaluateQuery,
+  HIGHER_IS_BETTER,
+  LOWER_IS_BETTER,
   type EvaluationMetrics,
   type LabeledQuery,
+  type QueryOutcome,
 } from './metrics';
 
 interface Fixture {
@@ -21,9 +25,10 @@ interface Fixture {
   queryVectors: Record<string, number[]>;
 }
 
-// 높을수록 좋은 지표는 이만큼까지 하락을 허용한다. 정답 쿼리가 33개일 때
-// 한 쿼리의 정답이 1위→2위로 밀리는 정도(MRR -0.015)는 통과하고,
-// 한 쿼리의 정답이 사라지는 경우(Recall -0.03)는 실패한다.
+type Baseline = Record<'overall' | 'dev' | 'test', EvaluationMetrics>;
+
+// 지표별 허용 하락폭. 분할당 정답 쿼리가 30개 이상일 때 한 쿼리의 정답이
+// 1위→2위로 밀리는 정도(MRR 약 -0.015)는 통과하고, 정답이 사라지면(Recall 약 -0.03) 실패한다.
 const TOLERANCE = 0.02;
 
 const readJson = <T>(name: string): T =>
@@ -39,15 +44,70 @@ function search(query: string): SearchResultItem[] {
   return orderResultsBySection(rankQuery(fixture.records, query, vector));
 }
 
-const formatReport = (outcomes: ReturnType<typeof evaluateQuery>[]): string =>
-  outcomes
+const round = (value: number): number => Number(value.toFixed(4));
+
+function roundMetrics(metrics: EvaluationMetrics): EvaluationMetrics {
+  return Object.fromEntries(
+    Object.entries(metrics).map(([key, value]) => [key, round(value)]),
+  ) as unknown as EvaluationMetrics;
+}
+
+function computeBaseline(outcomes: QueryOutcome[]): Baseline {
+  const by = (predicate: (query: LabeledQuery) => boolean) =>
+    roundMetrics(aggregateWhere(queries, outcomes, predicate).metrics);
+  return {
+    overall: by(() => true),
+    dev: by((query) => query.split === 'dev'),
+    test: by((query) => query.split === 'test'),
+  };
+}
+
+function formatQueries(outcomes: QueryOutcome[]): string {
+  return outcomes
     .map((outcome, index) => {
       const labeled = queries[index];
-      const expected = labeled.relevant.length === 0 ? 'no answer' : `rank ${outcome.firstRelevantRank ?? '-'}`;
+      const expected = labeled.relevant.length === 0
+        ? 'no answer'
+        : `rank ${outcome.firstRelevantRank ?? '-'} p@5=${round(outcome.precisionAt5)}`;
       const location = outcome.locationMatched === null ? '' : ` location=${outcome.locationMatched}`;
-      return `${labeled.query} → ${expected} (${outcome.resultCount} results)${location}\n    ${outcome.topPaths.join(', ')}`;
+      return `[${labeled.split}] ${labeled.query} → ${expected} (${outcome.resultCount} results)${location}\n    ${outcome.topPaths.join(', ')}`;
     })
     .join('\n');
+}
+
+/** 태그별 지표 표. 전체 평균에 약점이 가려지지 않도록 영역별로 따로 본다. */
+function formatTags(outcomes: QueryOutcome[]): string {
+  const tags = [...new Set(queries.flatMap((query) => query.tags))].sort();
+  const rows = tags.map((tag) => {
+    const inTag = (query: LabeledQuery) => query.tags.includes(tag);
+    const { count, metrics } = aggregateWhere(queries, outcomes, inTag);
+    const noAnswerOnly = queries.filter(inTag).every((query) => query.relevant.length === 0);
+    const values = noAnswerOnly
+      ? `fp=${round(metrics.noAnswerFalsePositiveRate)}`
+      : `recall@5=${round(metrics.recallAt5)} mrr=${round(metrics.mrr)} ndcg@10=${round(metrics.ndcgAt10)} p@5=${round(metrics.precisionAt5)} noise=${round(metrics.noiseRate)}`;
+    return `${tag.padEnd(12)} n=${String(count).padStart(2)}  ${values}`;
+  });
+  return rows.join('\n');
+}
+
+function findRegressions(current: Baseline, baseline: Baseline): string[] {
+  const regressions: string[] = [];
+  for (const scope of ['overall', 'dev', 'test'] as const) {
+    for (const key of HIGHER_IS_BETTER) {
+      if (current[scope][key] < baseline[scope][key] - TOLERANCE) {
+        regressions.push(`${scope}.${key}: ${current[scope][key]} < baseline ${baseline[scope][key]}`);
+      }
+    }
+    for (const key of LOWER_IS_BETTER) {
+      // 정답 없는 쿼리의 오탐은 하나라도 늘면 실패한다.
+      const tolerance = key === 'noAnswerFalsePositiveRate' ? 1e-9 : TOLERANCE;
+      if (current[scope][key] > baseline[scope][key] + tolerance) {
+        regressions.push(`${scope}.${key}: ${current[scope][key]} > baseline ${baseline[scope][key]}`);
+      }
+    }
+  }
+  return regressions;
+}
 
 describe('search ranking evaluation', () => {
   it('has a precomputed vector for every query', () => {
@@ -57,34 +117,22 @@ describe('search ranking evaluation', () => {
     expect(missing, 'run `npm run eval:fixture` to embed new queries').toEqual([]);
   });
 
+  it('labels every query with a split', () => {
+    expect(queries.filter((query) => query.split !== 'dev' && query.split !== 'test')).toEqual([]);
+  });
+
   it('does not regress against the baseline', () => {
     const outcomes = queries.map((labeled) => evaluateQuery(labeled, search(labeled.query)));
-    const metrics = aggregate(queries, outcomes);
+    const current = computeBaseline(outcomes);
+    const report = `${formatQueries(outcomes)}\n\n${formatTags(outcomes)}`;
 
     if (process.env.NOOKIVE_UPDATE_BASELINE) {
-      writeFileSync(baselineUrl, `${JSON.stringify(roundMetrics(metrics), null, 2)}\n`);
-      console.log(`${formatReport(outcomes)}\n\nbaseline updated: ${JSON.stringify(roundMetrics(metrics))}`);
+      writeFileSync(baselineUrl, `${JSON.stringify(current, null, 2)}\n`);
+      console.log(`${report}\n\nbaseline updated:\n${JSON.stringify(current, null, 2)}`);
       return;
     }
 
-    const baseline = JSON.parse(readFileSync(baselineUrl, 'utf-8')) as EvaluationMetrics;
-    const regressions: string[] = [];
-    for (const key of ['recallAt5', 'recallAt10', 'mrr', 'locationAccuracy'] as const) {
-      if (metrics[key] < baseline[key] - TOLERANCE) {
-        regressions.push(`${key}: ${metrics[key].toFixed(4)} < baseline ${baseline[key]}`);
-      }
-    }
-    if (metrics.noAnswerFalsePositiveRate > baseline.noAnswerFalsePositiveRate + 1e-9) {
-      regressions.push(
-        `noAnswerFalsePositiveRate: ${metrics.noAnswerFalsePositiveRate.toFixed(4)} > baseline ${baseline.noAnswerFalsePositiveRate}`,
-      );
-    }
-    expect(regressions, `\n${formatReport(outcomes)}\n`).toEqual([]);
+    const baseline = JSON.parse(readFileSync(baselineUrl, 'utf-8')) as Baseline;
+    expect(findRegressions(current, baseline), `\n${report}\n`).toEqual([]);
   });
 });
-
-function roundMetrics(metrics: EvaluationMetrics): EvaluationMetrics {
-  return Object.fromEntries(
-    Object.entries(metrics).map(([key, value]) => [key, Number(value.toFixed(4))]),
-  ) as unknown as EvaluationMetrics;
-}
