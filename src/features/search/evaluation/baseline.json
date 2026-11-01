@@ -3,9 +3,9 @@
     "recallAt5": 0.9671,
     "recallAt10": 0.9671,
     "mrr": 0.9737,
-    "ndcgAt10": 0.9439,
-    "precisionAt5": 0.8414,
-    "noiseRate": 0.1322,
+    "ndcgAt10": 0.945,
+    "precisionAt5": 0.8991,
+    "noiseRate": 0.0746,
     "noAnswerFalsePositiveRate": 0.1818,
     "locationAccuracy": 1
   },
@@ -14,8 +14,8 @@
     "recallAt10": 0.9342,
     "mrr": 0.9474,
     "ndcgAt10": 0.9088,
-    "precisionAt5": 0.8575,
-    "noiseRate": 0.0899,
+    "precisionAt5": 0.8925,
+    "noiseRate": 0.0548,
     "noAnswerFalsePositiveRate": 0.3333,
     "locationAccuracy": 1
   },
@@ -23,9 +23,9 @@
     "recallAt5": 1,
     "recallAt10": 1,
     "mrr": 1,
-    "ndcgAt10": 0.979,
-    "precisionAt5": 0.8254,
-    "noiseRate": 0.1746,
+    "ndcgAt10": 0.9811,
+    "precisionAt5": 0.9057,
+    "noiseRate": 0.0943,
     "noAnswerFalsePositiveRate": 0,
     "locationAccuracy": 1
   }
