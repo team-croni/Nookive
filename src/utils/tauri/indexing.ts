@@ -245,6 +245,15 @@ export async function setIndexOptions(useAligner: boolean): Promise<void> {
 }
 
 /** 수동 색인 중임을 Rust 워처에 알려 자동 색인과 겹치지 않게 한다. */
+/** 수동 또는 자동 색인이 진행 중인지 확인한다. */
+export async function isIndexingBusy(): Promise<boolean> {
+  try {
+    return await invoke<boolean>('is_indexing_busy');
+  } catch {
+    return false;
+  }
+}
+
 export async function setIndexingBusy(busy: boolean): Promise<boolean> {
   try {
     return await invoke<boolean>('set_indexing_busy', { busy });

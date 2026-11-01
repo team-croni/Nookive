@@ -159,6 +159,13 @@ pub fn set_indexing_busy(busy: bool, state: tauri::State<IndexingBusyState>) -> 
     }
 }
 
+/// 수동 또는 자동 색인이 진행 중인지 알려준다. 설정 창을 연 시점에 이미
+/// 자동 색인이 돌고 있으면 진행 상태를 이어서 보여주는 데 쓴다.
+#[tauri::command]
+pub fn is_indexing_busy(state: tauri::State<IndexingBusyState>) -> bool {
+    state.is_busy()
+}
+
 #[tauri::command]
 pub fn sync_index_manifest(app: AppHandle, roots: Vec<String>) -> Result<IndexSyncStatus, String> {
     let status = manifest::sync_index_manifest(app.clone(), roots)?;

@@ -10,6 +10,7 @@ import {
   getIndexError,
   getIndexStatus,
   indexPendingMedia,
+  isIndexingBusy,
   pickIndexFolder,
   resetIndex,
   setIndexOptions,
@@ -43,6 +44,8 @@ export function useIndexingController() {
     }
   });
   const abortRef = useRef<AbortController | null>(null);
+  // Rust가 앱 시작이나 파일 변경 때 직접 시작한 자동 색인을 따라가는 중인지
+  const autoRunRef = useRef(false);
   const progressTimerRef = useRef<number | null>(null);
   const queuedProgressRef = useRef<IndexProgress | null>(null);
 
@@ -102,6 +105,82 @@ export function useIndexingController() {
     void refresh();
   }, [refresh]);
 
+  // 자동 색인도 수동 색인과 같은 진행률로 보여준다. Rust는 자동 색인의 시작(index-auto-started),
+  // 파일별 진행(index-progress, runId가 auto-로 시작), 끝(index-updated / index-auto-failed)을 알린다.
+  useEffect(() => {
+    let total = 0;
+    let indexed = 0;
+    let skipped = 0;
+    const show = (completed: number, currentPath?: string) => {
+      publishProgress({
+        total,
+        completed,
+        indexed,
+        skipped,
+        errors: skipped,
+        phase: 'media',
+        overallTotal: total,
+        overallCompleted: completed,
+        textTotal: 0,
+        textCompleted: 0,
+        mediaTotal: total,
+        mediaCompleted: completed,
+        pendingMedia: Math.max(total - completed, 0),
+        currentPath,
+      });
+    };
+    const begin = (pendingPaths: string[]) => {
+      // 수동 색인 중이면 그쪽 진행률을 그대로 쓴다.
+      if (abortRef.current) return;
+      autoRunRef.current = true;
+      total = pendingPaths.length;
+      indexed = 0;
+      skipped = 0;
+      setIsBusy(true);
+      setIndexMessage(null);
+      show(0, pendingPaths[0]);
+    };
+    const finish = async () => {
+      if (!autoRunRef.current) return;
+      autoRunRef.current = false;
+      flushProgress();
+      setProgress(null);
+      setIsBusy(false);
+      const latest = await getIndexStatus();
+      if (latest) setStatus(latest);
+    };
+
+    let cancelled = false;
+    const stops: Array<() => void> = [];
+    void Promise.all([
+      listen<IndexSyncStatus>('index-auto-started', ({ payload }) => begin(payload.pending_paths)),
+      listen<MediaIndexProgress>('index-progress', ({ payload }) => {
+        if (!autoRunRef.current || !payload.runId?.startsWith('auto-')) return;
+        if (payload.indexed) indexed += 1;
+        else skipped += 1;
+        total = payload.total;
+        show(payload.completed, payload.path);
+      }),
+      listen('index-updated', () => void finish()),
+      listen('index-auto-failed', () => void finish()),
+    ]).then((unlisteners) => {
+      if (cancelled) unlisteners.forEach((stop) => stop());
+      else stops.push(...unlisteners);
+    });
+
+    // 설정 창을 열었을 때 이미 자동 색인이 돌고 있으면 남은 파일 수로 진행 표시를 시작한다.
+    void Promise.all([isIndexingBusy(), getIndexStatus()]).then(([busy, current]) => {
+      if (!cancelled && busy && current && !abortRef.current && !autoRunRef.current) {
+        begin(current.pending_paths);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      stops.forEach((stop) => stop());
+    };
+  }, [flushProgress, publishProgress]);
+
   // "정확한 시점 표시" 설정을 Rust 자동 색인 워처에도 반영한다.
   useEffect(() => {
     void setIndexOptions(useAligner);
@@ -109,6 +188,10 @@ export function useIndexingController() {
 
   const startIndexing = useCallback(async (nextStatus: IndexSyncStatus | null = status) => {
     if (!nextStatus || nextStatus.pending_paths.length === 0 || abortRef.current) return;
+    if (autoRunRef.current) {
+      setIndexMessage(i18n.t('messages.indexBusy', { ns: 'settings' }));
+      return;
+    }
     const diskSpace = await getIndexDiskSpace();
     if (diskSpace && diskSpace.available_bytes < diskSpace.minimum_required_bytes) {
       setIndexMessage(i18n.t('messages.storageFull', { ns: 'settings' }));
