@@ -6,6 +6,7 @@
 // 3. 평가 쿼리 벡터를 만들고, 경로를 정규화해 src/features/search/evaluation/fixture.json에 저장한다.
 //
 // 준비: `npm run sidecar`로 임베딩 서버(8080)를 띄운다. ASR 서버(8081)는 없으면 이 스크립트가 띄웠다가 끈다.
+// 쿼리나 폴더·앱 목록만 바꿨다면 `npm run eval:fixture -- --queries-only`로 다시 색인 없이 갱신한다.
 import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -139,10 +140,10 @@ function metadataRecords() {
     bestChunk: { chunkIndex: 0, textSnippet: `macOS folder: ${name}` },
     category: "document",
   }));
-  const applicationRecords = applications.map(({ name, bundleId }) => ({
-    id: `application:/Applications/${name}.app`,
+  const applicationRecords = applications.map(({ name, bundleFile, bundleId }) => ({
+    id: `application:/Applications/${bundleFile ?? name}.app`,
     file: {
-      path: `/Applications/${name}.app`,
+      path: `/Applications/${bundleFile ?? name}.app`,
       name,
       extension: "app",
       kind: "application",
@@ -181,6 +182,21 @@ async function main() {
   }
   if (!(await isUp(EMBED_URL))) {
     throw new Error("임베딩 서버(127.0.0.1:8080)가 꺼져 있습니다. `npm run sidecar`를 먼저 실행하세요.");
+  }
+
+  // 쿼리나 폴더·앱 레코드만 바꾼 경우 코퍼스를 다시 색인하지 않고 쿼리 벡터와
+  // 메타데이터 레코드만 갱신한다. 파일 벡터가 그대로라 재색인에 따른 미세한 변동 없이 비교할 수 있다.
+  if (process.argv.includes("--queries-only")) {
+    const fixture = JSON.parse(fs.readFileSync(FIXTURE_PATH, "utf-8"));
+    const { queries } = JSON.parse(fs.readFileSync(QUERIES_PATH, "utf-8"));
+    fixture.records = [
+      ...fixture.records.filter((record) => !["folder", "application"].includes(record.file.kind)),
+      ...metadataRecords(),
+    ].sort((a, b) => a.id.localeCompare(b.id));
+    fixture.queryVectors = await embedQueries(queries);
+    fs.writeFileSync(FIXTURE_PATH, `${JSON.stringify(fixture)}\n`);
+    console.log(`쿼리 벡터 갱신: ${queries.length}개`);
+    return;
   }
 
   let asrProcess = null;
