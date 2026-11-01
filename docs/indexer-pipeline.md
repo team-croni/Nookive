@@ -45,6 +45,11 @@ Nookive는 Tauri 시작 시 `/Applications`, `/System/Applications`, `~/Applicat
 색인한다. 자동 색인이 끝나면 `index-updated` 이벤트로 검색 창이 인덱스를 새로고침한다.
 설정 창을 열지 않아도 새 파일이 검색에 반영된다.
 
+자동 색인(앱 시작 시, 파일 변경 시)이 도는 동안 설정 창은 `index-auto-started`, `index-progress`
+(`auto-`로 시작하는 run ID), `index-updated`, `index-auto-failed` 이벤트를 받아 수동 색인과 같은
+진행률을 보여준다. 색인 도중 설정 창을 열면 `is_indexing_busy`로 진행 중인 실행을 이어 받고, 자동
+색인이 끝날 때까지 수동 색인 시작은 막는다.
+
 ### 2.3 1차 증분 인덱싱 기반
 
 현재 구현은 사용자 승인 없이 임의의 Documents/Downloads를 읽지 않도록 루트 선택을 IPC로 받는다.
