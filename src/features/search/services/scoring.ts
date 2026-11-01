@@ -114,6 +114,21 @@ interface KeywordMatch {
   filenamePrefixCoverage: number;
 }
 
+/**
+ * 이름 매칭에 쓸 이름 목록. 앱은 표시 이름(예: "Code")과 번들 파일명
+ * (예: "Visual Studio Code.app")이 다를 수 있으므로 둘 다 이름으로 본다.
+ */
+function searchableNames(item: SearchResultItem): string[] {
+  const names = [nfc(item.file.name).toLowerCase()];
+  if (item.file.kind === 'application') {
+    const bundleName = nfc(item.file.path.split('/').pop() ?? '')
+      .replace(/\.app$/i, '')
+      .toLowerCase();
+    if (bundleName && !names.includes(bundleName)) names.push(bundleName);
+  }
+  return names;
+}
+
 function keywordCoverage(
   item: SearchResultItem,
   baseKeywords: string[],
@@ -129,7 +144,7 @@ function keywordCoverage(
     };
   }
 
-  const fileName = nfc(item.file.name).toLowerCase();
+  const names = searchableNames(item);
   // 전사 텍스트는 스니펫에 포함되지 않는 비디오 사운드트랙도 검색되도록 별도로 합친다.
   const snippet = nfc(
     `${item.bestChunk?.textSnippet || ''} ${item.bestChunk?.transcript || ''}`,
@@ -149,18 +164,18 @@ function keywordCoverage(
   let bundleIdMatched = 0;
   let filenamePrefixMatched = 0;
   for (const keyword of baseKeywords) {
-    const inName = fileName.includes(keyword);
+    const inName = names.some((name) => name.includes(keyword));
     const inSnippet = snippet.includes(keyword);
     if (inName || inSnippet) baseMatched += 1;
     if (inName) filenameMatched += 1;
     if (contentText.includes(keyword)) contentMatched += 1;
     if (bundleId.includes(keyword)) bundleIdMatched += 1;
-    if (fileName.startsWith(keyword)) filenamePrefixMatched += 1;
+    if (names.some((name) => name.startsWith(keyword))) filenamePrefixMatched += 1;
   }
 
   let synonymMatched = 0;
   for (const keyword of synonymKeywords) {
-    if (fileName.includes(keyword) || snippet.includes(keyword)) {
+    if (names.some((name) => name.includes(keyword)) || snippet.includes(keyword)) {
       synonymMatched += 1;
     }
   }
@@ -306,6 +321,12 @@ export function scoreRecords(
   const koreanBodyShortQuery =
     shortQuery && /^[가-힣]{2}$/.test(baseKeywords[0]);
 
+  const coverages = items.map((item) => keywordCoverage(item, baseKeywords, queryKeywords));
+  // 여러 단어 검색어가 어떤 파일명과 모두 일치하면(예: "microsoft word" → Microsoft Word)
+  // 일부 단어만 겹친 항목(Microsoft Excel)은 키워드만으로 통과시키지 않는다.
+  const hasFullFilenameMatch =
+    baseKeywords.length >= 2 && coverages.some((match) => match.filenameCoverage === 1);
+
   return items.map((item, i) => {
     const zScore = (centered[i] - centeredMean) / std;
     const {
@@ -314,16 +335,16 @@ export function scoreRecords(
       contentCoverage,
       bundleIdCoverage,
       filenamePrefixCoverage,
-    } = keywordCoverage(item, baseKeywords, queryKeywords);
+    } = coverages[i];
+    const names = searchableNames(item);
     const section = modalityOf(item);
     // 짧은 검색어는 본문에 우연히 포함된 결과를 막되, 한글 검색어는
     // 파일명 중간에 등장하는 경우도 허용한다. 예를 들어
     // "주택"은 "2026_주택임대차_표준계약서.pdf"에 포함되어야 한다.
     // 숫자/영문 한 글자는 기존처럼 파일명 prefix만 허용해 노이즈를 줄인다.
     const shortQueryMatch = baseKeywords.every((keyword) => {
-      const fileName = nfc(item.file.name).toLowerCase();
       const containsKorean = keyword.length >= 2 && /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(keyword);
-      return containsKorean ? fileName.includes(keyword) : fileName.startsWith(keyword);
+      return names.some((name) => (containsKorean ? name.includes(keyword) : name.startsWith(keyword)));
     });
     // 2글자 한글 검색어는 본문/전사에 실제로 등장하면 매칭으로 인정한다.
     // ("개발" → 본문 "개발자" 포함 PDF) 파일명 매칭은 그대로 유지한다.
@@ -357,7 +378,19 @@ export function scoreRecords(
       absolutePass &&
       lexicalPass &&
       (zScore >= Z_GATE || (hinted && zScore >= HINTED_Z_GATE));
-    const keywordPass = shortQuery ? shortQueryMatched : coverage >= 0.5;
+    // 여러 단어 중 일부만 일치하면 그 단어가 우연히 겹쳤을 수 있다.
+    // ("visual studio" → Android Studio, "세금 서류" → Vision 라벨 "문서 서류"가 붙은 사진)
+    // 이 경우에는 의미 유사도도 절대 하한을 넘거나, 파일명이 검색어의 첫 단어로 시작해야 통과한다.
+    // ("slack 앱"처럼 앱 이름 뒤에 다른 단어를 붙인 검색은 계속 통과하고,
+    //  "visual studio" → studio-booking.md처럼 뒤쪽 단어만 파일명 앞에 있는 경우는 거른다.)
+    const partialKeywordMatch = baseKeywords.length >= 2 && coverage < 1;
+    const startsWithFirstKeyword = names.some((name) => name.startsWith(baseKeywords[0] ?? ''));
+    const partialKeywordAllowed =
+      (semanticMode && absolutePass)
+      || (startsWithFirstKeyword && filenamePrefixCoverage > 0 && !hasFullFilenameMatch);
+    const keywordPass = shortQuery
+      ? shortQueryMatched
+      : coverage >= 0.5 && (!partialKeywordMatch || partialKeywordAllowed);
     const offlinePass = !semanticMode && (shortQuery ? shortQueryMatched : coverage > 0);
     const pass = semanticPass || keywordPass || offlinePass;
 

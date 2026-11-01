@@ -380,18 +380,21 @@ export const videos = [
 // 파일 내용 없이 이름/경로로만 검색되는 레코드. 실제 앱의 list_indexed_folders/list_applications 형식과 같다.
 export const folders = ["Work", "Personal", "Receipts", "세금 서류", "Photos", "Recordings"];
 
+// 앱 이름은 실제 앱 목록처럼 Info.plist의 CFBundleDisplayName(없으면 CFBundleName)을 쓴다.
+// 번들 파일명과 다른 경우 bundleFile로 경로를 지정한다. (예: "Code" → Visual Studio Code.app)
+// Info.plist 이름은 현지화되지 않으므로 "카카오톡", "메모" 같은 한국어 이름은 레코드에 없다.
 export const applications = [
   { name: "Slack", bundleId: "com.tinyspeck.slackmacgap" },
   { name: "Safari", bundleId: "com.apple.Safari" },
-  { name: "메모", bundleId: "com.apple.Notes" },
-  { name: "캘린더", bundleId: "com.apple.iCal" },
-  { name: "Visual Studio Code", bundleId: "com.microsoft.VSCode" },
-  { name: "카카오톡", bundleId: "com.kakao.KakaoTalkMac" },
-  { name: "시스템 설정", bundleId: "com.apple.systempreferences" },
+  { name: "Notes", bundleId: "com.apple.Notes" },
+  { name: "Calendar", bundleId: "com.apple.iCal" },
+  { name: "Code", bundleFile: "Visual Studio Code", bundleId: "com.microsoft.VSCode" },
+  { name: "KakaoTalk", bundleId: "com.kakao.KakaoTalkMac" },
+  { name: "System Settings", bundleId: "com.apple.systempreferences" },
   { name: "Finder", bundleId: "com.apple.finder" },
   // 이름 일부가 겹치는 앱(hard negative)
   { name: "Android Studio", bundleId: "com.google.android.studio" },
   { name: "Microsoft Excel", bundleId: "com.microsoft.Excel" },
   { name: "Microsoft Word", bundleId: "com.microsoft.Word" },
-  { name: "사진", bundleId: "com.apple.Photos" },
+  { name: "Photos", bundleId: "com.apple.Photos" },
 ];

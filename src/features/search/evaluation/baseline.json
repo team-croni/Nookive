@@ -1,32 +1,32 @@
 {
   "overall": {
-    "recallAt5": 0.9308,
-    "recallAt10": 0.9308,
-    "mrr": 0.9385,
-    "ndcgAt10": 0.9046,
-    "precisionAt5": 0.7797,
-    "noiseRate": 0.1579,
-    "noAnswerFalsePositiveRate": 0.0909,
+    "recallAt5": 0.8851,
+    "recallAt10": 0.8851,
+    "mrr": 0.8919,
+    "ndcgAt10": 0.8642,
+    "precisionAt5": 0.8086,
+    "noiseRate": 0.0833,
+    "noAnswerFalsePositiveRate": 0,
     "locationAccuracy": 1
   },
   "dev": {
-    "recallAt5": 0.8939,
-    "recallAt10": 0.8939,
-    "mrr": 0.9091,
-    "ndcgAt10": 0.8631,
-    "precisionAt5": 0.7293,
-    "noiseRate": 0.1798,
+    "recallAt5": 0.8514,
+    "recallAt10": 0.8514,
+    "mrr": 0.8649,
+    "ndcgAt10": 0.8259,
+    "precisionAt5": 0.8018,
+    "noiseRate": 0.0631,
     "noAnswerFalsePositiveRate": 0,
     "locationAccuracy": 1
   },
   "test": {
-    "recallAt5": 0.9688,
-    "recallAt10": 0.9688,
-    "mrr": 0.9688,
-    "ndcgAt10": 0.9475,
-    "precisionAt5": 0.8318,
-    "noiseRate": 0.1354,
-    "noAnswerFalsePositiveRate": 0.2,
+    "recallAt5": 0.9189,
+    "recallAt10": 0.9189,
+    "mrr": 0.9189,
+    "ndcgAt10": 0.9024,
+    "precisionAt5": 0.8153,
+    "noiseRate": 0.1036,
+    "noAnswerFalsePositiveRate": 0,
     "locationAccuracy": 1
   }
 }
