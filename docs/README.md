@@ -18,6 +18,7 @@ Nookive의 공식 아키텍처, 디자인 시스템, 인덱싱 파이프라인 �
 | [indexer-pipeline.md](indexer-pipeline.md)       | v1.4.1 | 2026-10-28  | macOS 네이티브 미디어 처리와 텍스트·이미지·오디오·비디오 색인 파이프라인 |
 | [settings-and-menu-bar.md](settings-and-menu-bar.md) | v1.2.0 | 2026-10-23  | 메뉴바 상주 정책, 필수 AI 모델(임베딩+ASR) 전체 자동 설치 마법사 및 다운로드 안전 취소·이어받기, 설정 창 UX |
 | [release-checklist.md](release-checklist.md) | v1.2.0 | 2026-10-28 | PDF 검색/미리보기 검증, macOS 파일 접근, 제3자 라이선스 고지, DMG 배포 전 점검 |
+| [search-evaluation.md](search-evaluation.md) | v1.0.0 | 2026-11-01 | 검색 회귀 평가셋(CI)과 공개 벤치마크(MIRACL-ko, Crossmodal-3600) 실행 방법, 결과, 데이터 라이선스 |
 
 ---
 
