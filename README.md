@@ -6,6 +6,10 @@
 
 **Describe it. Find it.**
 
+<p align="center">
+  <img src="docs/assets/nookive-demo.gif" alt="Nookive demo: launching an app, finding the right PDF page from a question, finding photos by what is in them, jumping to a moment in a podcast, and searching in Korean" width="800">
+</p>
+
 Maintained by [Croni](https://github.com/team-croni). Source code and releases
 are hosted at [team-croni/Nookive](https://github.com/team-croni/Nookive).
 
@@ -173,6 +177,15 @@ other open-source components. Their licenses and upstream links are listed in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Nookive is not affiliated
 with Google or Apple. EmbeddingGemma/Gemma, macOS, and Apple are trademarks of
 their respective owners.
+
+The demo above uses made-up documents and recordings created by
+[`scripts/demo`](scripts/demo/README.md). The photos come from
+[Crossmodal-3600](https://google.github.io/crossmodal-3600/) and are licensed
+under [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/):
+[sunset over the sea](https://www.flickr.com/photos/mckaysavage/7012759923)
+by McKay Savage and
+[evening beach](https://www.flickr.com/photos/eager/5686015449/) by
+準建築人手札網站 Forgemind ArchiMedia.
 
 ## License
 
