@@ -82,6 +82,9 @@ flowchart TB
 앱 카탈로그는 파일 내용 임베딩 대상이 아니다. 검색 인덱스를 처음 로드하거나 새로고침할 때
 `/Applications`, `/System/Applications`, `~/Applications`를 스캔해 앱 이름과 Bundle ID를 별도
 메타데이터 레코드로 exact/lexical 검색한다. 실행은 macOS `open`으로 위임한다.
+표시 이름은 앱 번들의 현지화 이름(`InfoPlist.strings` / `.loctable`)을 Nookive 화면 언어로
+고르고(예: 한국어 화면에서 Notes → 메모), Info.plist의 원래 이름과 번들 파일명은 검색용 이름으로
+함께 둔다. 설정에서 화면 언어를 바꾸면 앱 목록을 다시 불러온다.
 
 ### 2.4. 미디어 세그먼트 & 이동
 
