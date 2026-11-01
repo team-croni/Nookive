@@ -19,18 +19,37 @@ fn encode_component(input: &str) -> String {
     out
 }
 
+/// URL에 넣을 수 있는 언어 코드만 받는다 (예: "en", "zh-TW", "pt-BR"). 그 밖에는 영어를 쓴다.
+fn suggest_language(language: Option<&str>) -> &str {
+    match language {
+        Some(code)
+            if (2..=10).contains(&code.len())
+                && code.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') =>
+        {
+            code
+        }
+        _ => "en",
+    }
+}
+
 /// Google 자동완성 제안 조회.
 /// 웹뷰의 fetch는 suggestqueries.google.com의 CORS 헤더가 없어 실패하므로
 /// 네이티브 curl로 요청한 뒤 JSON만 파싱해 프론트엔드로 돌려준다.
 #[tauri::command]
-pub async fn google_suggest(query: String) -> Result<Vec<String>, String> {
+pub async fn google_suggest(
+    query: String,
+    language: Option<String>,
+) -> Result<Vec<String>, String> {
     let trimmed = query.trim();
     if trimmed.is_empty() {
         return Ok(Vec::new());
     }
 
+    // 앱 언어를 Google의 hl로 넘겨 그 언어권 기준으로 제안을 받는다.
+    // (한국어로 입력하면 hl과 관계없이 한국어 제안이 온다)
     let url = format!(
-        "https://suggestqueries.google.com/complete/search?client=firefox&hl=ko&q={}",
+        "https://suggestqueries.google.com/complete/search?client=firefox&hl={}&q={}",
+        suggest_language(language.as_deref()),
         encode_component(trimmed)
     );
 
@@ -110,4 +129,18 @@ pub fn open_url(url: String) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::suggest_language;
+
+    #[test]
+    fn accepts_locale_codes_and_falls_back_to_english() {
+        assert_eq!(suggest_language(Some("ko")), "ko");
+        assert_eq!(suggest_language(Some("zh-TW")), "zh-TW");
+        assert_eq!(suggest_language(None), "en");
+        assert_eq!(suggest_language(Some("en&q=x")), "en");
+        assert_eq!(suggest_language(Some("")), "en");
+    }
 }
