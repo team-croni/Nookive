@@ -30,11 +30,12 @@
       "tags": [
         "lookup",
         "application",
-        "ko"
+        "ko",
+        "localized-name"
       ],
       "split": "dev",
       "relevant": [
-        "/Applications/카카오톡.app"
+        "/Applications/KakaoTalk.app"
       ]
     },
     {
@@ -42,11 +43,12 @@
       "tags": [
         "lookup",
         "application",
-        "ko"
+        "ko",
+        "localized-name"
       ],
       "split": "test",
       "relevant": [
-        "/Applications/시스템 설정.app"
+        "/Applications/System Settings.app"
       ]
     },
     {
@@ -98,6 +100,70 @@
       "split": "test",
       "relevant": [
         "/Applications/Microsoft Excel.app"
+      ]
+    },
+    {
+      "query": "visual studio code",
+      "tags": [
+        "lookup",
+        "application",
+        "en",
+        "bundle-name"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Visual Studio Code.app"
+      ]
+    },
+    {
+      "query": "code",
+      "tags": [
+        "lookup",
+        "application",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/Visual Studio Code.app"
+      ]
+    },
+    {
+      "query": "kakaotalk",
+      "tags": [
+        "lookup",
+        "application",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/KakaoTalk.app"
+      ]
+    },
+    {
+      "query": "notes",
+      "tags": [
+        "lookup",
+        "application",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Notes.app"
+      ],
+      "acceptable": [
+        "/eval/Personal/reading-notes-habits.txt"
+      ]
+    },
+    {
+      "query": "system settings",
+      "tags": [
+        "lookup",
+        "application",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/System Settings.app"
       ]
     },
     {
@@ -213,7 +279,7 @@
       ],
       "split": "test",
       "relevant": [
-        "/Applications/카카오톡.app"
+        "/Applications/KakaoTalk.app"
       ]
     },
     {
@@ -226,6 +292,56 @@
       "split": "dev",
       "relevant": [
         "/Applications/Slack.app"
+      ]
+    },
+    {
+      "query": "slack 앱",
+      "tags": [
+        "launcher",
+        "application",
+        "extra-word"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Slack.app"
+      ]
+    },
+    {
+      "query": "카카오톡 실행",
+      "tags": [
+        "launcher",
+        "application",
+        "extra-word",
+        "ko",
+        "localized-name"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/KakaoTalk.app"
+      ]
+    },
+    {
+      "query": "safari browser",
+      "tags": [
+        "launcher",
+        "application",
+        "extra-word"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/Safari.app"
+      ]
+    },
+    {
+      "query": "word 문서 앱",
+      "tags": [
+        "launcher",
+        "application",
+        "extra-word"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Microsoft Word.app"
       ]
     },
     {
