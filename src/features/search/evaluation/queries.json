@@ -167,6 +167,36 @@
       ]
     },
     {
+      "query": "메모",
+      "tags": [
+        "lookup",
+        "application",
+        "ko",
+        "localized-name"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Notes.app"
+      ],
+      "acceptable": [
+        "/eval/Recordings/장보기_음성메모.m4a",
+        "/eval/Personal/종합소득세_신고_메모.md"
+      ]
+    },
+    {
+      "query": "캘린더",
+      "tags": [
+        "lookup",
+        "application",
+        "ko",
+        "localized-name"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/Calendar.app"
+      ]
+    },
+    {
       "query": "receipts",
       "tags": [
         "lookup",

@@ -115,11 +115,16 @@ interface KeywordMatch {
 }
 
 /**
- * 이름 매칭에 쓸 이름 목록. 앱은 표시 이름(예: "Code")과 번들 파일명
- * (예: "Visual Studio Code.app")이 다를 수 있으므로 둘 다 이름으로 본다.
+ * 이름 매칭에 쓸 이름 목록. 앱은 표시 이름(예: "카카오톡", "Code")과
+ * Info.plist 이름(예: "KakaoTalk"), 번들 파일명(예: "Visual Studio Code.app")이
+ * 다를 수 있으므로 모두 이름으로 본다.
  */
 function searchableNames(item: SearchResultItem): string[] {
   const names = [nfc(item.file.name).toLowerCase()];
+  for (const alternate of item.file.alternateNames ?? []) {
+    const name = nfc(alternate).toLowerCase();
+    if (!names.includes(name)) names.push(name);
+  }
   if (item.file.kind === 'application') {
     const bundleName = nfc(item.file.path.split('/').pop() ?? '')
       .replace(/\.app$/i, '')
@@ -270,10 +275,16 @@ export function scoreRecords(
     return Math.max(audioSim, textSim);
   });
 
+  // 앱·폴더처럼 벡터가 없는 레코드는 코사인이 항상 0이라 통계에서 제외한다.
+  // 섞이면 Mac에 설치된 앱 수(수백 개)만큼 0이 더해져 표준편차가 작아지고,
+  // 모든 파일의 z-score가 부풀려져 관련 없는 결과가 의미 게이트를 통과한다.
+  const hasVector = items.map((item) => Boolean(item.vector || item.textVector));
+  const vectorIndexes = items.flatMap((_, i) => (hasVector[i] ? [i] : []));
+
   // 모달리티별 평균 (표본이 적으면 전체 평균 쪽으로 shrinkage)
   const sums = new Map<FileSection, { sum: number; count: number }>();
   let globalSum = 0;
-  for (let i = 0; i < items.length; i += 1) {
+  for (const i of vectorIndexes) {
     const section = modalityOf(items[i]);
     const entry = sums.get(section) ?? { sum: 0, count: 0 };
     entry.sum += cosines[i];
@@ -281,7 +292,7 @@ export function scoreRecords(
     sums.set(section, entry);
     globalSum += cosines[i];
   }
-  const globalMean = items.length > 0 ? globalSum / items.length : 0;
+  const globalMean = vectorIndexes.length > 0 ? globalSum / vectorIndexes.length : 0;
   const means = new Map<FileSection, number>();
   for (const [section, entry] of sums) {
     means.set(
@@ -294,14 +305,15 @@ export function scoreRecords(
   const centered = items.map(
     (item, i) => cosines[i] - (means.get(modalityOf(item)) ?? globalMean),
   );
+  const vectorCentered = vectorIndexes.map((i) => centered[i]);
   const centeredMean =
-    centered.length > 0
-      ? centered.reduce((sum, value) => sum + value, 0) / centered.length
+    vectorCentered.length > 0
+      ? vectorCentered.reduce((sum, value) => sum + value, 0) / vectorCentered.length
       : 0;
   const variance =
-    centered.length > 0
-      ? centered.reduce((sum, value) => sum + (value - centeredMean) ** 2, 0) /
-      centered.length
+    vectorCentered.length > 0
+      ? vectorCentered.reduce((sum, value) => sum + (value - centeredMean) ** 2, 0) /
+      vectorCentered.length
       : 0;
   const std = Math.max(Math.sqrt(variance), MIN_STD);
 
@@ -328,7 +340,8 @@ export function scoreRecords(
     baseKeywords.length >= 2 && coverages.some((match) => match.filenameCoverage === 1);
 
   return items.map((item, i) => {
-    const zScore = (centered[i] - centeredMean) / std;
+    // 벡터가 없는 레코드는 의미 점수가 없으므로 z-score를 0으로 둔다. (키워드로만 검색된다)
+    const zScore = hasVector[i] ? (centered[i] - centeredMean) / std : 0;
     const {
       coverage,
       filenameCoverage,

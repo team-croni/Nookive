@@ -20,6 +20,8 @@ export interface FileMetadata {
   /** 일반 파일과 macOS 애플리케이션을 구분한다. 앱은 내용 임베딩 없이 메타데이터로 검색한다. */
   kind?: 'file' | 'application' | 'folder';
   bundleId?: string;
+  /** 표시 이름 외에 검색에 함께 쓰는 이름 (예: "카카오톡"으로 표시되는 앱의 영문 이름 "KakaoTalk") */
+  alternateNames?: string[];
   sizeBytes: number;
   modifiedAt: string;
   pageCount?: number;

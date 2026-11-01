@@ -11,6 +11,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import zlib from "node:zlib";
+import { applicationRecords } from "../metadata.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../../..");
@@ -245,10 +246,11 @@ async function main() {
   const { dataset, options } = parseArgs(process.argv.slice(2));
   if (dataset === "mixed") {
     // 파일별 색인은 서로 독립이므로 두 데이터셋의 결과를 합치면 한 폴더에서 색인한 것과 같다.
+    // 실제 Mac처럼 벡터 없는 앱 레코드(약 200개)도 함께 넣어 의미 점수 통계에 미치는 영향을 본다.
     const parts = ["miracl", "xm3600"].map(readDataset);
     writeDataset(
       "mixed",
-      parts.flatMap((part) => part.records),
+      [...parts.flatMap((part) => part.records), ...applicationRecords()],
       parts.flatMap((part) => part.queries),
       Object.assign({}, ...parts.map((part) => part.queryVectors)),
     );

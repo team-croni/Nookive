@@ -12,11 +12,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { applicationRecords, folderRecords } from "./metadata.mjs";
 import {
-  applications,
   audio,
   documents,
-  folders,
   images,
   pdfs,
   videos,
@@ -126,39 +125,7 @@ function normalizeRecord(record, corpusDir) {
 }
 
 function metadataRecords() {
-  const folderRecords = folders.map((name) => ({
-    id: `folder:${FIXTURE_PATH_PREFIX}/${name}`,
-    file: {
-      path: `${FIXTURE_PATH_PREFIX}/${name}`,
-      name,
-      extension: "folder",
-      kind: "folder",
-      sizeBytes: 0,
-      modifiedAt: "폴더",
-    },
-    similarityScore: 0,
-    bestChunk: { chunkIndex: 0, textSnippet: `macOS folder: ${name}` },
-    category: "document",
-  }));
-  const applicationRecords = applications.map(({ name, bundleFile, bundleId }) => ({
-    id: `application:/Applications/${bundleFile ?? name}.app`,
-    file: {
-      path: `/Applications/${bundleFile ?? name}.app`,
-      name,
-      extension: "app",
-      kind: "application",
-      bundleId,
-      sizeBytes: 0,
-      modifiedAt: "설치된 앱",
-    },
-    similarityScore: 0,
-    bestChunk: {
-      chunkIndex: 0,
-      textSnippet: `macOS application: ${name}; bundle id: ${bundleId}`,
-    },
-    category: "application",
-  }));
-  return [...folderRecords, ...applicationRecords];
+  return [...folderRecords(FIXTURE_PATH_PREFIX), ...applicationRecords()];
 }
 
 async function embedQueries(queries) {
