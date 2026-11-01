@@ -1,0 +1,12 @@
+{
+  "applicationHint": "Enterキーでアプリを起動します。",
+  "folderHint": "Enterキーでフォルダを開きます。",
+  "unsupportedImage": "この画像形式は未対応または破損しています",
+  "pdfLoading": "PDFを読み込み中…",
+  "pdfBrowserUnsupported": "ウェブブラウザではローカルPDFをプレビューできません。デスクトップアプリで確認してください。",
+  "pdfFailed": "PDFをプレビューできません。下の「開く」で起動してください。",
+  "fileAccessChecking": "ファイルへのアクセスを確認中…",
+  "fileAccessTitle": "ファイルにアクセスできません",
+  "fileAccessDescription": "macOSの設定でNookiveのファイルアクセスを許可してください。",
+  "fileAccessRetry": "再試行"
+}

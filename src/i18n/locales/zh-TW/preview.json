@@ -1,0 +1,12 @@
+{
+  "applicationHint": "按 Enter 啟動應用程式。",
+  "folderHint": "按 Enter 開啟資料夾。",
+  "unsupportedImage": "不支援或損壞的圖片格式",
+  "pdfLoading": "正在載入 PDF…",
+  "pdfBrowserUnsupported": "無法在網頁瀏覽器中預覽本機PDF。請在桌面應用程式中查看。",
+  "pdfFailed": "無法預覽此 PDF。請使用下方的「開啟」。",
+  "fileAccessChecking": "正在檢查檔案存取權限…",
+  "fileAccessTitle": "無法存取檔案",
+  "fileAccessDescription": "請在 macOS 設定中允許 Nookive 存取檔案。",
+  "fileAccessRetry": "重試"
+}

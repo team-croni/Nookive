@@ -1,0 +1,7 @@
+{
+  "placeholder": "搜尋我的電腦",
+  "searching": "正在搜尋…",
+  "webSearch": "網頁搜尋",
+  "googleSearch": "在 Google 中搜尋「{{query}}」",
+  "footer": {"webOpen": "在網頁中開啟"}
+}

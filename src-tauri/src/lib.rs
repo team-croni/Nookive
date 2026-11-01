@@ -13,6 +13,7 @@ mod paths;
 #[cfg(target_os = "macos")]
 mod vibrancy;
 mod web;
+mod tray_labels;
 mod window;
 
 use tauri::{LogicalSize, Manager, RunEvent, Size};

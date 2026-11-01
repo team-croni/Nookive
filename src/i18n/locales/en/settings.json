@@ -1,5 +1,7 @@
 {
-  "title": "Search settings", "subtitle": "Manage the folders and files included in search.", "close": "Close settings",
+  "title": "Search settings",
+  "subtitle": "Manage the folders and files included in search.",
+  "close": "Close settings",
   "language": {"title": "Language", "description": "Choose the language used by Nookive."},
   "theme": {"title": "Appearance", "description": "Choose how Nookive looks.", "options": {"light": "Light", "dark": "Dark", "system": "System"}},
   "folders": {"title": "Search folders", "description": "Search the contents of the folders you select.", "add": "Add folder", "empty": "No folders selected yet."},
@@ -12,7 +14,7 @@
   "dataManagement": {"title": "App data", "description": "Delete downloaded models and search data created by Nookive.", "sourceFilesHint": "Your selected folders and original files will not be deleted.", "confirm": "Are you sure you want to delete it?", "button": "Delete models and app data", "hint": "Deletes models, search results, and app settings.", "error": "Could not delete app data. Restart the app and try again."},
   "webSearch": {"title": "Web search", "description": "Use Google suggestions and web search when local results are empty.", "option": "Use Google search", "privacyNotice": "When web search is enabled, your query may be sent to Google. File contents and local search data are not sent."},
   "dynamic": {"documentsAndMedia": "Search data can be built from {{documents}} documents and {{media}} images, audio, and videos.", "documents": "Search data can be built from {{count}} documents.", "media": "Search data can be built from {{count}} images, audio, and videos.", "action": "Build search data for {{count}} files.", "refreshHint": "Check for folder changes or refresh the search status."},
-  "messages": {"shortcutChanged": "Keyboard shortcut updated.", "shortcutFailed": "Could not change the shortcut. Choose another key combination.", "shortcutModifier": "Use one of command, option, control, or shift.", "indexFailed": "Could not build search data. Please try again later.", "autoIndexFailed": "Background indexing could not finish. Try again from Settings.", "storageFull": "Indexing stopped because there is not enough storage. Free up space and try again.", "asrFailed": "Could not load voice search components. Reinstall the app or try again later.", "indexed": "Made {{count}} files searchable.", "errors": "Could not process {{count}} files. Please try again later.", "skipped": "Skipped {{count}} files. Check their size or format.", "aborted": "Search data creation was stopped.", "completed": "Search data created.", "reset": "Search data reset.", "resetFailed": "Could not reset search data. Restart the app and try again."},
+  "messages": {"shortcutChanged": "Keyboard shortcut updated.", "shortcutFailed": "Could not change the shortcut. Choose another key combination.", "shortcutModifier": "Use one of command, option, control, or shift.", "indexFailed": "Could not build search data. Please try again later.", "autoIndexFailed": "Background indexing could not finish. Try again from Settings.", "storageFull": "Indexing stopped because there is not enough storage. Free up space and try again.", "asrFailed": "Could not load voice search components. Reinstall the app or try again later.", "indexed": "Made {{count}} files searchable.", "errors": "Could not process {{count}} files. Please try again later.", "skipped": "Skipped {{count}} files. Check their size or format.", "aborted": "Search data creation was stopped.", "completed": "Search data created.", "reset": "Search data reset.", "resetFailed": "Could not reset search data. Restart the app and try again.", "indexBusy": "Another indexing job is already running. Try again in a moment.", "engineNotReady": "The search model is not ready yet. Try again in a moment."},
   "installer": {
     "title": "Installing Nookive",
     "subtitle": "Preparing essential AI components for private, on-device search.",
@@ -43,7 +45,12 @@
     "folderSelect": "Choose folder",
     "languageTitle": "Language",
     "languageDescription": "Defaults to your macOS system language.",
-    "finishAction": "Finish setup"
+    "finishAction": "Finish setup",
+    "windowTitle": "Nookive Setup",
+    "windowTitleDone": "Nookive Setup Complete",
+    "preparing": "Preparing…",
+    "downloadingModel": "Downloading model…"
   },
-  "about": {"version": "Version {{version}}", "maintainer": "Croni OpenSource Project", "github": "GitHub", "license": "MIT License", "thirdParty": "Open-source licenses", "issues": "Report an issue"}
+  "about": {"version": "Version {{version}}", "maintainer": "Croni OpenSource Project", "github": "GitHub", "license": "MIT License", "thirdParty": "Open-source licenses", "issues": "Report an issue"},
+  "windowTitle": "Nookive Settings"
 }

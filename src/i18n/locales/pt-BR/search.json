@@ -1,0 +1,7 @@
+{
+  "placeholder": "Pesquisar no computador",
+  "searching": "Pesquisando…",
+  "webSearch": "Pesquisa na web",
+  "googleSearch": "Pesquisar “{{query}}” no Google",
+  "footer": {"webOpen": "Abrir na web"}
+}
