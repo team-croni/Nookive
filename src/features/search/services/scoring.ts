@@ -10,7 +10,7 @@
 // - 키워드 일치는 coverage(쿼리 단어 중 몇 %가 파일명/스니펫에 있는가)로 반영한다.
 import type { SearchMatchChunk, SearchResultItem } from '../../../types/search';
 import { getFileSection, type FileSection } from '../../../utils/fileType';
-import { nfc } from './textUtils';
+import { hangulCompletionPattern, nfc } from './textUtils';
 
 const Z_GATE = 2.0;
 const WORD_WEIGHT = 2.0;
@@ -152,10 +152,34 @@ function searchableNames(item: SearchResultItem): string[] {
   return names;
 }
 
+interface NameMatcher {
+  includes: (name: string) => boolean;
+  startsWith: (name: string) => boolean;
+}
+
+/**
+ * 이름에 키워드가 들어 있는지 확인하는 함수. 검색어의 마지막 키워드가 아직 조합 중인
+ * 한글이면("카카오ㅌ", "카카오토") 완성될 수 있는 형태까지 이름 일치로 인정한다.
+ * 조합은 입력 중인 마지막 글자에서만 일어나므로 마지막 키워드에만 적용하고,
+ * 앞에 완성된 글자가 없는 한 글자("ㅎ", "하")는 너무 많은 이름과 겹쳐 적용하지 않는다.
+ */
+function nameMatchers(baseKeywords: string[]): NameMatcher[] {
+  return baseKeywords.map((keyword, index) => {
+    const completing = index === baseKeywords.length - 1 && keyword.length >= 2;
+    const pattern = completing ? hangulCompletionPattern(keyword) : null;
+    const anchored = pattern ? new RegExp(`^(?:${pattern.source})`) : null;
+    return {
+      includes: (name) => name.includes(keyword) || (pattern?.test(name) ?? false),
+      startsWith: (name) => name.startsWith(keyword) || (anchored?.test(name) ?? false),
+    };
+  });
+}
+
 function keywordCoverage(
   item: SearchResultItem,
   baseKeywords: string[],
   queryKeywords: string[],
+  matchers: NameMatcher[],
 ): KeywordMatch {
   if (queryKeywords.length === 0) {
     return {
@@ -186,14 +210,15 @@ function keywordCoverage(
   let contentMatched = 0;
   let bundleIdMatched = 0;
   let filenamePrefixMatched = 0;
-  for (const keyword of baseKeywords) {
-    const inName = names.some((name) => name.includes(keyword));
+  for (const [index, keyword] of baseKeywords.entries()) {
+    const matcher = matchers[index];
+    const inName = names.some(matcher.includes);
     const inSnippet = snippet.includes(keyword);
     if (inName || inSnippet) baseMatched += 1;
     if (inName) filenameMatched += 1;
     if (contentText.includes(keyword)) contentMatched += 1;
     if (bundleId.includes(keyword)) bundleIdMatched += 1;
-    if (names.some((name) => name.startsWith(keyword))) filenamePrefixMatched += 1;
+    if (names.some(matcher.startsWith)) filenamePrefixMatched += 1;
   }
 
   let synonymMatched = 0;
@@ -363,7 +388,8 @@ export function scoreRecords(
       && searchableNames(item).includes(normalizedQuery),
   );
 
-  const coverages = items.map((item) => keywordCoverage(item, baseKeywords, queryKeywords));
+  const matchers = nameMatchers(baseKeywords);
+  const coverages = items.map((item) => keywordCoverage(item, baseKeywords, queryKeywords, matchers));
   // 여러 단어 검색어가 어떤 파일명과 모두 일치하면(예: "microsoft word" → Microsoft Word)
   // 일부 단어만 겹친 항목(Microsoft Excel)은 키워드만으로 통과시키지 않는다.
   const hasFullFilenameMatch =
@@ -385,9 +411,9 @@ export function scoreRecords(
     // 파일명 중간에 등장하는 경우도 허용한다. 예를 들어
     // "주택"은 "2026_주택임대차_표준계약서.pdf"에 포함되어야 한다.
     // 숫자/영문 한 글자는 기존처럼 파일명 prefix만 허용해 노이즈를 줄인다.
-    const shortQueryMatch = baseKeywords.every((keyword) => {
+    const shortQueryMatch = baseKeywords.every((keyword, index) => {
       const containsKorean = keyword.length >= 2 && /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(keyword);
-      return names.some((name) => (containsKorean ? name.includes(keyword) : name.startsWith(keyword)));
+      return names.some(containsKorean ? matchers[index].includes : matchers[index].startsWith);
     });
     // 2글자 한글 검색어는 본문/전사에 실제로 등장하면 매칭으로 인정한다.
     // ("개발" → 본문 "개발자" 포함 PDF) 파일명 매칭은 그대로 유지한다.
@@ -438,7 +464,7 @@ export function scoreRecords(
     // ("slack 앱"처럼 앱 이름 뒤에 다른 단어를 붙인 검색은 계속 통과하고,
     //  "visual studio" → studio-booking.md처럼 뒤쪽 단어만 파일명 앞에 있는 경우는 거른다.)
     const partialKeywordMatch = baseKeywords.length >= 2 && coverage < 1;
-    const startsWithFirstKeyword = names.some((name) => name.startsWith(baseKeywords[0] ?? ''));
+    const startsWithFirstKeyword = matchers.length > 0 && names.some(matchers[0].startsWith);
     const partialKeywordAllowed =
       (semanticMode && absolutePass)
       || (startsWithFirstKeyword && filenamePrefixCoverage > 0 && !hasFullFilenameMatch);

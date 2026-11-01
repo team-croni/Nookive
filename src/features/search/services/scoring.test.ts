@@ -73,6 +73,13 @@ describe('partial keyword matches', () => {
 });
 
 describe('application names', () => {
+  it('keeps matching a Korean name while its last syllable is being typed', () => {
+    for (const query of ['카카오', '카카오ㅌ', '카카오토', '카카옽', '카카오톡']) {
+      expect(search(query)).toEqual(['카카오톡']);
+    }
+    expect(search('ㅋ')).toEqual([]);
+  });
+
   it('matches both the localized name and the Info.plist name', () => {
     expect(search('카카오톡')).toEqual(['카카오톡']);
     expect(search('kakaotalk')).toEqual(['카카오톡']);

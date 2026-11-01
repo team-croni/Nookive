@@ -375,6 +375,84 @@
       ]
     },
     {
+      "query": "카카오ㅌ",
+      "tags": [
+        "launcher",
+        "application",
+        "ko",
+        "composing"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/KakaoTalk.app"
+      ]
+    },
+    {
+      "query": "카카오토",
+      "tags": [
+        "launcher",
+        "application",
+        "ko",
+        "composing"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/KakaoTalk.app"
+      ]
+    },
+    {
+      "query": "카카옽",
+      "tags": [
+        "launcher",
+        "application",
+        "ko",
+        "composing"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/KakaoTalk.app"
+      ]
+    },
+    {
+      "query": "시스템 설ㅈ",
+      "tags": [
+        "launcher",
+        "application",
+        "ko",
+        "composing"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/System Settings.app"
+      ]
+    },
+    {
+      "query": "캘리",
+      "tags": [
+        "launcher",
+        "application",
+        "ko",
+        "composing"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Calendar.app"
+      ]
+    },
+    {
+      "query": "제주도_여행_일ㅈ",
+      "tags": [
+        "launcher",
+        "document",
+        "ko",
+        "composing"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Personal/제주도_여행_일정.md"
+      ]
+    },
+    {
       "query": "제주도 여행 일졍",
       "tags": [
         "semantic",
