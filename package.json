@@ -48,7 +48,7 @@
     "pdfjs-dist": "^6.2.108",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-i18next": "^17.1.0"
+    "react-i18next": "^17.1.9"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.12.2",
