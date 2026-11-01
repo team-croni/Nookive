@@ -2,7 +2,7 @@
 // pdf.js 워커 설정 및 문서 로드 캐시.
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
-import PdfWorker from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+import PdfWorker from './pdfWorker?worker&url';
 import { readFileBytes } from '../../../utils/tauriBridge';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = PdfWorker;
