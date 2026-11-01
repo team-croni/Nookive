@@ -42,3 +42,55 @@ export function expandKeywords(baseKeywords: string[]): string[] {
     new Set(baseKeywords.flatMap((kw) => [kw, ...(SYNONYMS[kw] ?? [])])),
   );
 }
+
+// ── 한글 입력 중간 상태 ─────────────────────────────────────────────
+// "카카오톡"을 입력하면 검색창에는 "카카오ㅌ" → "카카오토" → "카카오톡"이 차례로 들어온다.
+// 마지막 글자가 아직 조합 중이면 그 글자가 될 수 있는 완성형까지 이름 매칭에서 인정한다.
+const HANGUL_BASE = 0xac00;
+const HANGUL_LAST = 0xd7a3;
+const JUNGSEONG_COUNT = 21;
+const JONGSEONG_COUNT = 28;
+const SYLLABLES_PER_CHOSEONG = JUNGSEONG_COUNT * JONGSEONG_COUNT;
+// 호환용 자모 → 초성 순서 (ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ)
+const CHOSEONG = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+// 종성 순서 (0은 받침 없음). 겹받침은 다음 글자로 옮겨 가지 않으므로 빈 칸으로 둔다.
+const JONGSEONG = ' ㄱㄲ ㄴ  ㄷㄹ       ㅁㅂ ㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
+
+const syllable = (choseong: number, jungseong: number, jongseong = 0): string =>
+  String.fromCharCode(
+    HANGUL_BASE + choseong * SYLLABLES_PER_CHOSEONG + jungseong * JONGSEONG_COUNT + jongseong,
+  );
+
+/** 초성이 같은 모든 완성형 글자 범위 (예: ㅌ → [타-팋]) */
+const choseongRange = (choseong: number): string =>
+  `[${syllable(choseong, 0)}-${syllable(choseong, JUNGSEONG_COUNT - 1, JONGSEONG_COUNT - 1)}]`;
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * 키워드의 마지막 글자가 조합 중인 한글이면, 완성될 수 있는 형태까지 받는 정규식을 만든다.
+ * - "카카오ㅌ" → "카카오" + ㅌ으로 시작하는 글자
+ * - "카카오토" → "카카오" + "토"에 받침이 붙은 글자(토, 톡, 톤 …)
+ * - "카카옽"   → "카카옽" 또는 "카카오" + ㅌ으로 시작하는 글자 (입력기가 자음을 받침으로 붙인 경우)
+ * 조합 중이 아니면 null을 돌려준다.
+ */
+export function hangulCompletionPattern(keyword: string): RegExp | null {
+  if (!keyword) return null;
+  const prefix = escapeRegExp(keyword.slice(0, -1));
+  const last = keyword.charAt(keyword.length - 1);
+  const choseong = CHOSEONG.indexOf(last);
+  if (choseong >= 0) return new RegExp(`${prefix}${choseongRange(choseong)}`);
+
+  const code = last.charCodeAt(0);
+  if (code < HANGUL_BASE || code > HANGUL_LAST) return null;
+  const offset = code - HANGUL_BASE;
+  const lead = Math.floor(offset / SYLLABLES_PER_CHOSEONG);
+  const vowel = Math.floor((offset % SYLLABLES_PER_CHOSEONG) / JONGSEONG_COUNT);
+  const tail = offset % JONGSEONG_COUNT;
+  if (tail === 0) {
+    return new RegExp(`${prefix}[${syllable(lead, vowel, 0)}-${syllable(lead, vowel, JONGSEONG_COUNT - 1)}]`);
+  }
+  const movable = CHOSEONG.indexOf(JONGSEONG.charAt(tail));
+  if (movable < 0) return null;
+  return new RegExp(`${prefix}(?:${escapeRegExp(last)}|${syllable(lead, vowel, 0)}${choseongRange(movable)})`);
+}
