@@ -9,10 +9,14 @@ use crate::models::{ApplicationChunk, ApplicationFile, ApplicationSearchResult};
 
 /// 설치된 macOS 앱은 앱 바이너리/리소스를 임베딩하지 않고 LaunchServices 검색에
 /// 필요한 표시 이름과 Bundle ID만 색인한다. 앱 검색은 이름/ID에 대한 정확 검색이다.
+///
+/// `language`는 Nookive의 화면 언어다. 앱 이름도 같은 언어로 보여줘야 화면이 일관되므로
+/// macOS 시스템 언어보다 우선한다. 넘기지 않으면 macOS 선호 언어를 쓴다.
 #[tauri::command]
-pub fn list_applications() -> Vec<ApplicationSearchResult> {
+pub fn list_applications(language: Option<String>) -> Vec<ApplicationSearchResult> {
     #[cfg(not(target_os = "macos"))]
     {
+        let _ = language;
         return Vec::new();
     }
 
@@ -26,7 +30,10 @@ pub fn list_applications() -> Vec<ApplicationSearchResult> {
             roots.push(PathBuf::from(home).join("Applications"));
         }
 
-        let languages = preferred_languages();
+        let languages = match language.filter(|code| !code.is_empty()) {
+            Some(code) => vec![code],
+            None => preferred_languages(),
+        };
         let mut apps = Vec::new();
         for root in roots {
             collect_applications(&root, &languages, &mut apps, 0);
@@ -156,6 +163,12 @@ fn parse_apple_languages(output: &str) -> Vec<String> {
 #[cfg(any(target_os = "macos", test))]
 fn language_candidates(language: &str) -> Vec<String> {
     let mut candidates = vec![language.to_string(), language.replace('-', "_")];
+    // 중국어는 앱에 따라 zh_CN/zh_TW 대신 zh-Hans/zh-Hant 폴더를 쓴다.
+    match language.replace('_', "-").to_ascii_lowercase().as_str() {
+        "zh-cn" | "zh-sg" => candidates.push("zh-Hans".to_string()),
+        "zh-tw" | "zh-hk" => candidates.push("zh-Hant".to_string()),
+        _ => {}
+    }
     if let Some(base) = language.split(['-', '_']).next() {
         candidates.push(base.to_string());
     }
@@ -376,6 +389,10 @@ mod tests {
         );
         assert_eq!(language_candidates("ko-KR"), vec!["ko-KR", "ko_KR", "ko"]);
         assert_eq!(language_candidates("ko"), vec!["ko"]);
+        assert_eq!(
+            language_candidates("zh-TW"),
+            vec!["zh-TW", "zh_TW", "zh-Hant", "zh"]
+        );
     }
 
     #[cfg(target_os = "macos")]

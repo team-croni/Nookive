@@ -4,6 +4,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import type { SearchResultItem } from '../../../types/search';
+import i18n from '../../../i18n';
 import { getIndexStatus } from '../../../utils/tauriBridge';
 import { searchClient } from '../services/searchClient';
 import { orderResultsBySection } from '../utils/orderResults';
@@ -136,6 +137,13 @@ export function useSearchResults() {
     return () => {
       unlisten?.();
     };
+  }, []);
+
+  // 앱 이름은 화면 언어로 표시하므로, 설정에서 언어를 바꾸면 앱 목록을 다시 불러온다.
+  useEffect(() => {
+    const reload = () => void searchClient.refresh();
+    i18n.on('languageChanged', reload);
+    return () => i18n.off('languageChanged', reload);
   }, []);
 
   const resetSelection = useCallback(() => setSelectedIndex(0), []);
