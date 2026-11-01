@@ -95,6 +95,63 @@ Track streaks on a paper calendar and forgive missed days quickly.
     path: "Work/연구_기록_2026.md",
     text: researchLog,
   },
+  // ── 헷갈리는 문서(hard negative): 같은 형식·비슷한 주제지만 다른 내용 ──
+  {
+    path: "Work/회의록_2026_3분기_개발.md",
+    text: `# 2026년 3분기 개발팀 회의록
+
+- 참석자: 백엔드 3명, 프론트엔드 2명
+- 3분기 목표는 검색 응답 속도 개선과 결제 모듈 리팩터링이다.
+- 서버 증설 비용은 다음 분기로 미룬다.
+- 코드 리뷰 규칙을 정리해 위키에 올린다.
+`,
+  },
+  {
+    path: "Personal/부산_여행_후기.md",
+    text: `# 부산 2박 3일 여행 후기
+
+해운대에서 바다를 보며 산책했고, 광안리 야경이 특히 좋았다.
+자갈치 시장에서 회를 먹고 감천문화마을을 구경했다.
+다음에는 기차 대신 비행기를 타고 갈 생각이다.
+`,
+  },
+  {
+    path: "Personal/된장찌개_레시피.txt",
+    text: `된장찌개 레시피 (2인분)
+
+재료: 된장 2큰술, 애호박 반 개, 감자 1개, 두부 반 모, 양파, 청양고추
+1. 멸치 육수 500ml를 끓인다.
+2. 된장을 풀고 감자와 양파를 넣어 10분 끓인다.
+3. 애호박, 두부, 청양고추를 넣고 5분 더 끓인다.
+`,
+  },
+  {
+    path: "Work/vpn-troubleshooting.md",
+    text: `# VPN troubleshooting
+
+If the VPN client fails to connect, check that your device certificate has not expired.
+Restart the client after changing networks. Error 809 usually means a firewall is blocking the tunnel.
+Contact IT if the problem continues for more than one day.
+`,
+  },
+  {
+    path: "Personal/종합소득세_신고_메모.md",
+    text: `# 2025년 종합소득세 신고 메모
+
+- 신고 기간: 5월 1일 ~ 5월 31일
+- 준비할 것: 원천징수영수증, 의료비·교육비 영수증, 기부금 영수증
+- 프리랜서 수입은 사업소득으로 신고한다.
+- 홈택스에서 모두채움 신고서를 먼저 확인한다.
+`,
+  },
+  {
+    path: "Work/studio-booking.md",
+    text: `# Photo studio booking
+
+The photo studio is booked for the product shoot on March 12 from 10 a.m. to 4 p.m.
+Bring two backup batteries and the white backdrop. The deposit has been paid.
+`,
+  },
 ];
 
 export const pdfs = [
@@ -113,6 +170,14 @@ export const pdfs = [
       "주택 임대차 계약서\n임대인과 임차인은 아래 주택에 대해 임대차 계약을 체결한다.\n계약 기간은 2년으로 한다.",
       "보증금 반환\n임대인은 계약 종료일에 임차인에게 보증금 전액을 반환한다.\n미납 관리비가 있으면 공제 후 반환한다.",
       "특약 사항\n반려동물 동반 입주를 허용한다.\n벽면 못 사용은 사전 협의한다.",
+    ],
+  },
+  {
+    path: "Documents/2024_연간_보고서.pdf",
+    pages: [
+      "2024 연간 보고서\n회사 개요\n한 해의 주요 사건을 정리합니다.",
+      "국내 사업 실적\n국내 매출은 전년과 비슷한 수준을 유지했다.",
+      "해외 사업 실적\n해외 매출은 전년 대비 12% 증가했다.\n일본 시장 매출이 가장 컸다.",
     ],
   },
   {
@@ -180,6 +245,20 @@ export const images = [
         { text: "Q2", x: 310, y: 455, size: 22 },
         { text: "Q3", x: 470, y: 455, size: 22 },
         { text: "Q4", x: 630, y: 455, size: 22 },
+      ],
+    },
+  },
+  {
+    path: "Receipts/taxi-receipt.png",
+    image: {
+      width: 420,
+      height: 520,
+      background: [0.98, 0.98, 0.98],
+      texts: [
+        { text: "택시 영수증", x: 120, y: 40, size: 30, bold: true },
+        { text: "승차 22:14  하차 22:41", x: 40, y: 140, size: 22 },
+        { text: "요금 18,400원", x: 40, y: 200, size: 26, bold: true },
+        { text: "카드 결제", x: 40, y: 260, size: 22 },
       ],
     },
   },
@@ -261,6 +340,12 @@ export const audio = [
     voice: "Samantha",
     text: "Reminder: your dentist appointment is on Thursday at three p.m. Please arrive ten minutes early.",
   },
+  // 헷갈리는 녹음(hard negative): 같은 예약 알림 형식, 다른 내용
+  {
+    path: "Recordings/hair-salon-reminder.m4a",
+    voice: "Samantha",
+    text: "Hi, this is a reminder that your haircut is booked for Friday at eleven a.m. Call us if you need to reschedule.",
+  },
 ];
 
 export const videos = [
@@ -293,7 +378,7 @@ export const videos = [
 ];
 
 // 파일 내용 없이 이름/경로로만 검색되는 레코드. 실제 앱의 list_indexed_folders/list_applications 형식과 같다.
-export const folders = ["Work", "Personal", "Receipts", "세금 서류"];
+export const folders = ["Work", "Personal", "Receipts", "세금 서류", "Photos", "Recordings"];
 
 export const applications = [
   { name: "Slack", bundleId: "com.tinyspeck.slackmacgap" },
@@ -304,4 +389,9 @@ export const applications = [
   { name: "카카오톡", bundleId: "com.kakao.KakaoTalkMac" },
   { name: "시스템 설정", bundleId: "com.apple.systempreferences" },
   { name: "Finder", bundleId: "com.apple.finder" },
+  // 이름 일부가 겹치는 앱(hard negative)
+  { name: "Android Studio", bundleId: "com.google.android.studio" },
+  { name: "Microsoft Excel", bundleId: "com.microsoft.Excel" },
+  { name: "Microsoft Word", bundleId: "com.microsoft.Word" },
+  { name: "사진", bundleId: "com.apple.Photos" },
 ];

@@ -1,49 +1,978 @@
 {
-  "description": "Labeled queries for the search evaluation set. `relevant` lists every expected path; an empty list marks a no-answer query that should return nothing. `location` checks the badge position of the first relevant result. Run `npm run eval:fixture` after adding a query so its vector is generated.",
+  "description": "Labeled queries for the search evaluation set. `relevant` lists paths that must appear; `acceptable` lists paths that may appear without counting as noise; an empty `relevant` marks a no-answer query. `split` separates queries used for tuning (dev) from queries used to check for overfitting (test). `location` checks the badge position of the first relevant result. Run `npm run eval:fixture` after adding a query so its vector is generated.",
   "queries": [
-    { "query": "slack", "tags": ["lookup", "application"], "relevant": ["/Applications/Slack.app"] },
-    { "query": "safari", "tags": ["lookup", "application"], "relevant": ["/Applications/Safari.app"] },
-    { "query": "카카오톡", "tags": ["lookup", "application", "ko"], "relevant": ["/Applications/카카오톡.app"] },
-    { "query": "시스템 설정", "tags": ["lookup", "application", "ko"], "relevant": ["/Applications/시스템 설정.app"] },
-    { "query": "visual studio", "tags": ["lookup", "application"], "relevant": ["/Applications/Visual Studio Code.app"] },
-    { "query": "receipts", "tags": ["lookup", "folder"], "relevant": ["/eval/Receipts"] },
-    { "query": "세금 서류", "tags": ["lookup", "folder", "ko"], "relevant": ["/eval/세금 서류"] },
-    { "query": "invoice 1042", "tags": ["lookup", "pdf"], "relevant": ["/eval/Documents/invoice-1042.pdf"] },
-    { "query": "ERR_CONN_TIMEOUT", "tags": ["lookup", "document", "error-code"], "relevant": ["/eval/Work/incident-postmortem-db-outage.md"] },
-
-    { "query": "3분기 마케팅 예산", "tags": ["semantic", "document", "ko"], "relevant": ["/eval/Work/회의록_2026_3분기_마케팅.md"] },
-    { "query": "제주도 여행 계획", "tags": ["semantic", "document", "ko"], "relevant": ["/eval/Personal/제주도_여행_일정.md"] },
-    { "query": "김치찌개 만드는 법", "tags": ["semantic", "document", "video", "ko"], "relevant": ["/eval/Personal/김치찌개_레시피.txt", "/eval/Videos/김치찌개_요리_브이로그.mp4"] },
-    { "query": "이사 준비할 것", "tags": ["semantic", "document", "ko"], "relevant": ["/eval/Personal/이사_체크리스트.md"] },
-    { "query": "보증금 돌려받는 조건", "tags": ["semantic", "pdf", "ko", "location"], "relevant": ["/eval/Documents/임대차_계약서.pdf"], "location": { "pageNumber": 2 } },
-    { "query": "해외 매출 실적", "tags": ["semantic", "pdf", "ko", "location"], "relevant": ["/eval/Documents/2025_연간_보고서.pdf"], "location": { "pageNumber": 3 } },
-    { "query": "양자 컴퓨팅 오류 정정", "tags": ["semantic", "document", "ko", "location"], "relevant": ["/eval/Work/연구_기록_2026.md"], "location": { "lineStart": 45, "tolerance": 3 } },
-    { "query": "장 볼 목록", "tags": ["semantic", "audio", "ko"], "relevant": ["/eval/Recordings/장보기_음성메모.m4a"] },
-    { "query": "훈민정음 창제", "tags": ["semantic", "audio", "ko", "location"], "relevant": ["/eval/Recordings/역사_강의_조선.m4a"], "location": { "timestampSeconds": 12, "tolerance": 2.5 } },
-    { "query": "결제 실패 스크린샷", "tags": ["semantic", "image", "ko"], "relevant": ["/eval/Screenshots/payment-error.png"] },
-    { "query": "카페 영수증", "tags": ["semantic", "image", "ko"], "relevant": ["/eval/Receipts/cafe-receipt.png"] },
-    { "query": "바닷가 노을 사진", "tags": ["semantic", "image", "ko"], "relevant": ["/eval/Photos/sunset-beach.png"] },
-    { "query": "밤 도시 빌딩 야경", "tags": ["semantic", "image", "video", "ko"], "relevant": ["/eval/Photos/night-city.png", "/eval/Videos/city-timelapse.mp4"] },
-
-    { "query": "how to set up vpn for new employees", "tags": ["semantic", "document", "en"], "relevant": ["/eval/Work/onboarding-guide.md"] },
-    { "query": "database outage root cause", "tags": ["semantic", "document", "en"], "relevant": ["/eval/Work/incident-postmortem-db-outage.md"] },
-    { "query": "quarterly revenue bar chart", "tags": ["semantic", "image", "en"], "relevant": ["/eval/Work/quarterly-revenue-chart.png"] },
-    { "query": "sprint planning board", "tags": ["semantic", "image", "en"], "relevant": ["/eval/Work/sprint-whiteboard.png"] },
-    { "query": "dentist appointment reminder", "tags": ["semantic", "audio", "en"], "relevant": ["/eval/Recordings/dentist-reminder.m4a"] },
-    { "query": "podcast about language models", "tags": ["semantic", "audio", "en"], "relevant": ["/eval/Recordings/podcast-intro-ai.m4a"] },
-    { "query": "demo adding a folder in settings", "tags": ["semantic", "video", "en"], "relevant": ["/eval/Videos/nookive-product-demo.mp4"] },
-    { "query": "habit tracking tips", "tags": ["semantic", "document", "en"], "relevant": ["/eval/Personal/reading-notes-habits.txt"] },
-
-    { "query": "음성 메모 장보기", "tags": ["kind-hint", "audio", "ko"], "relevant": ["/eval/Recordings/장보기_음성메모.m4a"] },
-    { "query": "screenshot of card declined", "tags": ["kind-hint", "image", "en"], "relevant": ["/eval/Screenshots/payment-error.png"] },
-    { "query": "김치찌개 영상", "tags": ["kind-hint", "video", "ko"], "relevant": ["/eval/Videos/김치찌개_요리_브이로그.mp4"] },
-
-    { "query": "ㅋㅋ", "tags": ["no-answer", "low-signal"], "relevant": [] },
-    { "query": "ㅎ", "tags": ["no-answer", "low-signal"], "relevant": [] },
-    { "query": "asdf", "tags": ["no-answer", "low-signal"], "relevant": [] },
-    { "query": "aaaa", "tags": ["no-answer", "low-signal"], "relevant": [] },
-    { "query": "현재 sota 모델을 알려줘", "tags": ["no-answer", "ko"], "relevant": [] },
-    { "query": "주식 시세 알려줘", "tags": ["no-answer", "ko"], "relevant": [] },
-    { "query": "how tall is mount everest", "tags": ["no-answer", "en"], "relevant": [] }
+    {
+      "query": "slack",
+      "tags": [
+        "lookup",
+        "application",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Slack.app"
+      ]
+    },
+    {
+      "query": "safari",
+      "tags": [
+        "lookup",
+        "application",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/Safari.app"
+      ]
+    },
+    {
+      "query": "카카오톡",
+      "tags": [
+        "lookup",
+        "application",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/카카오톡.app"
+      ]
+    },
+    {
+      "query": "시스템 설정",
+      "tags": [
+        "lookup",
+        "application",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/시스템 설정.app"
+      ]
+    },
+    {
+      "query": "visual studio",
+      "tags": [
+        "lookup",
+        "application",
+        "en",
+        "partial-collision"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Visual Studio Code.app"
+      ]
+    },
+    {
+      "query": "android studio",
+      "tags": [
+        "lookup",
+        "application",
+        "en",
+        "partial-collision"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/Android Studio.app"
+      ]
+    },
+    {
+      "query": "microsoft word",
+      "tags": [
+        "lookup",
+        "application",
+        "en",
+        "partial-collision"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Microsoft Word.app"
+      ]
+    },
+    {
+      "query": "excel",
+      "tags": [
+        "lookup",
+        "application",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/Microsoft Excel.app"
+      ]
+    },
+    {
+      "query": "receipts",
+      "tags": [
+        "lookup",
+        "folder",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Receipts"
+      ],
+      "acceptable": [
+        "/eval/Receipts/cafe-receipt.png",
+        "/eval/Receipts/taxi-receipt.png"
+      ]
+    },
+    {
+      "query": "세금 서류",
+      "tags": [
+        "lookup",
+        "folder",
+        "ko",
+        "partial-collision"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/세금 서류"
+      ],
+      "acceptable": [
+        "/eval/Personal/종합소득세_신고_메모.md"
+      ]
+    },
+    {
+      "query": "recordings",
+      "tags": [
+        "lookup",
+        "folder",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Recordings"
+      ]
+    },
+    {
+      "query": "invoice 1042",
+      "tags": [
+        "lookup",
+        "pdf",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Documents/invoice-1042.pdf"
+      ]
+    },
+    {
+      "query": "ERR_CONN_TIMEOUT",
+      "tags": [
+        "lookup",
+        "document",
+        "error-code"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Work/incident-postmortem-db-outage.md"
+      ]
+    },
+    {
+      "query": "sla",
+      "tags": [
+        "launcher",
+        "application",
+        "prefix"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Slack.app"
+      ]
+    },
+    {
+      "query": "saf",
+      "tags": [
+        "launcher",
+        "application",
+        "prefix"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/Safari.app"
+      ]
+    },
+    {
+      "query": "vscode",
+      "tags": [
+        "launcher",
+        "application",
+        "bundle-id"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Visual Studio Code.app"
+      ]
+    },
+    {
+      "query": "kakao",
+      "tags": [
+        "launcher",
+        "application",
+        "bundle-id"
+      ],
+      "split": "test",
+      "relevant": [
+        "/Applications/카카오톡.app"
+      ]
+    },
+    {
+      "query": "slakc",
+      "tags": [
+        "launcher",
+        "application",
+        "typo"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/Applications/Slack.app"
+      ]
+    },
+    {
+      "query": "제주도 여행 일졍",
+      "tags": [
+        "semantic",
+        "document",
+        "ko",
+        "typo"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Personal/제주도_여행_일정.md"
+      ]
+    },
+    {
+      "query": "3분기 마케팅 예산",
+      "tags": [
+        "semantic",
+        "document",
+        "ko",
+        "hard-negative"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Work/회의록_2026_3분기_마케팅.md"
+      ]
+    },
+    {
+      "query": "3분기 개발팀 회의",
+      "tags": [
+        "semantic",
+        "document",
+        "ko",
+        "hard-negative"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Work/회의록_2026_3분기_개발.md"
+      ]
+    },
+    {
+      "query": "제주도 여행 계획",
+      "tags": [
+        "semantic",
+        "document",
+        "ko",
+        "hard-negative"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Personal/제주도_여행_일정.md"
+      ]
+    },
+    {
+      "query": "김치찌개 만드는 법",
+      "tags": [
+        "semantic",
+        "document",
+        "video",
+        "ko",
+        "hard-negative"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Personal/김치찌개_레시피.txt",
+        "/eval/Videos/김치찌개_요리_브이로그.mp4"
+      ]
+    },
+    {
+      "query": "이사 준비할 것",
+      "tags": [
+        "semantic",
+        "document",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Personal/이사_체크리스트.md"
+      ]
+    },
+    {
+      "query": "보증금 돌려받는 조건",
+      "tags": [
+        "semantic",
+        "pdf",
+        "ko",
+        "location"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Documents/임대차_계약서.pdf"
+      ],
+      "location": {
+        "pageNumber": 2
+      }
+    },
+    {
+      "query": "해외 매출 실적",
+      "tags": [
+        "semantic",
+        "pdf",
+        "ko",
+        "location",
+        "hard-negative"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Documents/2025_연간_보고서.pdf"
+      ],
+      "acceptable": [
+        "/eval/Documents/2024_연간_보고서.pdf"
+      ],
+      "location": {
+        "pageNumber": 3
+      }
+    },
+    {
+      "query": "양자 컴퓨팅 오류 정정",
+      "tags": [
+        "semantic",
+        "document",
+        "ko",
+        "location"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Work/연구_기록_2026.md"
+      ],
+      "location": {
+        "lineStart": 45,
+        "tolerance": 3
+      }
+    },
+    {
+      "query": "장 볼 목록",
+      "tags": [
+        "semantic",
+        "audio",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Recordings/장보기_음성메모.m4a"
+      ]
+    },
+    {
+      "query": "훈민정음 창제",
+      "tags": [
+        "semantic",
+        "audio",
+        "ko",
+        "location"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Recordings/역사_강의_조선.m4a"
+      ],
+      "location": {
+        "timestampSeconds": 12,
+        "tolerance": 2.5
+      }
+    },
+    {
+      "query": "결제 실패 스크린샷",
+      "tags": [
+        "semantic",
+        "image",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Screenshots/payment-error.png"
+      ]
+    },
+    {
+      "query": "카페 영수증",
+      "tags": [
+        "semantic",
+        "image",
+        "ko",
+        "hard-negative"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Receipts/cafe-receipt.png"
+      ],
+      "acceptable": [
+        "/eval/Receipts"
+      ]
+    },
+    {
+      "query": "바닷가 노을 사진",
+      "tags": [
+        "semantic",
+        "image",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Photos/sunset-beach.png"
+      ],
+      "acceptable": [
+        "/eval/Photos"
+      ]
+    },
+    {
+      "query": "밤 도시 빌딩 야경",
+      "tags": [
+        "semantic",
+        "image",
+        "video",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Photos/night-city.png",
+        "/eval/Videos/city-timelapse.mp4"
+      ],
+      "acceptable": [
+        "/eval/Photos"
+      ]
+    },
+    {
+      "query": "how to set up vpn for new employees",
+      "tags": [
+        "semantic",
+        "document",
+        "en",
+        "hard-negative"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Work/onboarding-guide.md"
+      ],
+      "acceptable": [
+        "/eval/Work/vpn-troubleshooting.md"
+      ]
+    },
+    {
+      "query": "vpn connection error",
+      "tags": [
+        "semantic",
+        "document",
+        "en",
+        "hard-negative"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Work/vpn-troubleshooting.md"
+      ],
+      "acceptable": [
+        "/eval/Work/onboarding-guide.md"
+      ]
+    },
+    {
+      "query": "database outage root cause",
+      "tags": [
+        "semantic",
+        "document",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Work/incident-postmortem-db-outage.md"
+      ]
+    },
+    {
+      "query": "quarterly revenue bar chart",
+      "tags": [
+        "semantic",
+        "image",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Work/quarterly-revenue-chart.png"
+      ]
+    },
+    {
+      "query": "sprint planning board",
+      "tags": [
+        "semantic",
+        "image",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Work/sprint-whiteboard.png"
+      ]
+    },
+    {
+      "query": "dentist appointment reminder",
+      "tags": [
+        "semantic",
+        "audio",
+        "en",
+        "hard-negative"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Recordings/dentist-reminder.m4a"
+      ]
+    },
+    {
+      "query": "haircut booking",
+      "tags": [
+        "semantic",
+        "audio",
+        "en",
+        "hard-negative"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Recordings/hair-salon-reminder.m4a"
+      ]
+    },
+    {
+      "query": "podcast about language models",
+      "tags": [
+        "semantic",
+        "audio",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Recordings/podcast-intro-ai.m4a"
+      ]
+    },
+    {
+      "query": "demo adding a folder in settings",
+      "tags": [
+        "semantic",
+        "video",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Videos/nookive-product-demo.mp4"
+      ]
+    },
+    {
+      "query": "photo studio reservation",
+      "tags": [
+        "semantic",
+        "document",
+        "en",
+        "partial-collision"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Work/studio-booking.md"
+      ]
+    },
+    {
+      "query": "가을 홍보비 얼마 쓰기로 했지",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "document",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Work/회의록_2026_3분기_마케팅.md"
+      ]
+    },
+    {
+      "query": "섬으로 떠나는 휴가 코스",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "document",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Personal/제주도_여행_일정.md"
+      ]
+    },
+    {
+      "query": "매콤한 국물 요리 레시피",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "document",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Personal/김치찌개_레시피.txt",
+        "/eval/Personal/된장찌개_레시피.txt"
+      ],
+      "acceptable": [
+        "/eval/Videos/김치찌개_요리_브이로그.mp4"
+      ]
+    },
+    {
+      "query": "새 집으로 옮길 때 할 일",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "document",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Personal/이사_체크리스트.md"
+      ]
+    },
+    {
+      "query": "전세금 언제 돌려받나",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "pdf",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Documents/임대차_계약서.pdf"
+      ]
+    },
+    {
+      "query": "작년에 외국에서 번 돈",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "pdf",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Documents/2025_연간_보고서.pdf"
+      ],
+      "acceptable": [
+        "/eval/Documents/2024_연간_보고서.pdf"
+      ]
+    },
+    {
+      "query": "세금 신고할 때 챙길 영수증",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "document",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Personal/종합소득세_신고_메모.md"
+      ]
+    },
+    {
+      "query": "음성으로 남긴 쇼핑 목록",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "audio",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Recordings/장보기_음성메모.m4a"
+      ]
+    },
+    {
+      "query": "한글을 만든 왕 이야기",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "audio",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Recordings/역사_강의_조선.m4a"
+      ]
+    },
+    {
+      "query": "해 질 녘 해변 풍경",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "image",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Photos/sunset-beach.png"
+      ]
+    },
+    {
+      "query": "치과 예약 알림",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "audio",
+        "ko",
+        "cross-lingual"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Recordings/dentist-reminder.m4a"
+      ]
+    },
+    {
+      "query": "what new staff should do on day one",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "document",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Work/onboarding-guide.md"
+      ]
+    },
+    {
+      "query": "why did the server go down",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "document",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Work/incident-postmortem-db-outage.md"
+      ]
+    },
+    {
+      "query": "small routines that are easy to keep",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "document",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Personal/reading-notes-habits.txt"
+      ]
+    },
+    {
+      "query": "checkout rejected my credit card",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "image",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Screenshots/payment-error.png"
+      ]
+    },
+    {
+      "query": "sales growth by quarter graph",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "image",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Work/quarterly-revenue-chart.png"
+      ]
+    },
+    {
+      "query": "show about AI and private search",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "audio",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Recordings/podcast-intro-ai.m4a"
+      ]
+    },
+    {
+      "query": "how much the coffee shop charged me",
+      "tags": [
+        "semantic",
+        "paraphrase",
+        "image",
+        "en",
+        "cross-lingual"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Receipts/cafe-receipt.png"
+      ]
+    },
+    {
+      "query": "음성 메모 장보기",
+      "tags": [
+        "kind-hint",
+        "audio",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Recordings/장보기_음성메모.m4a"
+      ]
+    },
+    {
+      "query": "screenshot of card declined",
+      "tags": [
+        "kind-hint",
+        "image",
+        "en"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Screenshots/payment-error.png"
+      ]
+    },
+    {
+      "query": "김치찌개 영상",
+      "tags": [
+        "kind-hint",
+        "video",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": [
+        "/eval/Videos/김치찌개_요리_브이로그.mp4"
+      ],
+      "acceptable": [
+        "/eval/Personal/김치찌개_레시피.txt"
+      ]
+    },
+    {
+      "query": "부산 여행 사진",
+      "tags": [
+        "kind-hint",
+        "image",
+        "ko",
+        "kind-mismatch"
+      ],
+      "split": "test",
+      "relevant": [
+        "/eval/Personal/부산_여행_후기.md"
+      ]
+    },
+    {
+      "query": "ㅋㅋ",
+      "tags": [
+        "no-answer",
+        "low-signal"
+      ],
+      "split": "dev",
+      "relevant": []
+    },
+    {
+      "query": "ㅎ",
+      "tags": [
+        "no-answer",
+        "low-signal"
+      ],
+      "split": "test",
+      "relevant": []
+    },
+    {
+      "query": "asdf",
+      "tags": [
+        "no-answer",
+        "low-signal"
+      ],
+      "split": "dev",
+      "relevant": []
+    },
+    {
+      "query": "aaaa",
+      "tags": [
+        "no-answer",
+        "low-signal"
+      ],
+      "split": "test",
+      "relevant": []
+    },
+    {
+      "query": "현재 sota 모델을 알려줘",
+      "tags": [
+        "no-answer",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": []
+    },
+    {
+      "query": "주식 시세 알려줘",
+      "tags": [
+        "no-answer",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": []
+    },
+    {
+      "query": "how tall is mount everest",
+      "tags": [
+        "no-answer",
+        "en"
+      ],
+      "split": "dev",
+      "relevant": []
+    },
+    {
+      "query": "고양이 사진",
+      "tags": [
+        "no-answer",
+        "ko"
+      ],
+      "split": "test",
+      "relevant": []
+    },
+    {
+      "query": "비행기 표 예매 내역",
+      "tags": [
+        "no-answer",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": []
+    },
+    {
+      "query": "python script",
+      "tags": [
+        "no-answer",
+        "en"
+      ],
+      "split": "test",
+      "relevant": []
+    },
+    {
+      "query": "강아지 산책 영상",
+      "tags": [
+        "no-answer",
+        "ko"
+      ],
+      "split": "dev",
+      "relevant": []
+    }
   ]
 }
