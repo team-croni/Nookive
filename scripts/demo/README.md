@@ -42,8 +42,8 @@ Back in the main account, edit the take and convert it to a GIF (needs
 `ffmpeg` and Pillow):
 
 ```bash
-python3 scripts/demo/edit-video.py /Users/Shared/NookiveDemo/recordings/take-<time>.mov demo.mp4 960
-ffmpeg -i demo.mp4 -vf "fps=15,split[a][b];[a]palettegen=max_colors=192:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" docs/assets/nookive-demo.gif
+python3 scripts/demo/edit-video.py /Users/Shared/NookiveDemo/recordings/take-<time>.mov demo.mp4 800
+ffmpeg -i demo.mp4 -vf "fps=30,split[a][b];[a]palettegen=max_colors=192:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" docs/assets/nookive-demo.gif
 ```
 
 The cut points and zoom area in `edit-video.py` match the current storyboard on
