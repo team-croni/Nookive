@@ -46,6 +46,10 @@ impl IndexingBusyState {
         self.manual.store(busy, Ordering::Relaxed);
     }
 
+    pub fn is_busy(&self) -> bool {
+        self.manual.load(Ordering::Relaxed)
+    }
+
     pub fn try_acquire(&self) -> bool {
         self.manual
             .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)

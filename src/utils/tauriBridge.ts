@@ -53,6 +53,7 @@ export {
   cancelMediaIndexing,
   setIndexOptions,
   setIndexingBusy,
+  isIndexingBusy,
   getIndexDiskSpace,
   getIndexError,
   clearIndexError,

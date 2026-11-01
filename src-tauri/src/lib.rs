@@ -10,10 +10,10 @@ mod licenses;
 mod mask_png;
 mod models;
 mod paths;
+mod tray_labels;
 #[cfg(target_os = "macos")]
 mod vibrancy;
 mod web;
-mod tray_labels;
 mod window;
 
 use tauri::{LogicalSize, Manager, RunEvent, Size};
@@ -137,6 +137,7 @@ pub fn run() {
             index::cancel_media_indexing,
             index::set_index_options,
             index::set_indexing_busy,
+            index::is_indexing_busy,
             index::get_index_disk_space,
             index::delete_app_data,
             models::get_model_status,
