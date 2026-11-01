@@ -1,0 +1,6 @@
+{
+  "actions": {"open": "開く", "cancel": "キャンセル", "close": "閉じる", "remove": "削除", "copyPath": "パスをコピー", "refresh": "更新", "stop": "停止", "start": "インデックスを作成", "details": "詳細", "enabled": "オン", "disabled": "オフ"},
+  "fileTypes": {"document": "ドキュメント", "image": "画像", "video": "動画", "audio": "音声", "code": "コード"},
+  "file": {"application": "アプリケーション", "folder": "フォルダ", "page": "ページ {{count}}", "timestamp": "タイムスタンプ {{value}}", "finder": "Finderで表示", "installedApp": "インストール済みアプリ", "pageOf": "ページ {{page}}/{{total}}"},
+  "language": {"label": "言語", "korean": "한국어", "english": "English", "japanese": "日本語", "chineseSimplified": "简体中文", "chineseTraditional": "繁體中文", "spanish": "Español", "french": "Français", "german": "Deutsch", "portuguese": "Português (Brasil)"}
+}

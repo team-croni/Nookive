@@ -257,14 +257,23 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
         <p className={styles.filePath} title={file.path}>{file.path}</p>
 
         <div className={styles.metaRow}>
-          <span className={styles.metaItem}>
-            <HardDrive size={12} />
-            {formatBytes(file.sizeBytes)}
-          </span>
-          <span className={styles.metaItem}>
-            <Clock size={12} />
-            {file.modifiedAt}
-          </span>
+          {isApplication || isFolder ? (
+            // 앱과 폴더는 크기와 수정 시각 대신 종류만 보여준다.
+            <span className={styles.metaItem}>
+              {isApplication ? t('file.installedApp', { ns: 'common' }) : t('file.folder', { ns: 'common' })}
+            </span>
+          ) : (
+            <>
+              <span className={styles.metaItem}>
+                <HardDrive size={12} />
+                {formatBytes(file.sizeBytes)}
+              </span>
+              <span className={styles.metaItem}>
+                <Clock size={12} />
+                {file.modifiedAt}
+              </span>
+            </>
+          )}
           {isPdf && pdfCurrentPage !== undefined && (
             <span className={styles.metaItem}>
               {t('file.pageOf', {

@@ -19,7 +19,7 @@ import { expandKeywords, nfc, tokenizeKeywords } from './textUtils';
 export function isLowSignalQuery(query: string): boolean {
   const trimmedQuery = nfc(query).trim();
   const compactQuery = trimmedQuery.replace(/\s+/g, '');
-  const jamoOnly = /^[ㄱ-ㆎ\s]+$/.test(trimmedQuery);
+  const jamoOnly = /^[\u3131-\u318E\s]+$/.test(trimmedQuery);
   const repeatedChar =
     compactQuery.length >= 3 && new Set(compactQuery).size === 1;
   const keyboardMash = /^(asdf|qwer|zxcv|1234|hjkl)/i.test(compactQuery);

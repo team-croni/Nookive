@@ -1,0 +1,12 @@
+{
+  "applicationHint": "按 Enter 启动应用。",
+  "folderHint": "按 Enter 打开文件夹。",
+  "unsupportedImage": "不支持或损坏的图片格式",
+  "pdfLoading": "正在加载 PDF…",
+  "pdfBrowserUnsupported": "无法在网页浏览器中预览本地 PDF。请在桌面应用中查看。",
+  "pdfFailed": "无法预览此 PDF。请使用下方的“打开”。",
+  "fileAccessChecking": "正在检查文件访问权限…",
+  "fileAccessTitle": "无法访问文件",
+  "fileAccessDescription": "请在 macOS 设置中允许 Nookive 访问文件。",
+  "fileAccessRetry": "重试"
+}

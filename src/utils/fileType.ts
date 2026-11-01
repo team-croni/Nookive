@@ -54,16 +54,6 @@ export const FILE_SECTION_ORDER: FileSection[] = [
   'code',
 ];
 
-export const FILE_SECTION_LABELS: Record<FileSection, string> = {
-  applications: '앱',
-  folders: '폴더',
-  documents: '문서',
-  images: '이미지',
-  video: '비디오',
-  audio: '오디오',
-  code: '코드',
-};
-
 export function getFileSection(ext: string): FileSection {
   const normalized = ext.toLowerCase();
   if (normalized === 'app') return 'applications';

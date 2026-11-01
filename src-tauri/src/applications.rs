@@ -118,7 +118,8 @@ fn application_result(path: &Path, languages: &[String]) -> Option<ApplicationSe
             bundle_id,
             alternate_names,
             size_bytes: 0,
-            modified_at: "설치된 앱".to_string(),
+            // 표시 문구는 프론트엔드가 종류(kind)를 보고 번역해 보여준다.
+            modified_at: String::new(),
         },
         similarity_score: 0.0,
         best_chunk: ApplicationChunk {

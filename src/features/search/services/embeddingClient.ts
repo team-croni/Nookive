@@ -9,9 +9,9 @@ export async function requestQueryEmbedding(
   query: string,
   signal: AbortSignal,
 ): Promise<Response> {
-  let lastError: unknown = new Error('EmbeddingGemma가 아직 준비되지 않았습니다.');
+  let lastError: unknown = new Error('EmbeddingGemma is not ready yet.');
   for (let attempt = 0; attempt < EMBEDDING_RETRY_COUNT; attempt += 1) {
-    if (signal.aborted) throw new DOMException('검색이 취소되었습니다.', 'AbortError');
+    if (signal.aborted) throw new DOMException('Search was cancelled.', 'AbortError');
     try {
       const response = await fetch(LLAMA_SERVER_URL, {
         method: 'POST',
@@ -20,7 +20,7 @@ export async function requestQueryEmbedding(
         signal,
       });
       if (response.ok) return response;
-      lastError = new Error(`EmbeddingGemma 응답 오류: ${response.status}`);
+      lastError = new Error(`EmbeddingGemma request failed: ${response.status}`);
     } catch (error) {
       if ((error as Error)?.name === 'AbortError') throw error;
       lastError = error;
@@ -29,7 +29,7 @@ export async function requestQueryEmbedding(
       const timer = window.setTimeout(resolve, EMBEDDING_RETRY_DELAY_MS);
       signal.addEventListener('abort', () => {
         window.clearTimeout(timer);
-        reject(new DOMException('검색이 취소되었습니다.', 'AbortError'));
+        reject(new DOMException('Search was cancelled.', 'AbortError'));
       }, { once: true });
     });
   }

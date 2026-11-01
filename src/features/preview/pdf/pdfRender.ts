@@ -162,7 +162,7 @@ export async function renderPdfPage({
   canvas.style.transformOrigin = 'center center';
   const displayCtx = canvas.getContext('2d');
   if (!displayCtx) {
-    throw new Error('PDF 미리보기용 캔버스를 초기화하지 못했습니다.');
+    throw new Error('Could not create a canvas for the PDF preview.');
   }
 
   // Rust가 원시 RGBA 바이트를 그대로 반환하므로 base64 디코딩 없이 바로 그린다.
