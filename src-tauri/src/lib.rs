@@ -137,6 +137,7 @@ pub fn run() {
             index::cancel_media_indexing,
             index::set_index_options,
             index::set_indexing_busy,
+            index::is_indexing_busy,
             index::get_index_disk_space,
             index::delete_app_data,
             models::get_model_status,
