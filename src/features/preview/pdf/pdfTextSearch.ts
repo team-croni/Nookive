@@ -1,6 +1,7 @@
 // src/features/preview/pdf/pdfTextSearch.ts
 // PDF 텍스트에서 검색어 위치(사각형)를 찾는다.
 import type { PDFDocumentProxy } from 'pdfjs-dist';
+import { tokenizeKeywords } from '../../search/services/textUtils';
 
 export interface Rect {
   left: number;
@@ -258,6 +259,8 @@ interface PageScan {
   rects: Rect[];
   textItems: TextItemRect[];
   textMatched: boolean;
+  /** 이 페이지에 등장한 서로 다른 검색어 수 */
+  matchedTerms: number;
 }
 
 /** 페이지 하나의 텍스트를 스캔해 하이라이트 사각형/텍스트 매칭 여부를 계산한다. */
@@ -323,43 +326,50 @@ async function scanPage(
     }
   }
 
-  let textMatched = false;
-  // 항목 단위 매칭이 없는 페이지에서만 전체 텍스트를 조인해 확인한다.
-  if (pageRects.length === 0) {
-    const pageText = pageTextParts.join('').toLowerCase();
-    const pageTextSpaced = pageTextParts.join(' ').toLowerCase();
-    textMatched = terms.some(
-      (t) => pageText.includes(t) || pageTextSpaced.includes(t),
-    );
-  }
+  // 페이지 전체 텍스트(공백 유무 모두)로 서로 다른 검색어가 몇 개 등장하는지 센다.
+  // 키워드가 여러 항목에 쪼개져 하이라이트할 수 없는 경우도 페이지 선택에는 반영한다.
+  const pageText = pageTextParts.join('').toLowerCase();
+  const pageTextSpaced = pageTextParts.join(' ').toLowerCase();
+  const matchedTerms = terms.filter(
+    (t) => pageText.includes(t) || pageTextSpaced.includes(t),
+  ).length;
+  const textMatched = pageRects.length === 0 && matchedTerms > 0;
 
   // 매칭된 페이지에서만 텍스트 레이어를 만든다. (비매칭 페이지 비용 절감)
   const textItems = pageRects.length > 0 || textMatched
     ? extractTextItemRects(vp1, tc.items, styles)
     : [];
 
-  return { page: pageNumber, rects: pageRects, textItems, textMatched };
+  return { page: pageNumber, rects: pageRects, textItems, textMatched, matchedTerms };
 }
 
 /**
- * 키워드가 처음 등장하는 페이지와 좌표를 탐색한다.
+ * 검색어와 가장 잘 맞는 페이지와 하이라이트 좌표를 찾는다.
+ * - "how", "did" 같은 불용어는 세지 않는다. (흔한 단어가 표지에 걸려 1페이지로 가는 문제)
+ * - 서로 다른 검색어가 가장 많이 등장한 페이지를 고르고, 같으면 검색 결과가 가리킨
+ *   페이지(preferredPage), 그다음 앞 페이지를 고른다.
  * 검색어가 없거나 매칭이 없으면 1페이지를 반환한다.
  */
 async function scanMatchRects(
   doc: PDFDocumentProxy,
   query: string,
   isCancelled: () => boolean,
+  preferredPage?: number,
 ): Promise<MatchScanResult> {
   const rawQuery = (query || '').trim().toLowerCase();
-  let terms = rawQuery.split(/\s+/).filter((k) => k.length >= 2);
+  let terms = tokenizeKeywords(rawQuery).filter((k) => k.length >= 2);
   if (terms.length === 0 && rawQuery.length > 0) terms = [rawQuery];
 
   if (terms.length > 0) {
-    // 항상 문서 첫 페이지부터 훑어 "검색어가 처음 발견된 페이지"를 기준으로
-    // 삼는다. 페이지를 청크 단위로 병렬 스캔하되, 청크 안에서는 페이지
-    // 순서를 유지해 가장 먼저 발견된 페이지를 그대로 보장한다.
     const scanLimit = Math.min(doc.numPages, MAX_SCAN_PAGES);
-    let firstTextMatch: PageScan | null = null;
+    let best: PageScan | null = null;
+    const better = (scan: PageScan, current: PageScan | null) => {
+      if (scan.matchedTerms === 0) return false;
+      if (!current || scan.matchedTerms > current.matchedTerms) return true;
+      return scan.matchedTerms === current.matchedTerms
+        && scan.page === preferredPage
+        && current.page !== preferredPage;
+    };
 
     for (let start = 1; start <= scanLimit; start += SCAN_CHUNK) {
       if (isCancelled()) break;
@@ -372,29 +382,19 @@ async function scanMatchRects(
         pageNumbers.map((n) => scanPage(doc, n, terms)),
       );
       if (isCancelled()) break;
-
-      // 하이라이트 가능한(항목 단위 매칭) 첫 페이지에서 즉시 멈춘다.
-      const rectMatch = scans.find((scan) => scan.rects.length > 0);
-      if (rectMatch) {
-        return {
-          targetPage: rectMatch.page,
-          rects: rectMatch.rects,
-          textItems: rectMatch.textItems,
-          matched: true,
-        };
+      for (const scan of scans) {
+        if (better(scan, best)) best = scan;
       }
-      // 키워드가 여러 항목에 쪼개진 경우: 첫 매칭 페이지만 기억해 두고
-      // 뒤 페이지에서 실제 하이라이트 가능한 매칭이 있는지 계속 확인한다.
-      if (!firstTextMatch) {
-        firstTextMatch = scans.find((scan) => scan.textMatched) ?? null;
-      }
+      // 모든 검색어가 나온 페이지를 찾았고, 우선할 페이지도 이미 훑었다면 더 볼 필요가 없다.
+      const preferredScanned = preferredPage === undefined || preferredPage <= end;
+      if (best && best.matchedTerms === terms.length && preferredScanned) break;
     }
 
-    if (firstTextMatch) {
+    if (best) {
       return {
-        targetPage: firstTextMatch.page,
-        rects: [],
-        textItems: firstTextMatch.textItems,
+        targetPage: best.page,
+        rects: best.rects,
+        textItems: best.textItems,
         matched: true,
       };
     }
@@ -426,15 +426,16 @@ export function findMatchRects(
   path: string,
   doc: PDFDocumentProxy,
   query: string,
+  preferredPage?: number,
 ): Promise<MatchScanResult> {
   const rawQuery = (query || '').trim().toLowerCase();
-  const cacheKey = `${path}|${rawQuery}`;
+  const cacheKey = `${path}|${rawQuery}|${preferredPage ?? ''}`;
   const cached = MATCH_CACHE.get(cacheKey);
   if (cached) return Promise.resolve(cached);
 
   let inflight = MATCH_INFLIGHT.get(cacheKey);
   if (!inflight) {
-    inflight = scanMatchRects(doc, rawQuery, () => false)
+    inflight = scanMatchRects(doc, rawQuery, () => false, preferredPage)
       .then((result) => {
         MATCH_CACHE.set(cacheKey, result);
         if (MATCH_CACHE.size > MATCH_CACHE_LIMIT) {

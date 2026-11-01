@@ -34,10 +34,12 @@ locally with EmbeddingGemma 2 and llama.cpp.
 - Exact terms and filenames alongside semantic ranking.
 
 PDF results are scanned in the background so a result can show the page where
-the query was found before it is opened. When a PDF is opened, Nookive uses
-the first page containing the query when the document has a readable text
-layer, highlights the matching text, and shows the current page and total page
-count. PDF scan results are cached for the same document and query.
+the query was found before it is opened. When a PDF is opened, Nookive picks
+the page that contains the most query words (ignoring one-letter words and
+stopwords such as "how" or "did") when the document has a readable text layer,
+highlights the matching text, and shows the current page and total page count.
+When pages tie, the page that search ranked highest wins. PDF scan results are
+cached for the same document, query, and page.
 
 On macOS, PDF pages can be rendered through the native Core Graphics renderer.
 Documents without a usable text layer can still be previewed, but they may

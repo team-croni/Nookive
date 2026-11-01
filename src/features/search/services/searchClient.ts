@@ -1,5 +1,6 @@
 // src/features/search/services/searchClient.ts
 import type { SearchResultItem } from '../../../types/search';
+import i18n from '../../../i18n';
 import { listApplications, listIndexedFolders, loadRuntimeIndex } from '../../../utils/tauriBridge';
 import { requestQueryEmbedding } from './embeddingClient';
 import { isLowSignalQuery, rankQuery } from './rankQuery';
@@ -27,7 +28,8 @@ export class SearchClient {
 
   private async loadLocalIndexOnce(generation: number): Promise<SearchResultItem[]> {
     const [applications, folders, runtimeRecords] = await Promise.all([
-      listApplications(),
+      // 앱 이름을 화면 언어와 같은 언어로 받는다. 언어가 바뀌면 refresh()로 다시 불러온다.
+      listApplications(i18n.resolvedLanguage ?? i18n.language),
       listIndexedFolders(),
       loadRuntimeIndex(),
     ]);

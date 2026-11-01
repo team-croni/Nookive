@@ -15,9 +15,10 @@ import type {
  * macOS LaunchServices에 등록된 앱 중 주요 앱 폴더의 .app 메타데이터를 가져온다.
  * 브라우저 개발 환경에서는 Tauri IPC가 없으므로 빈 배열로 폴백한다.
  */
-export async function listApplications(): Promise<SearchResultItem[]> {
+/** 설치된 앱 목록. 앱 이름은 넘긴 언어(Nookive 화면 언어)로 표시된다. */
+export async function listApplications(language?: string): Promise<SearchResultItem[]> {
   try {
-    return await invoke<SearchResultItem[]>('list_applications');
+    return await invoke<SearchResultItem[]>('list_applications', { language });
   } catch {
     return [];
   }
