@@ -1,6 +1,6 @@
 ---
-date: 2026-11-01
-version: 1.0.0
+date: 2026-11-02
+version: 1.1.0
 ---
 
 # Search Evaluation

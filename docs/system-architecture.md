@@ -1,6 +1,6 @@
 ---
-date: 2026-10-23
-version: 1.8.0
+date: 2026-11-03
+version: 2.0.0
 ---
 
 # System Architecture Specification

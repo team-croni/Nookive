@@ -1,3 +1,8 @@
+---
+date: 2026-11-03
+version: 1.1.0
+---
+
 # Nookive 인덱싱 고도화 로드맵
 
 ## 목표
@@ -18,9 +23,13 @@ Nookive는 검색 UX와 로컬 프라이버시를 우선한다.
 path + sizeBytes + modifiedAtMs + extension + status
 ```
 
-상태는 `pending → processing → ready | failed`로 확장한다. 텍스트/코드는 React 증분 worker가 처리하고,
+상태는 `pending → processing → ready | failed`로 확장한다. 텍스트(문서)는 React 증분 worker가 처리하고,
 이미지/PDF/오디오/비디오는 Tauri `index_pending_media` 브리지가 기존 Node 멀티모달 인덱서를 호출해
 `pending → ready`로 전환한다. 현재는 사용자별 `runtime-index.json`을 사용하며, 기존 샘플 인덱스와 분리해 회귀 위험을 낮춘다.
+
+코드 파일은 임베딩하지 않고 코드 검색이 따로 다룬다(`docs/system-architecture.md` 2.7). 이름/경로는 메모리 목록,
+내용은 줄 단위 SQLite FTS5(trigram) `code-index.sqlite`이며, 검색 폴더 감시로 바뀐 파일만 다시 읽는다. 아래 SQLite
+store를 만들 때 `code_` 접두어 테이블을 옮겨 합칠 수 있게 분리해 두었다.
 
 ## 다음 단계: SQLite authoritative store
 
@@ -119,7 +128,7 @@ query
 ### P1 — 멀티모달 기본 기능
 
 - PDF 페이지 단위, 이미지 native embedding, 오디오 30초 overlap, 비디오 frame+audio (현재 구현)
-- 파일 변경 watcher
+- 파일 변경 watcher (현재 구현: 문서·미디어는 manifest 재동기화, 코드는 코드 검색 데이터 갱신)
 - 모델 버전별 재임베딩 migration
 - 검색된 PDF 페이지/미디어 시점으로 열기
 
@@ -129,7 +138,8 @@ query
 - ANN/sqlite-vec 도입 기준 측정
 - embedding batch, GPU/CPU 자동 선택, thermal-aware throttling
 - thumbnail/media cache quota 및 LRU
-- 평가셋과 Recall@K/MRR/latency 회귀 테스트
+- 평가셋과 Recall@K/MRR/latency 회귀 테스트 (현재 구현: `docs/search-evaluation.md`)
+- 열어본 결과 개인화 (현재 구현: 같은 검색어에서 연 결과를 최대 15% 올림)
 
 ### P3 — 제품 고도화
 
