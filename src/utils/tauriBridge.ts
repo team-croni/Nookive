@@ -61,13 +61,15 @@ export {
 } from './tauri/indexing';
 
 export {
+  getCodeIndexStatus,
   isCodeIndexBuilding,
   listCodeEditors,
   openCodeFile,
   refreshCodeFiles,
   searchCodeFiles,
+  sendCodeSearchEnabled,
   syncCodeIndex,
 } from './tauri/codeSearch';
-export type { CodeEditor } from './tauri/codeSearch';
+export type { CodeEditor, CodeIndexStatus } from './tauri/codeSearch';
 
 export { loadSearchFeedback, saveSearchFeedback, resetSearchFeedback } from './tauri/searchFeedback';

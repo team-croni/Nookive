@@ -1,6 +1,6 @@
 // src-tauri/src/index/watcher.rs
 // 등록된 검색 폴더를 감시하고, 변경이 감지되면 manifest를 동기화한 뒤
-// 백그라운드에서 자동으로 pending 파일을 색인한다.
+// 백그라운드에서 자동으로 pending 파일을 색인한다. 코드 파일 변경은 코드 내용 색인(code_index)에 알린다.
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{RecvTimeoutError, channel};
@@ -10,11 +10,20 @@ use std::time::{Duration, Instant};
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use tauri::{AppHandle, Emitter, Manager};
 
-use super::file_class::is_relevant_change;
+use super::file_class::{is_code_change, is_relevant_change};
 use super::manifest::{load_manifest, sync_index_manifest};
 use super::media::{MediaIndexState, index_pending_media_sync};
 
 const DEBOUNCE: Duration = Duration::from_secs(2);
+
+/// 감시 스레드로 보내는 변경 종류. 디바운스는 종류마다 따로 한다.
+#[derive(Clone, Copy)]
+enum Change {
+    /// 임베딩 색인 대상(문서·미디어) 변경
+    Index,
+    /// 코드 파일 변경
+    Code,
+}
 
 #[derive(Default)]
 pub struct IndexWatcherState {
@@ -79,7 +88,7 @@ pub fn start_index_watcher(app: AppHandle) {
 
     let stop = Arc::new(AtomicBool::new(false));
     let stop_for_thread = stop.clone();
-    let (tx, rx) = channel::<()>();
+    let (tx, rx) = channel::<Change>();
 
     let manifest = match load_manifest(&app) {
         Ok(manifest) => manifest,
@@ -108,7 +117,14 @@ pub fn start_index_watcher(app: AppHandle) {
             .iter()
             .any(|path| is_relevant_change(path, &event_roots, removal))
         {
-            let _ = tx.send(());
+            let _ = tx.send(Change::Index);
+        }
+        if event
+            .paths
+            .iter()
+            .any(|path| is_code_change(path, &event_roots, removal))
+        {
+            let _ = tx.send(Change::Code);
         }
     }) {
         Ok(watcher) => watcher,
@@ -141,24 +157,27 @@ pub fn start_index_watcher(app: AppHandle) {
     });
 
     std::thread::spawn(move || {
-        let mut pending = false;
-        let mut last_event = Instant::now();
+        // 종류별로 마지막 변경 시각을 기억하고, DEBOUNCE 동안 조용해지면 처리한다.
+        let mut pending_index: Option<Instant> = None;
+        let mut pending_code: Option<Instant> = None;
         loop {
             if stop_for_thread.load(Ordering::Relaxed) {
                 break;
             }
             match rx.recv_timeout(Duration::from_millis(500)) {
-                Ok(()) => {
-                    pending = true;
-                    last_event = Instant::now();
-                }
-                Err(RecvTimeoutError::Timeout) => {
-                    if pending && last_event.elapsed() >= DEBOUNCE {
-                        pending = false;
-                        auto_index(&app);
-                    }
-                }
+                Ok(Change::Index) => pending_index = Some(Instant::now()),
+                Ok(Change::Code) => pending_code = Some(Instant::now()),
+                Err(RecvTimeoutError::Timeout) => {}
                 Err(RecvTimeoutError::Disconnected) => break,
+            }
+            if pending_code.is_some_and(|at| at.elapsed() >= DEBOUNCE) {
+                pending_code = None;
+                // 코드 색인은 자체 스레드에서 돌므로 문서 자동 색인을 기다리게 하지 않는다.
+                crate::code_index::sync_after_file_changes(&app);
+            }
+            if pending_index.is_some_and(|at| at.elapsed() >= DEBOUNCE) {
+                pending_index = None;
+                auto_index(&app);
             }
         }
     });

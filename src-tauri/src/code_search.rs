@@ -335,9 +335,15 @@ fn ensure_code_files(
 }
 
 /// 내용 색인이 읽을 파일 목록. 오래된 목록이면 먼저 다시 훑는다.
-pub(crate) fn index_targets(app: &AppHandle) -> Result<Vec<IndexTarget>, String> {
+/// rescan이면 목록의 나이와 관계없이 다시 훑는다. (파일 감시가 변경을 알렸을 때)
+pub(crate) fn index_targets(app: &AppHandle, rescan: bool) -> Result<Vec<IndexTarget>, String> {
     let state = app.state::<CodeSearchState>();
-    ensure_code_files(app, &state, Some(CODE_FILES_MAX_AGE))?;
+    let max_age = if rescan {
+        Duration::ZERO
+    } else {
+        CODE_FILES_MAX_AGE
+    };
+    ensure_code_files(app, &state, Some(max_age))?;
     let cache = state
         .cache
         .lock()
@@ -531,5 +537,23 @@ mod tests {
         assert_eq!(format_modified_at(0), "");
         // 2026-11-02 08:30 UTC
         assert_eq!(format_modified_at(1_793_608_200_000), "2026-11-02 08:30");
+    }
+
+    /// 목록 다시 훑기 시간 측정. 실행: NOOKIVE_BENCH_DIR=<폴더> cargo test --release bench_scan -- --ignored --nocapture
+    #[test]
+    #[ignore]
+    fn bench_scan_code_files() {
+        let Ok(root) = std::env::var("NOOKIVE_BENCH_DIR") else {
+            return;
+        };
+        let roots = vec![root];
+        scan_search_roots(&roots);
+        let started = Instant::now();
+        let files = scan_search_roots(&roots);
+        println!(
+            "scanned {} code files in {:?}",
+            files.len(),
+            started.elapsed()
+        );
     }
 }
