@@ -151,8 +151,10 @@ Keychain, or CI secret storage for those values.
 Nookive reads file contents only from folders selected by the user and stores
 its local index in the application data directory. It also scans the standard
 macOS application folders for installed app names and bundle identifiers; app
-bundle contents are not indexed. Nookive does not upload indexed file
-contents. If you use autocomplete or web search, the typed query and the app
+bundle contents are not indexed. To rank results you open a little higher
+next time, Nookive keeps your search words and the opened paths in the
+application data directory; reset them under Settings → Search
+personalization. Nookive does not upload indexed file contents. If you use autocomplete or web search, the typed query and the app
 language are sent to Google and the selected URL is opened in your browser. The temporary
 embedding server listens on loopback (`127.0.0.1`) and should not be exposed
 publicly. Local indexes, logs, model caches, and selected paths may be

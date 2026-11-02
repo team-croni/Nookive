@@ -110,3 +110,23 @@ macOS에서는 Tauri command인 `render_pdf_page_native`가 Core Graphics를
 사용해 페이지를 렌더링할 수 있다. 이 경로는 macOS 전용이며, 텍스트 레이어가
 없는 PDF는 페이지 미리보기는 가능하지만 검색 매칭 페이지와 하이라이트를
 제공하지 못할 수 있다.
+
+### 2.6. 검색 개인화
+
+같은 검색어로 실제로 연 결과를 기억해 다음 검색에서 조금 올린다. 계산은
+`src/features/search/services/feedback.ts`(I/O 없는 순수 함수), 저장은 Rust
+`search_feedback.rs`가 맡는다.
+
+- 기록 시점: 로컬 결과를 연 경우만(Enter, 하단 열기 버튼, 더블클릭, 미리보기 열기 버튼).
+  네 경로 모두 `App.tsx`의 `handleOpenFile`을 지난다. 선택 이동·미리보기·경로 복사·Finder
+  표시·웹 검색은 기록하지 않는다.
+- 키: 화면 결과를 만든 `settledQuery`를 NFC·소문자·공백 정리로 정규화한 값 + `file.path`
+  (앱은 `.app` 경로). 파일을 옮기거나 이름을 바꾸면 기록이 이어지지 않는다.
+- 강도: 열 때마다 `s = s × 2^(−경과/30일) + 1`, 같은 쌍은 10분 안에 다시 열어도 한 번으로 센다.
+  배율은 `1 + 0.15 × (1 − 2^(−s))`로 최대 +15%다.
+- 적용: `rankResults`에서 게이트를 통과한(`rankScore > 0`) 결과의 `rankScore`에만 곱한다.
+  `similarityScore`는 그대로라 섹션 순서는 바뀌지 않고 섹션 안의 순서만 바뀐다.
+- 저장: `app_data_dir/search-feedback.json`(임시 파일 후 rename), 최근 사용 순 최대 2,000개.
+  저장에 실패해도 검색은 메모리 기록으로 계속된다.
+- 초기화: 설정의 "검색 개인화" 카드. 파일을 지우고 `search-feedback-reset` 이벤트로 검색 창의
+  메모리 기록도 비운다. 검색 데이터 초기화와는 따로 동작한다.

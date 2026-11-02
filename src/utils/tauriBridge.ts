@@ -59,3 +59,5 @@ export {
   clearIndexError,
   deleteAppData,
 } from './tauri/indexing';
+
+export { loadSearchFeedback, saveSearchFeedback, resetSearchFeedback } from './tauri/searchFeedback';

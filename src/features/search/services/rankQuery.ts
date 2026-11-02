@@ -8,6 +8,7 @@ import {
   scoreRecords,
   type ScoredSearchResult,
 } from './scoring';
+import type { RankBoost } from './feedback';
 import { expandKeywords, nfc, tokenizeKeywords } from './textUtils';
 
 /**
@@ -34,11 +35,13 @@ export function isLowSignalQuery(query: string): boolean {
 /**
  * 하이브리드 점수 계산 → 파일 단위 그룹화 → 게이트 통과 결과 정렬.
  * queryVector가 null이면 키워드 전용 검색으로 동작한다.
+ * boost는 검색 개인화 배율이다. 평가 테스트는 넘기지 않아 기본 랭킹만 측정한다.
  */
 export function rankQuery(
   records: SearchResultItem[],
   query: string,
   queryVector: number[] | null,
+  boost?: RankBoost,
 ): SearchResultItem[] {
   const qLower = nfc(query).toLowerCase().trim();
   const baseKeywords = tokenizeKeywords(qLower);
@@ -54,7 +57,7 @@ export function rankQuery(
     query,
   });
 
-  const results = groupAndRank(scored, baseKeywords, query);
+  const results = groupAndRank(scored, baseKeywords, query, boost);
   if (results.length > 0 || !scored.some((item) => item.rescuePass)) return results;
 
   // 4. 결과가 하나도 없으면, 절대 하한 바로 아래의 모달리티 1위만 살려 다시 정렬한다.
@@ -64,13 +67,14 @@ export function rankQuery(
       ? { ...item, rankScore: item.ungatedRankScore, similarityScore: normalizeRank(item.ungatedRankScore) }
       : item,
   );
-  return groupAndRank(rescued, baseKeywords, query);
+  return groupAndRank(rescued, baseKeywords, query, boost);
 }
 
 function groupAndRank(
   scored: ScoredSearchResult[],
   baseKeywords: string[],
   query: string,
+  boost?: RankBoost,
 ): SearchResultItem[] {
   // 2. 파일 단위 그룹화 (동일 파일의 다수 청크를 하나로 통합)
   //    baseKeywords를 넘겨 단어 단위 타임스탬프로 뱃지를 보정한다.
@@ -80,5 +84,5 @@ function groupAndRank(
   const sorted = deduplicated.sort(
     (a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0),
   );
-  return rankResults(sorted, query);
+  return rankResults(sorted, query, boost);
 }

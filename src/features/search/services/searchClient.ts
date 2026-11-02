@@ -3,6 +3,7 @@ import type { SearchResultItem } from '../../../types/search';
 import i18n from '../../../i18n';
 import { listApplications, listIndexedFolders, loadRuntimeIndex } from '../../../utils/tauriBridge';
 import { requestQueryEmbedding } from './embeddingClient';
+import { feedbackClient } from './feedbackClient';
 import { isLowSignalQuery, rankQuery } from './rankQuery';
 import { nfc, tokenizeKeywords } from './textUtils';
 
@@ -145,7 +146,7 @@ export class SearchClient {
         );
       }
     }
-    return rankQuery(records, query, queryVector);
+    return rankQuery(records, query, queryVector, await feedbackClient.boostFor(query));
   }
 }
 
