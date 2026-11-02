@@ -89,7 +89,8 @@ Nookive는 Tauri 시작 시 `/Applications`, `/System/Applications`, `~/Applicat
   `crt`, `kdbx` 등), lock·minified·source map 파일. 텍스트 문서는 이름에 `credential`, `secret`, `password`,
   `service-account`가 들어가면 제외한다(이미지·미디어에는 적용하지 않는다).
 - 규칙에 새로 걸린 기존 파일은 다음 manifest 동기화에서 removed로 처리되어 runtime 인덱스에서도 삭제된다.
-- 파일 감시자는 제외 디렉터리 아래 변경이나 색인 대상이 아닌 파일 변경으로는 재스캔하지 않는다.
+- 파일 감시자는 제외 디렉터리 아래 변경이나 색인 대상이 아닌 파일 변경으로는 재스캔하지 않는다. 코드 파일 변경은
+  manifest 재스캔 대신 코드 내용 색인 갱신으로 보낸다(`docs/system-architecture.md` 2.7).
 
 ---
 

@@ -4,6 +4,6 @@
   "webSearch": "Web search",
   "googleSearch": "Search Google for “{{query}}”",
   "footer": {"webOpen": "Open on the web"},
-  "code": {"placeholder": "Search code by file name, path, or contents", "placeholderNoFiles": "No code files in your search folders", "noResults": "No code matches this name, path, or contents.", "noFiles": "There are no code files in your search folders.", "contentHint": "Code contents are searched once you type 3 or more characters.", "indexing": "Indexing code contents. Some contents may not show up until it finishes."},
+  "code": {"placeholder": "Search code by file name, path, or contents", "placeholderNoFiles": "No code files in your search folders", "noResults": "No code matches this name, path, or contents.", "noFiles": "There are no code files in your search folders.", "contentHint": "Code contents are searched once you type 3 or more characters.", "indexing": "Building code search data. Some contents may not show up until it finishes."},
   "modes": {"all": {"name": "Search everything"}, "code": {"chip": "Code", "name": "Code search"}}
 }

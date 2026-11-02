@@ -160,6 +160,26 @@ pub(crate) fn is_relevant_change(path: &Path, roots: &[std::path::PathBuf], remo
     embeddable_extension(path).is_some()
 }
 
+/// 파일 감시 이벤트가 코드 내용 색인 갱신을 일으켜야 하는지 판단한다.
+/// is_relevant_change와 같은 제외 규칙을 쓰되, 임베딩 대상 대신 코드 파일을 본다.
+pub(crate) fn is_code_change(path: &Path, roots: &[std::path::PathBuf], removal: bool) -> bool {
+    let Some(relative) = roots.iter().find_map(|root| path.strip_prefix(root).ok()) else {
+        return false;
+    };
+    if relative.as_os_str().is_empty() || is_under_excluded_directory(relative) {
+        return false;
+    }
+    let Some(name) = relative.file_name().and_then(|name| name.to_str()) else {
+        return false;
+    };
+    // 폴더가 지워지거나 옮겨지면 안의 코드 파일도 바뀐 것이므로 다시 맞춘다.
+    if removal || path.is_dir() {
+        return !is_excluded_directory_name(name);
+    }
+    !is_excluded_file_name(name)
+        && extension_of(path).and_then(|ext| classify_extension(&ext)) == Some(FileClass::Code)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -283,5 +303,28 @@ mod tests {
             &roots,
             false,
         ));
+    }
+
+    #[test]
+    fn code_changes_pass_only_for_code_files_outside_excluded_folders() {
+        let roots = vec![PathBuf::from("/nonexistent-root")];
+        let code = |p: &str, removal| is_code_change(Path::new(p), &roots, removal);
+        assert!(code("/nonexistent-root/src/main.rs", false));
+        assert!(code("/nonexistent-root/web/app.tsx", false));
+        assert!(!code("/nonexistent-root/notes/a.md", false));
+        assert!(!code(
+            "/nonexistent-root/app/node_modules/x/index.js",
+            false
+        ));
+        assert!(!code("/nonexistent-root/target/debug/build.rs", false));
+        // 브랜치를 바꾸면 .git 안이 크게 바뀌지만 작업 폴더의 파일 변경으로 반영된다.
+        assert!(!code("/nonexistent-root/.git/HEAD", false));
+        assert!(!code("/nonexistent-root/package-lock.json", false));
+        assert!(!code("/nonexistent-root/.env.ts", false));
+        assert!(!code("/elsewhere/main.rs", false));
+        assert!(!code("/nonexistent-root", true));
+        // 폴더 삭제는 안의 코드 파일 삭제일 수 있다.
+        assert!(code("/nonexistent-root/old-module", true));
+        assert!(!code("/nonexistent-root/dist", true));
     }
 }
