@@ -7,7 +7,9 @@ import styles from './PreviewPane.module.css';
 interface PreviewPaneProps {
   selectedItem?: SearchResultItem;
   query?: string;
-  onOpenFile?: (path: string) => void;
+  onOpenItem?: (item: SearchResultItem) => void;
+  /** 열기 버튼 이름. 없으면 "열기" (코드 결과는 "VS Code에서 열기"처럼 에디터 이름) */
+  openLabel?: string;
   onRevealFile?: (path: string) => void;
   /** PDF 뷰어가 실제로 렌더한 페이지와 매칭 여부를 상위로 알린다. */
   onPdfPageResolved?: (page: number, matched: boolean) => void;
@@ -16,7 +18,8 @@ interface PreviewPaneProps {
 const PreviewPaneComponent: React.FC<PreviewPaneProps> = ({
   selectedItem,
   query = '',
-  onOpenFile,
+  onOpenItem,
+  openLabel,
   onRevealFile,
   onPdfPageResolved,
 }) => {
@@ -35,7 +38,8 @@ const PreviewPaneComponent: React.FC<PreviewPaneProps> = ({
       <PreviewContent
         selectedItem={selectedItem}
         query={query}
-        onOpenFile={onOpenFile}
+        onOpenItem={onOpenItem}
+        openLabel={openLabel}
         onRevealFile={onRevealFile}
         onPdfPageResolved={onPdfPageResolved}
         showPaneShell={false}

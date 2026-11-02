@@ -3,6 +3,7 @@
 mod applications;
 mod code_index;
 mod code_search;
+mod editors;
 mod embedding;
 mod files;
 mod folders;
@@ -158,6 +159,8 @@ pub fn run() {
             code_search::search_code_files,
             code_index::sync_code_index,
             code_index::is_code_index_building,
+            editors::list_code_editors,
+            editors::open_code_file,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
