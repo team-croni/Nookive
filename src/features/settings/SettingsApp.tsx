@@ -1,5 +1,6 @@
 // src/features/settings/SettingsApp.tsx
-import { useEffect, useState, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { Database, HardDrive, Info, Settings2, SlidersHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -10,8 +11,9 @@ import { useShortcut } from './hooks/useShortcut';
 import { SettingsHeader } from './components/SettingsHeader';
 import { FolderSection } from './components/FolderSection';
 import { ShortcutSection } from './components/ShortcutSection';
-import { StatusSection } from './components/StatusSection';
-import { IndexingSection } from './components/IndexingSection';
+import { SearchStatusSection } from './components/SearchStatusSection';
+import { SettingsSidebar, type SettingsSidebarItem } from './components/SettingsSidebar';
+import { settingsPanelId, settingsTabId } from './settingsTabIds';
 import { ResetSection } from './components/ResetSection';
 import { SearchHistorySection } from './components/SearchHistorySection';
 import { LanguageSection } from './components/LanguageSection';
@@ -25,6 +27,8 @@ import { OnboardingWizard } from '../onboarding/OnboardingWizard';
 import { getModelStatus } from '../../utils/tauriBridge';
 import { useTheme } from '../../hooks/useTheme';
 import styles from './SettingsApp.module.css';
+
+type SettingsTab = 'searchData' | 'searchOptions' | 'general' | 'dataManagement' | 'about';
 
 const isPdfPath = (filePath: string): boolean => /\.pdf$/i.test(filePath);
 
@@ -128,6 +132,21 @@ export default function SettingsApp() {
     void invoke('hide_settings_window').catch(() => window.hide().catch(() => window.close()));
   };
 
+  // 설정 창은 닫아도 숨기기만 하므로, 다시 열면 마지막으로 보던 분류가 그대로 남는다.
+  const [activeTab, setActiveTab] = useState<SettingsTab>('searchData');
+  const contentRef = useRef<HTMLDivElement>(null);
+  const tabs: SettingsSidebarItem<SettingsTab>[] = [
+    { id: 'searchData', label: t('groups.searchData'), icon: Database },
+    { id: 'searchOptions', label: t('groups.searchOptions'), icon: SlidersHorizontal },
+    { id: 'general', label: t('groups.general'), icon: Settings2 },
+    { id: 'dataManagement', label: t('groups.dataManagement'), icon: HardDrive },
+    { id: 'about', label: t('groups.about'), icon: Info },
+  ];
+  const changeTab = (tab: SettingsTab) => {
+    setActiveTab(tab);
+    contentRef.current?.scrollTo({ top: 0 });
+  };
+
   const handleAppDataDeleted = () => {
     // 로컬 설정을 비운 뒤 앱을 초기 설치 상태로 다시 시작한다.
     window.setTimeout(() => window.location.reload(), 200);
@@ -176,10 +195,6 @@ export default function SettingsApp() {
             ? t('dynamic.media', { count: pendingVisualMediaCount })
             : t('status.allReady');
 
-  const actionDetailText = activePendingFiles > 0
-    ? t('dynamic.action', { count: activePendingFiles })
-    : t('dynamic.refreshHint');
-
   if (showOnboarding === true) {
     return (
       <OnboardingWizard
@@ -196,71 +211,86 @@ export default function SettingsApp() {
     <main className={styles.page}>
       <SettingsHeader onClose={close} onHeaderMouseDown={handleHeaderMouseDown} />
 
-      <div className={styles.content}>
-        <ModelSection compact />
-        <FolderSection
-          roots={status?.roots ?? []}
-          isBusy={isBusy}
-          onAddFolder={() => void addFolder()}
-          onRemoveFolder={(folder) => void removeFolder(folder)}
-        />
+      <div className={styles.body}>
+        <SettingsSidebar items={tabs} active={activeTab} onChange={changeTab} ariaLabel={t('title')} />
 
-        <WebSearchSection />
+        <div
+          ref={contentRef}
+          className={styles.content}
+          role="tabpanel"
+          id={settingsPanelId(activeTab)}
+          aria-labelledby={settingsTabId(activeTab)}
+        >
+          {/* 모델이 없을 때만 보이는 안내. 분류와 관계없이 맨 위에 둔다. */}
+          <ModelSection compact />
 
-        <CodeSearchSection />
+          <h2 className={styles.contentTitle}>{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
 
-        <ShortcutSection
-          shortcutLabel={shortcutLabel}
-          shortcutMessage={shortcutMessage}
-          isRecordingShortcut={isRecordingShortcut}
-          onKeyDown={handleShortcutKeyDown}
-          onFocus={(event) => {
-            setIsRecordingShortcut(true);
-            event.currentTarget.select();
-          }}
-          onBlur={() => setIsRecordingShortcut(false)}
-        />
-
-        <LanguageSection />
-
-        <ThemeSection />
-
-        <StatusSection
-          status={status}
-          isBusy={isBusy}
-          indexStateLabel={indexStateLabel}
-          indexDetailText={indexDetailText}
-          pendingFiles={activePendingFiles}
-        />
-
-        <IndexingSection
-          actionDetailText={actionDetailText}
-          indexMessage={indexMessage}
-          displayProgress={displayProgress}
-          progressPercent={progressPercent}
-          isProgressDetailsOpen={isProgressDetailsOpen}
-          isBusy={isBusy}
-          canStart={(status?.pending_paths.length ?? 0) > 0}
-          onToggleDetails={() => setIsProgressDetailsOpen((open) => !open)}
-          onRefresh={() => void refresh()}
-          onStart={() => void startIndexing()}
-          onAbort={abortIndexing}
-        />
-
-        <SearchHistorySection />
-
-        <ResetSection
-          resetMessage={resetMessage}
-          isResetConfirming={isResetConfirming}
-          isBusy={isBusy}
-          onRequestReset={requestReset}
-          onCancelReset={cancelReset}
-          onConfirmReset={() => void confirmReset()}
-        />
-
-        <AppDataSection isBusy={isBusy} onDeleted={handleAppDataDeleted} />
-
-        <AboutSection />
+          {activeTab === 'searchData' && (
+            <>
+              <FolderSection
+                roots={status?.roots ?? []}
+                isBusy={isBusy}
+                onAddFolder={() => void addFolder()}
+                onRemoveFolder={(folder) => void removeFolder(folder)}
+              />
+              <SearchStatusSection
+                status={status}
+                isBusy={isBusy}
+                indexStateLabel={indexStateLabel}
+                indexDetailText={indexDetailText}
+                pendingFiles={activePendingFiles}
+                indexMessage={indexMessage}
+                displayProgress={displayProgress}
+                progressPercent={progressPercent}
+                isProgressDetailsOpen={isProgressDetailsOpen}
+                canStart={(status?.pending_paths.length ?? 0) > 0}
+                onToggleDetails={() => setIsProgressDetailsOpen((open) => !open)}
+                onRefresh={() => void refresh()}
+                onStart={() => void startIndexing()}
+                onAbort={abortIndexing}
+              />
+            </>
+          )}
+          {activeTab === 'searchOptions' && (
+            <>
+              <CodeSearchSection />
+              <WebSearchSection />
+              <SearchHistorySection />
+            </>
+          )}
+          {activeTab === 'general' && (
+            <>
+              <ShortcutSection
+                shortcutLabel={shortcutLabel}
+                shortcutMessage={shortcutMessage}
+                isRecordingShortcut={isRecordingShortcut}
+                onKeyDown={handleShortcutKeyDown}
+                onFocus={(event) => {
+                  setIsRecordingShortcut(true);
+                  event.currentTarget.select();
+                }}
+                onBlur={() => setIsRecordingShortcut(false)}
+              />
+              <LanguageSection />
+              <ThemeSection />
+            </>
+          )}
+          {activeTab === 'dataManagement' && (
+            <>
+              <ResetSection
+                resetMessage={resetMessage}
+                isResetConfirming={isResetConfirming}
+                isBusy={isBusy}
+                onRequestReset={requestReset}
+                onCancelReset={cancelReset}
+                onConfirmReset={() => void confirmReset()}
+              />
+              <AppDataSection isBusy={isBusy} onDeleted={handleAppDataDeleted} />
+            </>
+          )}
+          {activeTab === 'about' && <AboutSection />}
+        </div>
       </div>
     </main>
   );

@@ -55,14 +55,90 @@ h1 {
 }
 .content {
   flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  padding: 20px 20px 26px;
+  padding: 22px 28px 32px;
 }
 .card {
   margin-bottom: 48px;
   background: transparent;
   box-shadow: none;
+}
+/* 왼쪽 분류 목록 + 오른쪽 내용. 설정이 늘어나면 분류 항목을 더한다. */
+.body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.sidebar {
+  flex: 0 0 184px;
+  overflow-y: auto;
+  padding: 14px 10px;
+  border-right: 1px solid var(--border-chip);
+}
+.sidebar [role="tablist"] {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sidebarItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: default;
+}
+.sidebarItem span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebarItem:hover {
+  background: var(--surface-chip);
+  color: var(--text-primary);
+}
+/* 선택한 분류: GitHub 설정처럼 왼쪽에 강조 막대를 둔다. */
+.sidebarItem[aria-selected="true"] {
+  background: var(--surface-chip-strong);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.sidebarItem[aria-selected="true"]::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent-blue);
+}
+.sidebarItem:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: -2px;
+}
+.contentTitle {
+  margin: 0 0 24px !important;
+  font-size: 17px !important;
+  font-weight: 600;
+}
+/* 같은 분류의 카드는 선 없이 간격으로만 나눈다. 선은 옵션 상자 안의 줄 구분에만 쓴다. */
+.content > .card {
+  margin-bottom: 0;
+}
+.content > .card + .card {
+  margin-top: 36px;
 }
 .modelCardCompact {
   margin-bottom: 24px;
@@ -97,21 +173,36 @@ h1 {
   color: var(--text-tertiary) !important;
   font-size: 11px !important;
 }
+/* 카드 안의 옵션 줄은 채운 상자 하나에 모으고, 줄 사이에만 얇은 선을 둔다. (macOS 시스템 설정과 같은 방식) */
+.optionGroup {
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--surface-chip);
+}
 .webSearchRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 14px;
-  padding-top: 12px;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 6px 8px 6px 14px;
+}
+.webSearchRow + .webSearchRow {
   border-top: 1px solid var(--border-chip);
 }
 .webSearchOptionLabel {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--text-secondary);
-  font-size: 12px;
+  color: var(--text-primary);
+  font-size: 12.5px;
+}
+/* 옵션 상자 안의 선택 메뉴는 상자와 겹쳐 보이지 않게 테두리 없이 둔다. */
+.optionGroup .languageTrigger {
+  border-color: transparent;
+  background: var(--surface-chip);
 }
 .infoButton {
   display: inline-flex;
@@ -161,7 +252,7 @@ h1 {
 h2 {
   margin: 0;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
 }
 .card p {
   margin: 6px 0 0;
@@ -223,7 +314,9 @@ h2 {
   font: inherit;
   font-size: 12px;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 .languageTrigger:hover,
 .languageTrigger[aria-expanded="true"] {
@@ -406,24 +499,26 @@ h2 {
 }
 .folderList {
   margin-top: 14px;
-  overflow: hidden;
-  border: 1px solid var(--border-chip);
-  border-radius: 8px;
+  /* 폴더가 많아지면 6줄쯤에서 목록 안에서 스크롤한다. */
+  max-height: 312px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: var(--surface-chip);
 }
 .shortcutList {
   margin-top: 14px;
   overflow: hidden;
-  border: 1px solid var(--border-chip);
-  border-radius: 8px;
+  border-radius: 10px;
+  background: var(--surface-chip);
 }
 .shortcutRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 42px;
-  padding: 0 11px;
-  color: var(--text-secondary);
-  font-size: 12px;
+  min-height: 44px;
+  padding: 0 8px 0 14px;
+  color: var(--text-primary);
+  font-size: 12.5px;
 }
 .shortcutOr {
   color: var(--text-tertiary);
@@ -474,10 +569,54 @@ h2 {
 .folderRow + .folderRow {
   border-top: 1px solid var(--border-chip);
 }
-.folderRow span {
+.folderRow {
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 8px 0 12px;
+}
+.folderIcon {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+.folderText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.folderName,
+.folderParent {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.folderName {
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.folderParent {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+.titleWithCount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* 제목 글자와 세로 가운데를 맞춘다. (줄 높이를 글자 크기에 맞춰 위아래 여백을 같게 둔다) */
+.titleCount {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 9px;
+  background: var(--surface-chip-strong);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 .removeButton {
   margin-left: auto;
@@ -491,7 +630,9 @@ h2 {
 }
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* 코드 검색이 꺼져 있으면 칸이 하나 줄어든다. 칸 수에 맞춰 같은 폭으로 나눈다. */
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: 8px;
   margin-top: 14px;
 }
@@ -500,18 +641,28 @@ h2 {
   border-radius: 8px;
   background: var(--surface-chip);
 }
-.stats strong,
-.stats span {
+.stats > div > strong,
+.stats > div > span {
   display: block;
 }
 .stats strong {
   font-size: 17px;
   font-weight: 600;
 }
-.stats span {
+.stats > div > span {
   margin-top: 4px;
   color: var(--text-secondary);
   font-size: 11px;
+}
+.stats > div > .statLabel {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.statusUpdated {
+  margin-top: 10px !important;
+  color: var(--text-tertiary) !important;
+  font-size: 11px !important;
 }
 .progressBlock {
   margin-top: 18px;
@@ -601,17 +752,14 @@ h2 {
 }
 
 /* About section – 설정 하단 앱 정보 */
-.aboutSection {
+.aboutHeader {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 14px 0 0;
-  border-top: 1px solid var(--border-chip);
+  align-items: center;
+  gap: 14px;
 }
 .aboutLogo {
-  width: 28px;
-  height: 28px;
-  margin-top: 1px;
+  width: 52px;
+  height: 52px;
   flex-shrink: 0;
   display: block;
   object-fit: contain;
@@ -619,36 +767,37 @@ h2 {
 .aboutInfo {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 .aboutName {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
 }
-.aboutVersion {
-  font-size: 11px;
-  color: var(--text-tertiary);
-}
+.aboutVersion,
 .aboutMaintainer {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary);
 }
-.aboutLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 10px;
-  margin-top: 5px;
-}
-.aboutLinks button {
-  padding: 0;
+/* 정보의 링크 줄: 옵션 줄과 같은 모양의 버튼 */
+.linkRow {
+  width: 100%;
   border: 0;
   background: transparent;
-  color: var(--accent-blue);
+  color: var(--text-tertiary);
   font: inherit;
-  font-size: 11px;
+  text-align: left;
   cursor: pointer;
+  padding-right: 14px;
 }
-.aboutLinks button:hover {
-  text-decoration: underline;
+.aboutHeader + .optionGroup {
+  margin-top: 20px;
 }
+.linkRow:hover {
+  background: var(--surface-chip);
+}
+.linkRow:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: -2px;
+}
+
