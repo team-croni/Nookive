@@ -10,6 +10,7 @@ mod licenses;
 mod mask_png;
 mod models;
 mod paths;
+mod search_feedback;
 mod tray_labels;
 #[cfg(target_os = "macos")]
 mod vibrancy;
@@ -146,6 +147,9 @@ pub fn run() {
             models::pause_model_download,
             models::resume_model_download,
             models::reset_model_download,
+            search_feedback::load_search_feedback,
+            search_feedback::save_search_feedback,
+            search_feedback::reset_search_feedback,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
