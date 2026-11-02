@@ -32,7 +32,9 @@ locally with EmbeddingGemma 2 and llama.cpp.
 - Semantic matches such as “the clause about pets in the lease” or “payment
   declined screenshot”.
 - PDF pages and Markdown/text files. Code, configuration, and credential files
-  are not indexed.
+  are not indexed by content.
+- Code files by name or path in your search folders: press Tab or type
+  `code:` in the search window. You can turn this off in Settings.
 - Images by visual content, with macOS Vision labels/OCR where available.
 - Audio and video by content, with results pointing to a relevant time range.
 - Installed macOS applications by localized name, original name, or bundle

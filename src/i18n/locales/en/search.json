@@ -3,5 +3,7 @@
   "searching": "Searching…",
   "webSearch": "Web search",
   "googleSearch": "Search Google for “{{query}}”",
-  "footer": {"webOpen": "Open on the web"}
+  "footer": {"webOpen": "Open on the web"},
+  "code": {"placeholder": "Search code by file name or path", "placeholderNoFiles": "No code files in your search folders", "noResults": "No code files match this name or path.", "noFiles": "There are no code files in your search folders.", "contentHint": "Code search looks at file names and paths, not file contents."},
+  "modes": {"all": {"name": "Search everything"}, "code": {"chip": "Code", "name": "Code search"}}
 }

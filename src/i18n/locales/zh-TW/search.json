@@ -3,5 +3,7 @@
   "searching": "正在搜尋…",
   "webSearch": "網頁搜尋",
   "googleSearch": "在 Google 中搜尋「{{query}}」",
-  "footer": {"webOpen": "在網頁中開啟"}
+  "footer": {"webOpen": "在網頁中開啟"},
+  "code": {"placeholder": "依檔名或路徑搜尋程式碼", "placeholderNoFiles": "搜尋資料夾中沒有程式碼檔案", "noResults": "沒有名稱或路徑符合的程式碼檔案。", "noFiles": "搜尋資料夾中沒有程式碼檔案。", "contentHint": "程式碼搜尋依檔名和路徑尋找，不搜尋檔案內容。"},
+  "modes": {"all": {"name": "全部搜尋"}, "code": {"chip": "程式碼", "name": "程式碼搜尋"}}
 }

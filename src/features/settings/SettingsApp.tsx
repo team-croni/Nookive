@@ -20,6 +20,7 @@ import { ThemeSection } from './components/ThemeSection';
 import { AboutSection } from './components/AboutSection';
 import { AppDataSection } from './components/AppDataSection';
 import { WebSearchSection } from './components/WebSearchSection';
+import { CodeSearchSection } from './components/CodeSearchSection';
 import { OnboardingWizard } from '../onboarding/OnboardingWizard';
 import { getModelStatus } from '../../utils/tauriBridge';
 import { useTheme } from '../../hooks/useTheme';
@@ -205,6 +206,8 @@ export default function SettingsApp() {
         />
 
         <WebSearchSection />
+
+        <CodeSearchSection />
 
         <ShortcutSection
           shortcutLabel={shortcutLabel}

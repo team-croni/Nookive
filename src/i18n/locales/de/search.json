@@ -3,5 +3,7 @@
   "searching": "Suche läuft…",
   "webSearch": "Websuche",
   "googleSearch": "„{{query}}“ bei Google suchen",
-  "footer": {"webOpen": "Im Web öffnen"}
+  "footer": {"webOpen": "Im Web öffnen"},
+  "code": {"placeholder": "Code nach Dateiname oder Pfad suchen", "placeholderNoFiles": "Keine Codedateien in deinen Suchordnern", "noResults": "Keine Codedatei passt zu diesem Namen oder Pfad.", "noFiles": "In deinen Suchordnern gibt es keine Codedateien.", "contentHint": "Die Codesuche durchsucht Dateinamen und Pfade, nicht Dateiinhalte."},
+  "modes": {"all": {"name": "Alles durchsuchen"}, "code": {"chip": "Code", "name": "Codesuche"}}
 }

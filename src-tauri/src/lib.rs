@@ -1,6 +1,7 @@
 // src-tauri/src/lib.rs
 // 앱 진입점: 모듈 구성, Tauri 빌더 설정, 커맨드 등록.
 mod applications;
+mod code_search;
 mod embedding;
 mod files;
 mod folders;
@@ -35,6 +36,7 @@ pub fn run() {
         .manage(IndexWatcherState::default())
         .manage(IndexOptionsState::default())
         .manage(IndexingBusyState::default())
+        .manage(code_search::CodeSearchState::default())
         .manage(index::IndexErrorState::default())
         .plugin(
             tauri_plugin_log::Builder::default()
@@ -150,6 +152,8 @@ pub fn run() {
             search_feedback::load_search_feedback,
             search_feedback::save_search_feedback,
             search_feedback::reset_search_feedback,
+            code_search::refresh_code_files,
+            code_search::search_code_files,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

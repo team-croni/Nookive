@@ -5,7 +5,9 @@ import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import type { SearchResultItem } from '../../../types/search';
 import i18n from '../../../i18n';
-import { getIndexStatus } from '../../../utils/tauriBridge';
+import { getIndexStatus, refreshCodeFiles, searchCodeFiles } from '../../../utils/tauriBridge';
+import { getCodeSearchEnabled, subscribeCodeSearchEnabled } from '../../../utils/codeSearchPreference';
+import type { SearchMode, SpecialSearchMode } from '../utils/searchModes';
 import { searchClient } from '../services/searchClient';
 import { feedbackClient } from '../services/feedbackClient';
 import { orderResultsBySection } from '../utils/orderResults';
@@ -25,6 +27,13 @@ export function useSearchResults() {
   // isLoading은 effect에서 뒤늦게 true가 되므로, 입력 직후 첫 렌더에서
   // "빈 결과"를 확정 상태로 오인해 웹 폴백이 먼저 마운트되는 것을 막는 데 쓴다.
   const [settledQuery, setSettledQuery] = useState('');
+  // 검색 모드(Tab 순환 또는 "code:" 같은 접두어). 'code'는 코드 파일 이름/경로만 찾는다.
+  const [searchMode, setSearchModeState] = useState<SearchMode>('all');
+  const [settledSearchMode, setSettledSearchMode] = useState<SearchMode>('all');
+  // 설정의 코드 검색 스위치. 꺼져 있으면 Tab과 "code:"가 동작하지 않는다.
+  const [codeSearchEnabled, setCodeSearchEnabledState] = useState(getCodeSearchEnabled);
+  // 검색 폴더의 코드 파일 수. 0이면 Tab 안내를 숨겨 코드와 무관한 사용자에게 보이지 않게 한다.
+  const [codeFileCount, setCodeFileCount] = useState(0);
   // 실제 상태 전환이 발생한 뒤에만 네이티브 창 리사이즈를 예약한다.
   const previousExpandedRef = useRef(isWindowExpanded);
 
@@ -36,7 +45,7 @@ export function useSearchResults() {
 
   // 검색어가 입력된 경우에만 결과 영역을 노출한다.
   const hasQuery = query.trim().length > 0;
-  const isSettled = hasQuery && settledQuery === query;
+  const isSettled = hasQuery && settledQuery === query && settledSearchMode === searchMode;
   const isLoading = hasQuery && !isSettled;
 
   // 결과를 섹션 순서로 재정렬한다.
@@ -104,7 +113,7 @@ export function useSearchResults() {
 
     const timer = setTimeout(async () => {
       try {
-        const data = await searchClient.search(query);
+        const data = searchMode === 'code' ? await searchCodeFiles(query) : await searchClient.search(query);
         if (isMounted) {
           setResults(data);
           setSelectedIndex(0);
@@ -112,6 +121,7 @@ export function useSearchResults() {
       } finally {
         if (isMounted) {
           setSettledQuery(query);
+          setSettledSearchMode(searchMode);
         }
       }
     }, SEARCH_DEBOUNCE_MS);
@@ -120,7 +130,49 @@ export function useSearchResults() {
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [query, hasQuery]);
+  }, [query, hasQuery, searchMode]);
+
+  // 모드를 바꾸면 이전 모드의 결과를 바로 지운다. (칩 아래에 다른 모드 결과가 남지 않게)
+  const searchModeRef = useRef(searchMode);
+  const setSearchMode = useCallback((mode: SearchMode) => {
+    if (searchModeRef.current === mode) return;
+    searchModeRef.current = mode;
+    setSearchModeState(mode);
+    setResults([]);
+    setSelectedIndex(0);
+    // 코드 모드에 들어올 때 오래된 코드 파일 목록을 다시 훑는다. (30초 이내면 그대로 쓴다)
+    if (mode === 'code') void refreshCodeFiles().then(setCodeFileCount);
+  }, []);
+
+  // 설정에서 코드 검색을 끄면 코드 모드도 끝낸다.
+  useEffect(
+    () =>
+      subscribeCodeSearchEnabled((enabled) => {
+        setCodeSearchEnabledState(enabled);
+        if (!enabled && searchModeRef.current === 'code') setSearchMode('all');
+      }),
+    [setSearchMode],
+  );
+
+  // Tab 순환과 접두어로 들어갈 수 있는 모드. 설정에서 꺼진 모드는 빠진다.
+  const availableModes = useMemo<SpecialSearchMode[]>(
+    () => (codeSearchEnabled ? ['code'] : []),
+    [codeSearchEnabled],
+  );
+
+  // 코드 파일 수: 시작할 때, 검색 폴더가 바뀔 때, 스위치를 켤 때 다시 센다.
+  useEffect(() => {
+    if (!codeSearchEnabled) return;
+    const count = () => void refreshCodeFiles().then(setCodeFileCount);
+    count();
+    let unlisten: (() => void) | undefined;
+    void listen('index-updated', count)
+      .then((stop) => {
+        unlisten = stop;
+      })
+      .catch(() => { });
+    return () => unlisten?.();
+  }, [codeSearchEnabled]);
 
   // 설정 창에서 폴더/임베딩 인덱스가 실제로 바뀐 경우에만 검색 캐시를 갱신한다.
   // 검색창을 열 때마다 macOS 앱 전체를 재탐색하면 포커스 순간에 렉이 발생한다.
@@ -172,6 +224,10 @@ export function useSearchResults() {
     isSettled,
     /** 현재 화면에 표시 중인 결과를 만들어낸 검색어 */
     settledQuery,
+    searchMode,
+    setSearchMode,
+    availableModes,
+    hasCodeFiles: codeFileCount > 0,
     isWindowExpanded,
     orderedResults,
     deferredResults,
