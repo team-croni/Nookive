@@ -159,6 +159,8 @@ pub fn run() {
             code_search::search_code_files,
             code_index::sync_code_index,
             code_index::is_code_index_building,
+            code_index::set_code_search_enabled,
+            code_index::get_code_index_status,
             editors::list_code_editors,
             editors::open_code_file,
         ])

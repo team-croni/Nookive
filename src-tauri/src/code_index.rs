@@ -1,7 +1,7 @@
 // src-tauri/src/code_index.rs
 // 코드 검색(2단계): 코드 파일 내용을 줄 단위로 SQLite FTS5(trigram)에 색인해 줄 번호와 함께 찾는다.
-// 대상은 code_search가 훑은 코드 파일 목록이다. 파일 감시는 없고(#69), 코드 모드에 들어올 때
-// 수정 시각·크기가 바뀐 파일만 다시 읽는다. 임베딩 모델은 쓰지 않는다.
+// 대상은 code_search가 훑은 코드 파일 목록이다. 앱 시작 후(아직 없을 때), 코드 모드에 들어올 때,
+// 검색 폴더 감시가 코드 파일 변경을 알렸을 때 목록과 색인을 맞추며, 수정 시각·크기가 바뀐 파일만 다시 읽는다. 임베딩 모델은 쓰지 않는다.
 use rusqlite::{Connection, params};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -30,6 +30,8 @@ pub(crate) const MIN_CONTENT_QUERY_CHARS: usize = 3;
 const MAX_CANDIDATE_LINES: usize = 5_000;
 /// 파일 하나에서 돌려주는 최대 줄 수. 결과는 파일당 하나이고 나머지 줄은 미리보기에서 강조한다.
 const MAX_LINES_PER_FILE: usize = 20;
+/// 검색 데이터가 없을 때 앱 시작 후 이만큼 기다렸다가 미리 만든다.
+const PREBUILD_DELAY: std::time::Duration = std::time::Duration::from_secs(10);
 
 /// 색인할 파일. code_search의 목록에서 만든다.
 #[derive(Debug, Clone)]
@@ -66,6 +68,23 @@ pub(crate) struct LineMatch {
 #[derive(Default)]
 pub struct CodeIndexState {
     building: AtomicBool,
+    /// 설정의 코드 검색 스위치. 검색 창이 알려주기 전에는 꺼진 것으로 보고 감시 갱신을 하지 않는다.
+    enabled: AtomicBool,
+    /// 색인 중에 파일 변경이 들어오면 끝난 뒤 한 번 더 맞춘다.
+    resync_requested: AtomicBool,
+}
+
+#[derive(Debug, Default, Serialize)]
+pub struct CodeIndexStatus {
+    exists: bool,
+    building: bool,
+    files: usize,
+    skipped: usize,
+    #[serde(rename = "sizeBytes")]
+    size_bytes: u64,
+    /// 마지막으로 색인이 바뀐 시각 (Unix ms)
+    #[serde(rename = "updatedAtMs")]
+    updated_at_ms: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -379,43 +398,99 @@ fn emit_state(app: &AppHandle, building: bool, stats: Option<SyncStats>) {
     let _ = app.emit(CODE_INDEX_EVENT, CodeIndexEvent { building, stats });
 }
 
-/// 코드 모드에 들어올 때 호출한다. 이미 색인 중이면 false를 돌려주고 아무것도 하지 않는다.
+/// 색인을 백그라운드 스레드에서 맞춘다. 이미 색인 중이면 끝난 뒤 다시 맞추도록 표시하고 false를 돌려준다.
 /// 끝나면 code-index-state 이벤트(building: false)를 보낸다.
-#[tauri::command]
-pub fn sync_code_index(app: AppHandle) -> bool {
+fn start_sync(app: AppHandle, rescan: bool) -> bool {
     let state = app.state::<CodeIndexState>();
     if state.building.swap(true, Ordering::SeqCst) {
+        if rescan {
+            state.resync_requested.store(true, Ordering::SeqCst);
+        }
         return false;
     }
     emit_state(&app, true, None);
     std::thread::spawn(move || {
-        let started = Instant::now();
-        let result = (|| {
-            let targets = crate::code_search::index_targets(&app)?;
-            let path = index_path(&app)?;
-            if let Some(dir) = path.parent() {
-                std::fs::create_dir_all(dir)
-                    .map_err(|e| format!("앱 데이터 디렉터리 생성 실패: {e}"))?;
+        let mut rescan = rescan;
+        loop {
+            let started = Instant::now();
+            let result = (|| {
+                let targets = crate::code_search::index_targets(&app, rescan)?;
+                let path = index_path(&app)?;
+                if let Some(dir) = path.parent() {
+                    std::fs::create_dir_all(dir)
+                        .map_err(|e| format!("앱 데이터 디렉터리 생성 실패: {e}"))?;
+                }
+                let mut conn = open_at(&path).map_err(|e| format!("코드 색인 열기 실패: {e}"))?;
+                sync_index(&mut conn, &targets).map_err(|e| format!("코드 색인 실패: {e}"))
+            })();
+            let stats = match result {
+                Ok(stats) => {
+                    log::info!("[CodeIndex] {stats:?} in {:?}", started.elapsed());
+                    Some(stats)
+                }
+                Err(error) => {
+                    log::warn!("[CodeIndex] {error}");
+                    None
+                }
+            };
+            let state = app.state::<CodeIndexState>();
+            // 색인하는 동안 들어온 변경은 바로 이어서 반영한다. (building을 내리기 전에 확인해 놓치지 않게 한다)
+            if state.resync_requested.swap(false, Ordering::SeqCst) {
+                rescan = true;
+                continue;
             }
-            let mut conn = open_at(&path).map_err(|e| format!("코드 색인 열기 실패: {e}"))?;
-            sync_index(&mut conn, &targets).map_err(|e| format!("코드 색인 실패: {e}"))
-        })();
-        let stats = match result {
-            Ok(stats) => {
-                log::info!("[CodeIndex] {stats:?} in {:?}", started.elapsed());
-                Some(stats)
-            }
-            Err(error) => {
-                log::warn!("[CodeIndex] {error}");
-                None
-            }
-        };
-        app.state::<CodeIndexState>()
-            .building
-            .store(false, Ordering::SeqCst);
-        emit_state(&app, false, stats);
+            state.building.store(false, Ordering::SeqCst);
+            emit_state(&app, false, stats);
+            break;
+        }
     });
     true
+}
+
+/// 검색 폴더 감시가 코드 파일 변경을 알렸을 때 호출한다(디바운스 후).
+/// 코드 검색이 꺼져 있거나 색인을 아직 만든 적이 없으면 아무것도 하지 않는다.
+pub(crate) fn sync_after_file_changes(app: &AppHandle) {
+    if !app.state::<CodeIndexState>().enabled.load(Ordering::SeqCst) {
+        return;
+    }
+    if !index_path(app).is_ok_and(|path| path.exists()) {
+        return;
+    }
+    start_sync(app.clone(), true);
+}
+
+/// 코드 모드에 들어올 때 호출한다. 이미 색인 중이면 false를 돌려주고 아무것도 하지 않는다.
+#[tauri::command]
+pub fn sync_code_index(app: AppHandle) -> bool {
+    start_sync(app, false)
+}
+
+/// 검색 창이 시작할 때와 설정의 코드 검색 스위치가 바뀔 때 알려준다.
+/// 켜져 있는데 검색 데이터가 아직 없으면 잠시 뒤 백그라운드에서 미리 만들어, 코드 모드를 처음 열 때 바로 쓸 수 있게 한다.
+#[tauri::command]
+pub fn set_code_search_enabled(app: AppHandle, enabled: bool) {
+    let state = app.state::<CodeIndexState>();
+    let was_enabled = state.enabled.swap(enabled, Ordering::SeqCst);
+    if !enabled || was_enabled {
+        return;
+    }
+    std::thread::spawn(move || {
+        // 앱 시작 직후의 다른 작업(앱 목록, 문서 색인)과 겹치지 않게 조금 기다린다.
+        std::thread::sleep(PREBUILD_DELAY);
+        let state = app.state::<CodeIndexState>();
+        if !state.enabled.load(Ordering::SeqCst) || index_path(&app).is_ok_and(|path| path.exists())
+        {
+            return;
+        }
+        // 코드 파일이 없는 사용자에게는 빈 검색 데이터 파일도 만들지 않는다.
+        match crate::code_search::index_targets(&app, false) {
+            Ok(targets) if !targets.is_empty() => {
+                start_sync(app.clone(), false);
+            }
+            Ok(_) => {}
+            Err(error) => log::warn!("[CodeIndex] {error}"),
+        }
+    });
 }
 
 #[tauri::command]
@@ -423,6 +498,57 @@ pub fn is_code_index_building(app: AppHandle) -> bool {
     app.state::<CodeIndexState>()
         .building
         .load(Ordering::SeqCst)
+}
+
+fn read_status(path: &Path) -> rusqlite::Result<(usize, usize)> {
+    let conn = open_at(path)?;
+    conn.query_row(
+        "SELECT COUNT(*), COALESCE(SUM(skipped), 0) FROM code_files",
+        [],
+        |row| {
+            Ok((
+                row.get::<_, i64>(0)? as usize,
+                row.get::<_, i64>(1)? as usize,
+            ))
+        },
+    )
+}
+
+/// 설정의 코드 검색 카드에 보여줄 색인 상태. 색인 파일에서 바로 읽는다.
+#[tauri::command]
+pub fn get_code_index_status(app: AppHandle) -> Result<CodeIndexStatus, String> {
+    let building = is_code_index_building(app.clone());
+    let path = index_path(&app)?;
+    if !path.exists() {
+        return Ok(CodeIndexStatus {
+            building,
+            ..CodeIndexStatus::default()
+        });
+    }
+    let (files, skipped) =
+        read_status(&path).map_err(|e| format!("코드 색인 상태 확인 실패: {e}"))?;
+    let mut size_bytes = 0;
+    let mut updated_at_ms = None;
+    for suffix in ["", "-wal"] {
+        let Ok(metadata) = std::fs::metadata(format!("{}{suffix}", path.display())) else {
+            continue;
+        };
+        size_bytes += metadata.len();
+        let modified = metadata
+            .modified()
+            .ok()
+            .and_then(|time| time.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|duration| duration.as_millis() as u64);
+        updated_at_ms = updated_at_ms.max(modified);
+    }
+    Ok(CodeIndexStatus {
+        exists: true,
+        building,
+        files,
+        skipped,
+        size_bytes,
+        updated_at_ms,
+    })
 }
 
 #[cfg(test)]
@@ -553,8 +679,10 @@ mod tests {
         assert_eq!(unchanged.read, 0);
 
         let a = write(&dir, "a.py", b"\nnew_name = 1\n", 2);
-        let changed = sync_index(&mut conn, &[a]).unwrap();
-        assert_eq!((changed.read, changed.removed), (1, 1));
+        let c = write(&dir, "c.py", b"added_later = 3\n", 1);
+        let changed = sync_index(&mut conn, &[a, c]).unwrap();
+        assert_eq!((changed.read, changed.removed), (2, 1));
+        assert_eq!(found(&conn, "added_later"), vec![("c.py".into(), 1)]);
         assert!(found(&conn, "old_name").is_empty());
         assert!(found(&conn, "keep_me").is_empty());
         assert_eq!(found(&conn, "new_name"), vec![("a.py".into(), 2)]);

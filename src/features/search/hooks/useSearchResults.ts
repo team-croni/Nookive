@@ -10,6 +10,7 @@ import {
   isCodeIndexBuilding,
   refreshCodeFiles,
   searchCodeFiles,
+  sendCodeSearchEnabled,
   syncCodeIndex,
 } from '../../../utils/tauriBridge';
 import { getCodeSearchEnabled, subscribeCodeSearchEnabled } from '../../../utils/codeSearchPreference';
@@ -159,13 +160,15 @@ export function useSearchResults() {
     }
   }, []);
 
-  // 내용 색인이 끝나면 코드 모드의 결과를 새 색인으로 다시 찾는다.
+  // 내용 색인이 끝나면(코드 모드 진입 또는 파일 감시) 코드 파일 수를 다시 세고, 코드 모드의 결과를 새 색인으로 다시 찾는다.
   useEffect(() => {
     let unlisten: (() => void) | undefined;
     void isCodeIndexBuilding().then(setCodeIndexBuilding);
     void listen<{ building: boolean }>('code-index-state', ({ payload }) => {
       setCodeIndexBuilding(payload.building);
-      if (!payload.building && searchModeRef.current === 'code') setCodeIndexVersion((value) => value + 1);
+      if (payload.building) return;
+      void refreshCodeFiles().then(setCodeFileCount);
+      if (searchModeRef.current === 'code') setCodeIndexVersion((value) => value + 1);
     })
       .then((stop) => {
         unlisten = stop;
@@ -174,15 +177,15 @@ export function useSearchResults() {
     return () => unlisten?.();
   }, []);
 
-  // 설정에서 코드 검색을 끄면 코드 모드도 끝낸다.
-  useEffect(
-    () =>
-      subscribeCodeSearchEnabled((enabled) => {
-        setCodeSearchEnabledState(enabled);
-        if (!enabled && searchModeRef.current === 'code') setSearchMode('all');
-      }),
-    [setSearchMode],
-  );
+  // 설정에서 코드 검색을 끄면 코드 모드도 끝낸다. 스위치 값은 Rust에도 알려 파일 감시가 코드 색인을 갱신할지 정한다.
+  useEffect(() => {
+    void sendCodeSearchEnabled(getCodeSearchEnabled());
+    return subscribeCodeSearchEnabled((enabled) => {
+      setCodeSearchEnabledState(enabled);
+      void sendCodeSearchEnabled(enabled);
+      if (!enabled && searchModeRef.current === 'code') setSearchMode('all');
+    });
+  }, [setSearchMode]);
 
   // Tab 순환과 접두어로 들어갈 수 있는 모드. 설정에서 꺼진 모드는 빠진다.
   const availableModes = useMemo<SpecialSearchMode[]>(
