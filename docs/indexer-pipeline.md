@@ -1,6 +1,6 @@
 ---
-date: 2026-10-28
-version: 1.4.1
+date: 2026-11-03
+version: 1.5.0
 ---
 
 # Local Indexer & Embedding Pipeline

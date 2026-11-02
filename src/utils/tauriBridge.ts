@@ -73,3 +73,10 @@ export {
 export type { CodeEditor, CodeIndexStatus } from './tauri/codeSearch';
 
 export { loadSearchFeedback, saveSearchFeedback, resetSearchFeedback } from './tauri/searchFeedback';
+export {
+  applyLaunchAtLoginDefault,
+  getLaunchAtLogin,
+  openLoginItemsSettings,
+  setLaunchAtLogin,
+} from './tauri/loginItem';
+export type { LoginItemStatus } from './tauri/loginItem';

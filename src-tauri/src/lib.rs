@@ -9,6 +9,7 @@ mod files;
 mod folders;
 mod index;
 mod licenses;
+mod login_item;
 #[cfg(all(target_os = "macos", test))]
 mod mask_png;
 mod models;
@@ -163,6 +164,9 @@ pub fn run() {
             code_index::get_code_index_status,
             editors::list_code_editors,
             editors::open_code_file,
+            login_item::get_launch_at_login,
+            login_item::set_launch_at_login,
+            login_item::open_login_items_settings,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
