@@ -217,7 +217,16 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
 
         {isCode && fileAccess === 'allowed' && (
           <div className={styles.previewFrame}>
-            <CodePreview path={file.path} sizeBytes={file.sizeBytes} fallback={currentChunk.textSnippet} />
+            <CodePreview
+              key={file.path}
+              path={file.path}
+              extension={file.extension}
+              sizeBytes={file.sizeBytes}
+              fallback={currentChunk.textSnippet}
+              line={currentChunk.lineStart}
+              matchLines={selectedItem.chunks?.map((chunk) => chunk.lineStart).filter((value): value is number => value !== undefined)}
+              query={query}
+            />
           </div>
         )}
 

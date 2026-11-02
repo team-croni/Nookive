@@ -4,6 +4,6 @@
   "webSearch": "网页搜索",
   "googleSearch": "在 Google 中搜索“{{query}}”",
   "footer": {"webOpen": "在网页中打开"},
-  "code": {"placeholder": "按文件名或路径搜索代码", "placeholderNoFiles": "搜索文件夹中没有代码文件", "noResults": "没有名称或路径匹配的代码文件。", "noFiles": "搜索文件夹中没有代码文件。", "contentHint": "代码搜索按文件名和路径查找，不搜索文件内容。"},
+  "code": {"placeholder": "按文件名、路径或代码内容搜索", "placeholderNoFiles": "搜索文件夹中没有代码文件", "noResults": "没有名称、路径或内容匹配的代码。", "noFiles": "搜索文件夹中没有代码文件。", "contentHint": "输入 3 个或以上字符时搜索代码内容。", "indexing": "正在为代码内容建立索引。完成前可能找不到部分内容。"},
   "modes": {"all": {"name": "全部搜索"}, "code": {"chip": "代码", "name": "代码搜索"}}
 }

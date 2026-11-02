@@ -82,7 +82,7 @@ Nookive는 Tauri 시작 시 `/Applications`, `/System/Applications`, `~/Applicat
 거른 파일만 pending에 올리므로 React 텍스트 worker와 Node 인덱서 모두 같은 기준을 따른다.
 
 - **코드/설정 파일**(`ts`, `js`, `py`, `rs`, `json`, `yaml` 등)은 기본 임베딩에서 제외한다. 검색창의
-  코드 검색으로 이름/경로만 찾는다(#66, `docs/system-architecture.md` 2.7). 내용 검색은 #67에서 다룬다.
+  코드 검색이 이름/경로와 줄 단위 내용 색인(SQLite FTS5)으로 따로 찾는다(#66, #67, `docs/system-architecture.md` 2.7).
 - **제외 디렉터리**: 점으로 시작하는 디렉터리, `node_modules`, `vendor`, `dist`, `build`, `out`, `target`,
   `coverage`, `__pycache__`.
 - **제외 파일**: 숨김 파일(`.env*`, `.npmrc` 등), SSH 키(`id_rsa*` 등), 키/인증서 확장자(`pem`, `p12`, `pfx`,
