@@ -20,11 +20,12 @@ import { LanguageSection } from './components/LanguageSection';
 import { ModelSection } from './components/ModelSection';
 import { ThemeSection } from './components/ThemeSection';
 import { AboutSection } from './components/AboutSection';
+import { LoginItemSection } from './components/LoginItemSection';
 import { AppDataSection } from './components/AppDataSection';
 import { WebSearchSection } from './components/WebSearchSection';
 import { CodeSearchSection } from './components/CodeSearchSection';
 import { OnboardingWizard } from '../onboarding/OnboardingWizard';
-import { getModelStatus } from '../../utils/tauriBridge';
+import { applyLaunchAtLoginDefault, getModelStatus } from '../../utils/tauriBridge';
 import { useTheme } from '../../hooks/useTheme';
 import styles from './SettingsApp.module.css';
 
@@ -199,7 +200,11 @@ export default function SettingsApp() {
     return (
       <OnboardingWizard
         initialStatus={status}
-        onComplete={() => setShowOnboarding(false)}
+        onComplete={() => {
+          setShowOnboarding(false);
+          // 로그인 시 열기는 기본으로 켠다. macOS가 "로그인 항목 추가됨" 알림을 직접 보여준다.
+          void applyLaunchAtLoginDefault();
+        }}
         onAddFolder={addFolder}
         onClose={close}
         onHeaderMouseDown={handleHeaderMouseDown}
@@ -274,6 +279,7 @@ export default function SettingsApp() {
               />
               <LanguageSection />
               <ThemeSection />
+              <LoginItemSection />
             </>
           )}
           {activeTab === 'dataManagement' && (
