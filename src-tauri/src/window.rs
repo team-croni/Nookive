@@ -108,8 +108,9 @@ fn show_search_window_at_cursor(window: tauri::WebviewWindow) {
 }
 
 fn show_settings_window_with_mode(app: &AppHandle, onboarding: bool) {
-    let window_width = if onboarding { 760.0 } else { 688.0 };
-    let window_height = if onboarding { 760.0 } else { 648.0 };
+    // 창 크기에는 그림자용 여백(사방 64px)이 들어 있다. 설정은 왼쪽 분류 목록이 있어 내용 폭을 넉넉히 둔다.
+    let window_width = if onboarding { 760.0 } else { 880.0 };
+    let window_height = if onboarding { 760.0 } else { 720.0 };
     if let Some(window) = app.get_webview_window("settings") {
         // macOS에서는 동적으로 생성한 창의 그림자가 첫 표시 때 누락될 수 있어
         // 표시 직전에 네이티브 그림자 속성을 다시 적용한다.
