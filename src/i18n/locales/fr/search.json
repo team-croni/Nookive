@@ -3,5 +3,7 @@
   "searching": "Recherche…",
   "webSearch": "Recherche web",
   "googleSearch": "Rechercher « {{query}} » sur Google",
-  "footer": {"webOpen": "Ouvrir sur le web"}
+  "footer": {"webOpen": "Ouvrir sur le web"},
+  "code": {"placeholder": "Rechercher du code par nom de fichier ou chemin", "placeholderNoFiles": "Aucun fichier de code dans vos dossiers de recherche", "noResults": "Aucun fichier de code ne correspond à ce nom ou chemin.", "noFiles": "Aucun fichier de code dans vos dossiers de recherche.", "contentHint": "La recherche de code porte sur les noms et chemins des fichiers, pas sur leur contenu."},
+  "modes": {"all": {"name": "Tout rechercher"}, "code": {"chip": "Code", "name": "Recherche de code"}}
 }

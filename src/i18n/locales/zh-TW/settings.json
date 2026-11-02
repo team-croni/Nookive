@@ -12,6 +12,7 @@
   "dynamic": {"documentsAndMedia": "可以從 {{documents}} 個文件與 {{media}} 個圖片、音訊、影片建立搜尋資料。", "documents": "可以從 {{count}} 個文件建立搜尋資料。", "media": "可以從 {{count}} 個圖片、音訊、影片建立搜尋資料。", "action": "正在為 {{count}} 個檔案建立搜尋資料。", "refreshHint": "檢查資料夾變更或重新整理搜尋狀態。"},
   "models": {"title": "本機模型", "embedding": "搜尋模型", "embeddingDescription": "開始搜尋前請安裝本機模型。", "embeddingSize": "約 825MB。下載一次後會儲存在此 Mac 上。", "speech": "語音搜尋", "speechDescription": "選用功能，支援語音辨識與逐字時間標記，約 1.9GB。", "readyDescription": "模型只會儲存在此 Mac 上，不會與檔案一起上傳。", "download": "下載", "installed": "已安裝", "downloading": "正在下載模型…", "error": "模型下載失敗。請檢查連線後再試。"},
   "webSearch": {"title": "網頁搜尋", "description": "本機搜尋沒有結果時使用 Google 建議與網頁搜尋。", "option": "使用 Google 搜尋", "privacyNotice": "啟用網頁搜尋後，輸入的搜尋字詞可能會傳送至 Google。不會傳送檔案內容與本機搜尋資料。"},
+  "codeSearch": {"title": "程式碼搜尋", "description": "在搜尋視窗按 Tab 或輸入「code:」，即可依名稱或路徑尋找搜尋資料夾中的程式碼檔案。不會為檔案內容建立索引。", "option": "使用程式碼搜尋"},
   "about": {"version": "版本 {{version}}", "maintainer": "Croni OpenSource Project", "github": "GitHub", "license": "MIT 授權條款", "thirdParty": "開源授權條款", "issues": "回報問題"},
   "theme": {"title": "外觀", "description": "選擇 Nookive 的顯示模式。", "options": {"light": "淺色模式", "dark": "深色模式", "system": "跟隨系統"}},
   "dataManagement": {"title": "應用程式資料管理", "description": "刪除下載的模型與 Nookive 建立的搜尋資料。", "sourceFilesHint": "不會刪除你選取的資料夾與原始檔案。", "confirm": "確定要刪除嗎？", "button": "刪除模型與應用程式資料", "hint": "刪除模型、搜尋結果與應用程式設定。", "error": "無法刪除應用程式資料。請重新啟動應用程式後再試。"},

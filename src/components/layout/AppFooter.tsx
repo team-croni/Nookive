@@ -9,6 +9,8 @@ interface AppFooterProps {
   openLabel?: string;
   onOpen: () => void;
   onCopyPath: () => void;
+  /** 다음 검색 모드로 넘어가는 Tab 안내. 넘어갈 모드가 없으면 숨긴다. */
+  modeHint?: { label: string; onClick: () => void };
 }
 
 export function AppFooter({
@@ -17,6 +19,7 @@ export function AppFooter({
   openLabel,
   onOpen,
   onCopyPath,
+  modeHint,
 }: AppFooterProps) {
   const { t } = useTranslation('common');
   const resolvedOpenLabel = openLabel ?? t('actions.open');
@@ -44,6 +47,20 @@ export function AppFooter({
         <KeyHint label="C" glyph="⌘" />
         <span>{t('actions.copyPath')}</span>
       </Button>
+      {modeHint && (
+        <Button
+          variant="ghost"
+          size="xs"
+          className="footer-action footer-action-end"
+          onClick={modeHint.onClick}
+          // 클릭해도 검색 입력의 포커스를 유지해 Tab 전환이 계속 동작하게 한다.
+          onMouseDown={(event) => event.preventDefault()}
+          title={modeHint.label}
+        >
+          <KeyHint label="Tab" />
+          <span>{modeHint.label}</span>
+        </Button>
+      )}
     </div>
   );
 }

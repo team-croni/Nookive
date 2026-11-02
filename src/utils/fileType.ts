@@ -15,7 +15,9 @@ export const PDF_EXTS = new Set(['pdf']);
 export const CODE_EXTS = new Set([
   'ts', 'tsx', 'js', 'jsx', 'py', 'rs', 'go', 'c', 'cpp', 'h',
   'java', 'html', 'css', 'scss', 'json', 'yaml', 'yml', 'toml',
-  'sh', 'bash', 'zsh', 'sql', 'mjs', 'cjs',
+  'sh', 'bash', 'zsh', 'sql', 'mjs', 'cjs', 'swift', 'kt', 'kts', 'rb',
+  'php', 'vue', 'svelte', 'cs', 'dart', 'lua', 'scala', 'hpp', 'm', 'mm',
+  'xml', 'gradle',
 ]);
 
 export const SHEET_EXTS = new Set([

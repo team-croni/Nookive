@@ -3,5 +3,7 @@
   "searching": "正在搜索…",
   "webSearch": "网页搜索",
   "googleSearch": "在 Google 中搜索“{{query}}”",
-  "footer": {"webOpen": "在网页中打开"}
+  "footer": {"webOpen": "在网页中打开"},
+  "code": {"placeholder": "按文件名或路径搜索代码", "placeholderNoFiles": "搜索文件夹中没有代码文件", "noResults": "没有名称或路径匹配的代码文件。", "noFiles": "搜索文件夹中没有代码文件。", "contentHint": "代码搜索按文件名和路径查找，不搜索文件内容。"},
+  "modes": {"all": {"name": "全部搜索"}, "code": {"chip": "代码", "name": "代码搜索"}}
 }
