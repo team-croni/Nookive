@@ -225,6 +225,17 @@ export function useSearchResults() {
     };
   }, []);
 
+  // 앱을 설치하거나 지우면 앱 목록만 다시 불러온다. (Rust가 번들 목록이 실제로 바뀌었을 때만 알린다)
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    void listen('applications-changed', () => void searchClient.refreshApplications())
+      .then((un) => {
+        unlisten = un;
+      })
+      .catch(() => { });
+    return () => unlisten?.();
+  }, []);
+
   // 설정에서 검색 개인화를 초기화하면 메모리 기록도 비운다.
   useEffect(() => {
     let unlisten: (() => void) | undefined;

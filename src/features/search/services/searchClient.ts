@@ -53,6 +53,23 @@ export class SearchClient {
     await this.preload();
   }
 
+  /**
+   * 앱이 설치·삭제됐을 때 앱 목록만 다시 불러와 바꾼다. 문서·폴더 인덱스는 다시 읽지 않는다.
+   * 아직 인덱스를 불러오지 않았으면 다음 로드가 새 목록을 읽으므로 아무것도 하지 않는다.
+   */
+  async refreshApplications(): Promise<void> {
+    if (this.loadPromise) await this.loadPromise.catch(() => undefined);
+    if (!this.localIndex) return;
+    const generation = this.indexGeneration;
+    const applications = await listApplications(i18n.resolvedLanguage ?? i18n.language);
+    // 그 사이 전체 새로고침이 있었으면 그 결과를 그대로 둔다.
+    if (generation !== this.indexGeneration || !this.localIndex) return;
+    this.localIndex = [
+      ...this.localIndex.filter((record) => record.category !== 'application'),
+      ...applications,
+    ];
+  }
+
   /** 인덱스를 미리 로드해 즉시 검색을 가능하게 한다 (앱 시작 시 호출) */
   async preload(): Promise<void> {
     try {

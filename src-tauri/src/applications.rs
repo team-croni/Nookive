@@ -22,13 +22,8 @@ pub fn list_applications(language: Option<String>) -> Vec<ApplicationSearchResul
 
     #[cfg(target_os = "macos")]
     {
-        let mut roots = vec![
-            PathBuf::from("/Applications"),
-            PathBuf::from("/System/Applications"),
-        ];
-        if let Ok(home) = std::env::var("HOME") {
-            roots.push(PathBuf::from(home).join("Applications"));
-        }
+        let mut roots = vec![PathBuf::from("/System/Applications")];
+        roots.extend(user_application_roots());
 
         let languages = match language.filter(|code| !code.is_empty()) {
             Some(code) => vec![code],
@@ -42,6 +37,15 @@ pub fn list_applications(language: Option<String>) -> Vec<ApplicationSearchResul
         apps.dedup_by(|a, b| a.file.path == b.file.path);
         apps
     }
+}
+
+/// 사용자가 앱을 설치·삭제하는 폴더. `/System/Applications`는 macOS 업데이트 때만 바뀌므로 감시하지 않는다.
+pub(crate) fn user_application_roots() -> Vec<PathBuf> {
+    let mut roots = vec![PathBuf::from("/Applications")];
+    if let Ok(home) = std::env::var("HOME") {
+        roots.push(PathBuf::from(home).join("Applications"));
+    }
+    roots
 }
 
 #[cfg(target_os = "macos")]

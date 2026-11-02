@@ -1,6 +1,6 @@
 ---
 date: 2026-11-03
-version: 2.0.0
+version: 2.1.0
 ---
 
 # System Architecture Specification
@@ -85,6 +85,13 @@ flowchart TB
 표시 이름은 앱 번들의 현지화 이름(`InfoPlist.strings` / `.loctable`)을 Nookive 화면 언어로
 고르고(예: 한국어 화면에서 Notes → 메모), Info.plist의 원래 이름과 번들 파일명은 검색용 이름으로
 함께 둔다. 설정에서 화면 언어를 바꾸면 앱 목록을 다시 불러온다.
+
+앱 설치·삭제는 재시작 없이 반영한다(`app_watcher.rs`). `/Applications`와 `~/Applications`를 감시하되
+(`/System/Applications`는 macOS 업데이트 때만 바뀌어 제외), 번들 안쪽 파일 이벤트는 앱 업데이트이므로 무시하고
+번들 경로 자체나 번들을 담을 수 있는 폴더(3단계 깊이까지)의 변경만 받는다. 2초 동안 조용해지면 Info.plist를 읽지 않는
+가벼운 번들 경로 목록을 이전과 비교해, 실제로 달라졌을 때만 `applications-changed`를 보낸다. 검색 창은
+`searchClient.refreshApplications()`로 앱 레코드만 바꾸고 문서·폴더 인덱스는 다시 읽지 않는다. 휴지통으로 옮긴 앱도
+같은 방식으로 빠진다.
 
 ### 2.4. 미디어 세그먼트 & 이동
 
