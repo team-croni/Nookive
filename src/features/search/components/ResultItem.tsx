@@ -60,6 +60,8 @@ const ResultItemComponent: React.FC<ResultItemProps> = ({
   // 미리보기 페이지가 어긋나지 않게 한다.
   const { pageNumber: chunkPageNumber, lineStart, timestampSeconds } = item.bestChunk;
   const pageNumber = resolvedPageNumber ?? chunkPageNumber;
+  // 코드 내용 결과는 파일당 하나이므로, 같은 파일에서 더 일치한 줄 수를 라인 뱃지에 붙인다. (예: L52 +2)
+  const moreLines = item.category === 'code' && item.chunks ? item.chunks.length - 1 : 0;
 
   // PDF는 매칭 페이지가 확정되기 전에는 뱃지를 숨긴다. 청크 페이지가
   // 문서 뒤쪽이면 마지막 페이지/전체 페이지 수가 잠깐 노출됐다가 바뀌어
@@ -101,7 +103,9 @@ const ResultItemComponent: React.FC<ResultItemProps> = ({
               <Badge variant="neutral" active={isActive} fadeIn>p.{pageNumber}</Badge>
             )}
             {lineStart !== undefined && (
-              <Badge variant="neutral" active={isActive}>L{lineStart}</Badge>
+              <Badge variant="neutral" active={isActive}>
+                L{lineStart}{moreLines > 0 ? ` +${moreLines}` : ''}
+              </Badge>
             )}
             {timestampSeconds !== undefined && (
               <Badge variant="neutral" active={isActive}>

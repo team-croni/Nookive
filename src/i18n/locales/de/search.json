@@ -4,6 +4,6 @@
   "webSearch": "Websuche",
   "googleSearch": "„{{query}}“ bei Google suchen",
   "footer": {"webOpen": "Im Web öffnen"},
-  "code": {"placeholder": "Code nach Dateiname oder Pfad suchen", "placeholderNoFiles": "Keine Codedateien in deinen Suchordnern", "noResults": "Keine Codedatei passt zu diesem Namen oder Pfad.", "noFiles": "In deinen Suchordnern gibt es keine Codedateien.", "contentHint": "Die Codesuche durchsucht Dateinamen und Pfade, nicht Dateiinhalte."},
+  "code": {"placeholder": "Code nach Dateiname, Pfad oder Inhalt suchen", "placeholderNoFiles": "Keine Codedateien in deinen Suchordnern", "noResults": "Kein Code passt zu diesem Namen, Pfad oder Inhalt.", "noFiles": "In deinen Suchordnern gibt es keine Codedateien.", "contentHint": "Codeinhalte werden ab 3 Zeichen durchsucht.", "indexing": "Codeinhalte werden indexiert. Bis dahin werden manche Inhalte noch nicht gefunden."},
   "modes": {"all": {"name": "Alles durchsuchen"}, "code": {"chip": "Code", "name": "Codesuche"}}
 }

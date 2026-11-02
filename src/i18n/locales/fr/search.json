@@ -4,6 +4,6 @@
   "webSearch": "Recherche web",
   "googleSearch": "Rechercher « {{query}} » sur Google",
   "footer": {"webOpen": "Ouvrir sur le web"},
-  "code": {"placeholder": "Rechercher du code par nom de fichier ou chemin", "placeholderNoFiles": "Aucun fichier de code dans vos dossiers de recherche", "noResults": "Aucun fichier de code ne correspond à ce nom ou chemin.", "noFiles": "Aucun fichier de code dans vos dossiers de recherche.", "contentHint": "La recherche de code porte sur les noms et chemins des fichiers, pas sur leur contenu."},
+  "code": {"placeholder": "Rechercher du code par nom de fichier, chemin ou contenu", "placeholderNoFiles": "Aucun fichier de code dans vos dossiers de recherche", "noResults": "Aucun code ne correspond à ce nom, chemin ou contenu.", "noFiles": "Aucun fichier de code dans vos dossiers de recherche.", "contentHint": "Le contenu du code est recherché à partir de 3 caractères.", "indexing": "Indexation du contenu du code. Une partie du contenu peut manquer jusqu'à la fin."},
   "modes": {"all": {"name": "Tout rechercher"}, "code": {"chip": "Code", "name": "Recherche de code"}}
 }

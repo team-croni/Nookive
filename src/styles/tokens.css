@@ -77,6 +77,27 @@
   --accent-emerald: #059669;
   --accent-emerald-soft: rgba(5, 150, 105, 0.16);
   --accent-purple: #7c3aed;
+
+  /* 🧑‍💻 Code preview: 테마와 관계없이 VS Code Dark+ 색을 쓴다 */
+  --code-bg: #1e1e1e;
+  --code-border: transparent;
+  --code-text: #d4d4d4;
+  --code-gutter: #6e7681;
+  --code-gutter-active: #c6c6c6;
+  --code-line-active: rgba(255, 255, 255, 0.07);
+  --code-line-accent: #3794ff;
+  --code-line-accent-dim: rgba(55, 148, 255, 0.4);
+  --code-find-match: rgba(234, 92, 0, 0.45);
+  --code-keyword: #569cd6;
+  --code-control: #c586c0;
+  --code-string: #ce9178;
+  --code-number: #b5cea8;
+  --code-comment: #6a9955;
+  --code-function: #dcdcaa;
+  --code-type: #4ec9b0;
+  --code-variable: #9cdcfe;
+  --code-regexp: #d16969;
+  --code-meta: #9b9b9b;
   --accent-amber: #d97706;
 
   /* ⚠️ Error */
@@ -168,6 +189,9 @@
     --accent-emerald: #10b981;
     --accent-emerald-soft: rgba(16, 185, 129, 0.18);
     --accent-purple: #8b5cf6;
+    /* 다크 패널과 구분되도록 코드 면을 한 단계 어둡게 두고 얇은 테두리를 두른다. */
+    --code-bg: #141416;
+    --code-border: rgba(255, 255, 255, 0.08);
     --accent-amber: #f59e0b;
 
     --error-text: #fca5a5;
@@ -234,6 +258,8 @@
   --accent-emerald: #059669;
   --accent-emerald-soft: rgba(5, 150, 105, 0.16);
   --accent-purple: #7c3aed;
+  --code-bg: #1e1e1e;
+  --code-border: transparent;
   --accent-amber: #d97706;
   --error-text: #b91c1c;
   --error-bg: rgba(220, 38, 38, 0.08);
@@ -296,6 +322,9 @@
   --accent-emerald: #10b981;
   --accent-emerald-soft: rgba(16, 185, 129, 0.18);
   --accent-purple: #8b5cf6;
+  /* 다크 패널과 구분되도록 코드 면을 한 단계 어둡게 두고 얇은 테두리를 두른다. */
+  --code-bg: #141416;
+  --code-border: rgba(255, 255, 255, 0.08);
   --accent-amber: #f59e0b;
   --error-text: #fca5a5;
   --error-bg: rgba(0, 0, 0, 0.4);

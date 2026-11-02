@@ -1,6 +1,6 @@
 // src-tauri/src/code_search.rs
-// 코드 검색(1단계): 검색 폴더의 코드 파일을 이름/경로로 찾는다. 켜고 끄기는 프론트엔드 설정이다.
-// 파일 내용은 읽지 않고 임베딩도 하지 않는다. 목록은 메모리에만 두고 필요할 때 다시 훑는다.
+// 코드 검색: 검색 폴더의 코드 파일을 이름/경로로 찾고, 내용 색인(code_index)의 일치 줄을 뒤에 붙인다.
+// 켜고 끄기는 프론트엔드 설정이다. 파일 목록은 메모리에만 두고 필요할 때 다시 훑는다.
 use serde::Serialize;
 use std::path::Path;
 use std::sync::Mutex;
@@ -8,6 +8,7 @@ use std::time::{Duration, Instant, UNIX_EPOCH};
 use tauri::{AppHandle, Manager};
 use unicode_normalization::UnicodeNormalization;
 
+use crate::code_index::{self, IndexTarget, LineMatch};
 use crate::index::file_class::{
     FileClass, classify_extension, extension_of, is_excluded_directory_name, is_excluded_file_name,
 };
@@ -17,7 +18,10 @@ use crate::index::load_manifest;
 const CODE_FILES_MAX_AGE: Duration = Duration::from_secs(30);
 /// 아주 큰 폴더에서도 메모리 사용량이 일정 수준을 넘지 않게 한다.
 const MAX_CODE_FILES: usize = 200_000;
-const MAX_RESULTS: usize = 50;
+/// 이름이 일치하는 결과를 앞에 두되, 내용 결과가 밀려나지 않게 따로 상한을 둔다.
+const MAX_NAME_RESULTS: usize = 20;
+/// 내용이 일치한 파일 수 (파일당 결과 하나)
+const MAX_LINE_RESULTS: usize = 50;
 
 #[derive(Debug, Clone)]
 struct CodeFile {
@@ -60,6 +64,10 @@ pub struct CodeSnippet {
     chunk_index: u32,
     #[serde(rename = "textSnippet")]
     text_snippet: String,
+    #[serde(rename = "lineStart", skip_serializing_if = "Option::is_none")]
+    line_start: Option<u32>,
+    #[serde(rename = "lineEnd", skip_serializing_if = "Option::is_none")]
+    line_end: Option<u32>,
 }
 
 /// 프론트엔드 SearchResultItem과 같은 모양이다.
@@ -71,6 +79,8 @@ pub struct CodeSearchResult {
     similarity_score: f64,
     #[serde(rename = "bestChunk")]
     best_chunk: CodeSnippet,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    chunks: Option<Vec<CodeSnippet>>,
     category: &'static str,
 }
 
@@ -257,9 +267,46 @@ fn to_result((tier, file): (u8, &CodeFile)) -> CodeSearchResult {
         best_chunk: CodeSnippet {
             chunk_index: 0,
             text_snippet: file.relative.clone(),
+            line_start: None,
+            line_end: None,
         },
+        chunks: None,
         category: "code",
     }
+}
+
+fn line_snippet(item: &LineMatch) -> CodeSnippet {
+    CodeSnippet {
+        chunk_index: item.line,
+        text_snippet: item.text.trim().to_string(),
+        line_start: Some(item.line),
+        line_end: Some(item.line),
+    }
+}
+
+/// 내용이 일치한 파일 하나. 가장 좋은 줄이 bestChunk이고, chunks에는 일치한 줄을 모두 담는다.
+/// 이름 결과보다 낮은 점수를 준다.
+fn lines_to_result(lines: Vec<LineMatch>) -> Option<CodeSearchResult> {
+    let best = lines.first()?;
+    let path = Path::new(&best.path);
+    let name = path
+        .file_name()
+        .map(|name| name.to_string_lossy().to_string())
+        .unwrap_or_default();
+    Some(CodeSearchResult {
+        id: format!("code-lines:{}", best.path),
+        file: CodeFileMetadata {
+            extension: extension_of(path).unwrap_or_default(),
+            path: best.path.clone(),
+            name,
+            size_bytes: best.size_bytes,
+            modified_at: format_modified_at(best.modified_at_ms.max(0) as u128),
+        },
+        similarity_score: 0.3 - f64::from(best.tier) * 0.1,
+        best_chunk: line_snippet(best),
+        chunks: Some(lines.iter().map(line_snippet).collect()),
+        category: "code",
+    })
 }
 
 /// 목록이 없거나, 검색 폴더가 바뀌었거나, max_age보다 오래됐으면 다시 훑는다.
@@ -287,6 +334,26 @@ fn ensure_code_files(
     Ok(cache.as_ref().map_or(0, |cache| cache.files.len()))
 }
 
+/// 내용 색인이 읽을 파일 목록. 오래된 목록이면 먼저 다시 훑는다.
+pub(crate) fn index_targets(app: &AppHandle) -> Result<Vec<IndexTarget>, String> {
+    let state = app.state::<CodeSearchState>();
+    ensure_code_files(app, &state, Some(CODE_FILES_MAX_AGE))?;
+    let cache = state
+        .cache
+        .lock()
+        .map_err(|_| "코드 목록 잠금 실패".to_string())?;
+    Ok(cache
+        .as_ref()
+        .map_or(&[][..], |cache| cache.files.as_slice())
+        .iter()
+        .map(|file| IndexTarget {
+            path: file.path.clone(),
+            size_bytes: file.size_bytes,
+            modified_at_ms: file.modified_at_ms as i64,
+        })
+        .collect())
+}
+
 /// 코드 검색 모드에 들어올 때(와 검색창이 Tab 안내를 정할 때) 호출한다.
 /// 오래된 목록만 다시 훑고 코드 파일 수를 돌려준다.
 #[tauri::command]
@@ -307,17 +374,38 @@ pub async fn search_code_files(
     tauri::async_runtime::spawn_blocking(move || {
         let state = app.state::<CodeSearchState>();
         ensure_code_files(&app, &state, None)?;
-        let cache = state
-            .cache
-            .lock()
-            .map_err(|_| "코드 목록 잠금 실패".to_string())?;
-        let files = cache
-            .as_ref()
-            .map_or(&[][..], |cache| cache.files.as_slice());
-        Ok(rank_code_files(files, &query, MAX_RESULTS)
-            .into_iter()
-            .map(to_result)
-            .collect())
+        let mut results: Vec<CodeSearchResult> = {
+            let cache = state
+                .cache
+                .lock()
+                .map_err(|_| "코드 목록 잠금 실패".to_string())?;
+            let files = cache
+                .as_ref()
+                .map_or(&[][..], |cache| cache.files.as_slice());
+            rank_code_files(files, &query, MAX_NAME_RESULTS)
+                .into_iter()
+                .map(to_result)
+                .collect()
+        };
+        // 내용 검색이 실패해도 이름 결과는 보여준다.
+        match code_index::search_index(&app, &query, MAX_LINE_RESULTS) {
+            Ok(groups) => {
+                for lines in groups {
+                    // 이름으로도 찾은 파일은 결과를 하나만 두고, 일치한 줄은 미리보기에서 강조한다.
+                    let path = lines.first().map(|line| line.path.as_str());
+                    if let Some(named) = results
+                        .iter_mut()
+                        .find(|item| Some(item.file.path.as_str()) == path)
+                    {
+                        named.chunks = Some(lines.iter().map(line_snippet).collect());
+                    } else if let Some(result) = lines_to_result(lines) {
+                        results.push(result);
+                    }
+                }
+            }
+            Err(error) => log::warn!("[CodeSearch] {error}"),
+        }
+        Ok(results)
     })
     .await
     .map_err(|e| format!("코드 검색 실패: {e}"))?
