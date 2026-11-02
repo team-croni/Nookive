@@ -176,6 +176,18 @@
 }
 
 /* 본문 텍스트 스니펫: PDF 페이지처럼 흰 문서 영역으로 뷰포트를 채운다 */
+/* 좁은 미리보기에서 가로 스크롤 없이 읽히도록 긴 줄은 접는다. (들여쓰기는 유지) */
+.textContent.codeContent {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10.5px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  overflow-x: hidden;
+  tab-size: 2;
+}
+
 .textContent {
   width: 100%;
   height: 100%;
@@ -189,6 +201,9 @@
   white-space: pre-wrap;
   word-break: break-word;
   background: var(--surface-doc);
+  /* 문서 면은 다크 모드에서도 흰색이므로, 스크롤바도 라이트 모드 색을 쓴다. */
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
   padding: 14px 16px;
   border-radius: 8px;
   user-select: text;

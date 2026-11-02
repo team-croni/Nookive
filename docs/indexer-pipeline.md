@@ -81,8 +81,8 @@ Nookive는 Tauri 시작 시 `/Applications`, `/System/Applications`, `~/Applicat
 임베딩 대상은 Rust의 `src-tauri/src/index/file_class.rs` 한 곳에서 결정한다. manifest 스캔이 이 규칙으로
 거른 파일만 pending에 올리므로 React 텍스트 worker와 Node 인덱서 모두 같은 기준을 따른다.
 
-- **코드/설정 파일**(`ts`, `js`, `py`, `rs`, `json`, `yaml` 등)은 기본 임베딩에서 제외한다. 코드 검색은 별도
-  lexical 인덱스로 다룬다(#10).
+- **코드/설정 파일**(`ts`, `js`, `py`, `rs`, `json`, `yaml` 등)은 기본 임베딩에서 제외한다. 검색창의
+  코드 검색으로 이름/경로만 찾는다(#66, `docs/system-architecture.md` 2.7). 내용 검색은 #67에서 다룬다.
 - **제외 디렉터리**: 점으로 시작하는 디렉터리, `node_modules`, `vendor`, `dist`, `build`, `out`, `target`,
   `coverage`, `__pycache__`.
 - **제외 파일**: 숨김 파일(`.env*`, `.npmrc` 등), SSH 키(`id_rsa*` 등), 키/인증서 확장자(`pem`, `p12`, `pfx`,

@@ -36,6 +36,18 @@
   border-top: var(--rim-border-divider);
 }
 
+.code-search-empty {
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.code-search-empty small {
+  color: var(--text-tertiary);
+  font-size: 11.5px;
+}
+
 /* 로컬 결과가 없을 때의 웹 검색 폴백 (전체 폭 사용) */
 .web-fallback-pane {
   flex: 1;
@@ -82,6 +94,10 @@
   padding: 6px 8px;
   border-top: var(--rim-border-divider);
   flex-shrink: 0;
+}
+
+.footer-action-end {
+  margin-left: auto;
 }
 
 .footer-action {

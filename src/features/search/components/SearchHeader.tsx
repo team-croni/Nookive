@@ -1,18 +1,37 @@
 // src/features/search/components/SearchHeader.tsx
 import React, { useRef, useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
+import { CodeXml, Search, type LucideIcon } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import styles from './SearchHeader.module.css';
 import { useTranslation } from 'react-i18next';
+import {
+  nextSearchModeForKey,
+  parseModePrefix,
+  type SearchMode,
+  type SpecialSearchMode,
+} from '../utils/searchModes';
+
+// 칩 아이콘: 라벨을 읽지 않아도 모드를 알아볼 수 있게 한다.
+const MODE_ICONS: Record<SpecialSearchMode, LucideIcon> = { code: CodeXml };
 
 interface SearchHeaderProps {
   query: string;
   onQueryChange: (val: string) => void;
+  searchMode: SearchMode;
+  /** Tab 순환과 접두어로 들어갈 수 있는 모드 (설정에서 꺼진 모드는 빠진다) */
+  availableModes: readonly SpecialSearchMode[];
+  /** 검색 폴더에 코드 파일이 있는지. 없으면 코드 모드에서 안내 문구를 보여준다. */
+  hasCodeFiles: boolean;
+  onSearchModeChange: (mode: SearchMode) => void;
 }
 
 const SearchHeaderComponent: React.FC<SearchHeaderProps> = ({
   query,
   onQueryChange,
+  searchMode,
+  availableModes,
+  hasCodeFiles,
+  onSearchModeChange,
 }) => {
   const { t } = useTranslation('search');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,21 +81,61 @@ const SearchHeaderComponent: React.FC<SearchHeaderProps> = ({
     };
   }, []);
 
+  const ModeIcon = searchMode === 'all' ? null : MODE_ICONS[searchMode];
+
   return (
     <div className={styles.header}>
       <div className={styles.iconWrapper}>
         <Search className={styles.icon} size={22} />
       </div>
 
+      {ModeIcon && (
+        <span className={styles.modeChip}>
+          <ModeIcon size={14} strokeWidth={2.4} aria-hidden="true" />
+          {t(`modes.${searchMode}.chip`)}
+        </span>
+      )}
+
       <input
         ref={inputRef}
         type="text"
         autoFocus
         className={styles.input}
-        placeholder={t('placeholder')}
+        placeholder={
+          searchMode === 'code'
+            ? t(hasCodeFiles ? 'code.placeholder' : 'code.placeholderNoFiles')
+            : t('placeholder')
+        }
         value={inputValue}
+        onKeyDown={(e) => {
+          // Tab은 웹뷰 기본 동작(다음 버튼으로 포커스 이동)을 막고 모드 전환에만 쓴다.
+          if (e.key === 'Tab') e.preventDefault();
+          const next = nextSearchModeForKey(
+            {
+              key: e.key,
+              shiftKey: e.shiftKey,
+              metaKey: e.metaKey,
+              ctrlKey: e.ctrlKey,
+              altKey: e.altKey,
+              isComposing: e.nativeEvent.isComposing || e.keyCode === 229,
+            },
+            searchMode,
+            availableModes,
+            inputValue,
+          );
+          if (next !== null) {
+            e.preventDefault();
+            onSearchModeChange(next);
+          }
+        }}
         onChange={(e) => {
-          const nextValue = e.target.value;
+          let nextValue = e.target.value;
+          // "code:" 같은 접두어로 시작하면 접두어를 칩으로 바꾼다.
+          const prefixed = searchMode === 'all' ? parseModePrefix(nextValue, availableModes) : null;
+          if (prefixed) {
+            nextValue = prefixed.rest;
+            onSearchModeChange(prefixed.mode);
+          }
           inputValueRef.current = nextValue;
           setInputValue(nextValue);
           onQueryChange(nextValue);

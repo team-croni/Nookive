@@ -51,6 +51,7 @@ Nookive 아이콘
 - 필수 모델이 모두 준비된 경우 불필요한 모델 설치 및 정확도 향상 섹션은 숨겨져(`compact`) 깔끔한 설정 환경 유지
 - 검색 폴더 추가: macOS native folder picker
 - 검색 폴더 제거
+- 코드 검색 켜기/끄기(기본 켜짐): 검색 폴더의 코드 파일을 검색창의 코드 검색(Tab 또는 `code:`)에서 이름/경로로 찾는다. 설정은 localStorage(`nookive.codeSearchEnabled`)에 두고 검색 창은 storage 이벤트로 따라간다
 - 화면 모드 선택: 라이트모드, 다크모드, 시스템
 - manifest 기반 발견 파일/대기 파일/폴더 수 확인
 - 상태 새로고침

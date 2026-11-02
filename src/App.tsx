@@ -14,6 +14,7 @@ import { usePreviewSelection } from './features/search/hooks/usePreviewSelection
 import { usePdfMatchScan } from './features/search/hooks/usePdfMatchScan';
 import { openGoogleSearch } from './features/search/services/webSearchClient';
 import { feedbackClient } from './features/search/services/feedbackClient';
+import { cycleSearchMode } from './features/search/utils/searchModes';
 import { openFileInOS, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
 import type { SearchResultItem } from './types/search';
 import './App.css';
@@ -32,6 +33,10 @@ export function App() {
     hasQuery,
     isSettled,
     settledQuery,
+    searchMode,
+    setSearchMode,
+    availableModes,
+    hasCodeFiles,
     isWindowExpanded,
     orderedResults,
     deferredResults,
@@ -98,7 +103,9 @@ export function App() {
   // 로컬 검색이 "현재 쿼리에 대해 끝났고" 결과가 없을 때만 Google 자동완성 폴백을 노출한다.
   // (검색 중이거나 결과가 있는 동안에는 폴백을 마운트하지 않고 네트워크 요청도 보내지 않는다.
   //  입력 직후 첫 렌더에서 폴백이 먼저 마운트되면 네이티브 창 확장과 겹쳐 레이아웃이 흔들린다.)
-  const localWebMode = isSettled && !isLoading && orderedResults.length === 0;
+  // 코드 검색 모드에서는 웹 폴백 대신 빈 결과 안내를 보여준다.
+  const isCodeMode = searchMode === 'code';
+  const localWebMode = !isCodeMode && isSettled && !isLoading && orderedResults.length === 0;
   const {
     suggestions: webSuggestions,
     query: webQuery,
@@ -110,7 +117,7 @@ export function App() {
     // 검색어가 바뀌는 동안에도 확장된 웹 폴백 화면을 유지한다.
     // 이 순간 localWebMode만 false로 바꾸면 훅이 기존 목록을 []로
     // 반환해 결과 영역이 매 입력마다 사라졌다가 다시 나타난다.
-    localWebMode || (isWindowExpanded && !isSettled),
+    localWebMode || (!isCodeMode && isWindowExpanded && !isSettled),
   );
   const webMode = localWebMode && isWebSearchEnabled;
   const [webFallbackWasVisible, setWebFallbackWasVisible] = useState(false);
@@ -120,9 +127,10 @@ export function App() {
   // 앱 결과가 먼저 도착한 중간 렌더에서도 웹 폴백을 유지해 빈 화면을 방지한다.
   const keepWebFallbackDuringSearch =
     isWindowExpanded && isLoading && webFallbackWasVisible;
-  const showWebFallback =
+  const showWebFallback = !isCodeMode && (
     (orderedResults.length === 0 && (webMode || (isWindowExpanded && !isSettled)))
-    || keepWebFallbackDuringSearch;
+    || keepWebFallbackDuringSearch
+  );
 
   // 웹 폴백에서 새 로컬 검색으로 전환할 때, 앱 결과가 확정될 때까지
   // 웹 폴백을 유지할 수 있도록 마지막 표시 상태를 기억한다.
@@ -192,6 +200,8 @@ export function App() {
     onEscape: () => {
       if (query) {
         setQuery('');
+      } else if (searchMode !== 'all') {
+        setSearchMode('all');
       } else {
         hideDesktopWindow();
       }
@@ -237,6 +247,14 @@ export function App() {
     }
   };
 
+  // 하단 Tab 안내: 다음 모드 이름을 보여준다. 들어갈 모드가 없거나,
+  // 전체 검색에서 코드 파일이 없으면(코드와 무관한 사용자) 숨긴다.
+  const nextMode = cycleSearchMode(searchMode, availableModes);
+  const modeHint =
+    nextMode !== searchMode && (searchMode !== 'all' || hasCodeFiles)
+      ? { label: t(`modes.${nextMode}.name`), onClick: () => setSearchMode(nextMode) }
+      : undefined;
+
   const handleBackdropClick = () => {
     hideDesktopWindow();
   };
@@ -252,12 +270,22 @@ export function App() {
           <SearchHeader
             query={query}
             onQueryChange={setQuery}
+            searchMode={searchMode}
+            availableModes={availableModes}
+            hasCodeFiles={hasCodeFiles}
+            onSearchModeChange={setSearchMode}
           />
 
           {/* 2. 본문 영역: 결과가 있으면 항상 2열(로딩 중에도 유지),
                  표시할 결과가 없을 때는 Google 자동완성 폴백을 노출 */}
           {hasQuery && isWindowExpanded && (
-            showWebFallback ? (
+            isCodeMode && isSettled && orderedResults.length === 0 ? (
+              // 코드 검색 결과가 없으면 빈 미리보기 패널 없이 본문 전체에 안내를 보여준다.
+              <div className="search-status code-search-empty">
+                <span>{t(hasCodeFiles ? 'code.noResults' : 'code.noFiles')}</span>
+                <small>{t('code.contentHint')}</small>
+              </div>
+            ) : showWebFallback ? (
               <div className="web-fallback-pane">
                 <WebFallbackList
                   query={webDisplayQuery}
@@ -308,6 +336,7 @@ export function App() {
               openLabel={showWebFallback ? t('footer.webOpen') : t('common:actions.open')}
               onOpen={() => openSelectedAt(selectedIndex)}
               onCopyPath={handleCopyPath}
+              modeHint={modeHint}
             />
           )}
         </FloatingWindow>

@@ -22,7 +22,8 @@ impl FileClass {
 const DOCUMENT_EXTENSIONS: &[&str] = &["md", "txt", "rtf"];
 const CODE_EXTENSIONS: &[&str] = &[
     "ts", "tsx", "js", "jsx", "mjs", "cjs", "py", "rs", "go", "java", "c", "cpp", "h", "html",
-    "css", "scss", "json", "yaml", "yml", "toml", "sh", "bash", "zsh", "sql",
+    "css", "scss", "json", "yaml", "yml", "toml", "sh", "bash", "zsh", "sql", "swift", "kt", "kts",
+    "rb", "php", "vue", "svelte", "cs", "dart", "lua", "scala", "hpp", "m", "mm", "xml", "gradle",
 ];
 const IMAGE_EXTENSIONS: &[&str] = &["png", "jpg", "jpeg", "webp", "heic", "bmp", "gif"];
 const AUDIO_EXTENSIONS: &[&str] = &["mp3", "m4a", "wav", "flac", "aac", "ogg", "wma"];

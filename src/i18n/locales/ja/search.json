@@ -3,5 +3,7 @@
   "searching": "検索中…",
   "webSearch": "ウェブ検索",
   "googleSearch": "Googleで「{{query}}」を検索",
-  "footer": {"webOpen": "ウェブで開く"}
+  "footer": {"webOpen": "ウェブで開く"},
+  "code": {"placeholder": "ファイル名やパスでコードを検索", "placeholderNoFiles": "検索フォルダにコードファイルがありません", "noResults": "名前やパスが一致するコードファイルはありません。", "noFiles": "検索フォルダにコードファイルはありません。", "contentHint": "コード検索はファイルの内容ではなく、ファイル名とパスで探します。"},
+  "modes": {"all": {"name": "すべてを検索"}, "code": {"chip": "コード", "name": "コード検索"}}
 }

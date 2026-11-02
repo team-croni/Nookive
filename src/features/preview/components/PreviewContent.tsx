@@ -18,6 +18,7 @@ import { checkFileAccess, getFileSrc } from '../../../utils/tauriBridge';
 import { scrollChildIntoView } from '../../../utils/scroll';
 import { PdfViewer } from './PdfViewer';
 import { ImagePreview } from './ImagePreview';
+import { CodePreview } from './CodePreview';
 import { FileAccessState } from './FileAccessState';
 import { formatBytes } from '../utils/formatBytes';
 import styles from './PreviewPane.module.css';
@@ -98,7 +99,9 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
   const isPdf = isPdfFile(file.extension);
   const isApplication = file.kind === 'application' || selectedItem.category === 'application';
   const isFolder = file.kind === 'folder' || file.extension.toLowerCase() === 'folder';
-  const needsFileAccess = isImage || isVideo || isAudio || isPdf;
+  // 코드 검색 결과는 선택했을 때 파일 앞부분을 읽어 보여준다.
+  const isCode = selectedItem.category === 'code';
+  const needsFileAccess = isImage || isVideo || isAudio || isPdf || isCode;
   const [fileAccess, setFileAccess] = React.useState<'checking' | 'allowed' | 'denied'>('allowed');
   const [accessAttempt, setAccessAttempt] = React.useState(0);
 
@@ -127,7 +130,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
   }, [file.path, needsFileAccess, accessAttempt]);
   // 실물 뷰포트가 있는 파일은 텍스트 스니펫을 덧붙이지 않아
   // 모든 미리보기가 PDF 뷰어와 동일한 단일 뷰포트 크기가 된다.
-  const hasVisualPreview = isImage || isVideo || isAudio || isPdf || isApplication || isFolder;
+  const hasVisualPreview = isImage || isVideo || isAudio || isPdf || isApplication || isFolder || isCode;
   const fileAssetUrl = getFileSrc(file.path);
 
   React.useEffect(() => {
@@ -209,6 +212,12 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
               onPageCountChange={setPdfPageCount}
               onPageChange={handlePdfPageChange}
             />
+          </div>
+        )}
+
+        {isCode && fileAccess === 'allowed' && (
+          <div className={styles.previewFrame}>
+            <CodePreview path={file.path} sizeBytes={file.sizeBytes} fallback={currentChunk.textSnippet} />
           </div>
         )}
 
