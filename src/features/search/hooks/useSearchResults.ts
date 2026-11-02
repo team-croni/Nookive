@@ -5,7 +5,13 @@ import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import type { SearchResultItem } from '../../../types/search';
 import i18n from '../../../i18n';
-import { getIndexStatus, refreshCodeFiles, searchCodeFiles } from '../../../utils/tauriBridge';
+import {
+  getIndexStatus,
+  isCodeIndexBuilding,
+  refreshCodeFiles,
+  searchCodeFiles,
+  syncCodeIndex,
+} from '../../../utils/tauriBridge';
 import { getCodeSearchEnabled, subscribeCodeSearchEnabled } from '../../../utils/codeSearchPreference';
 import type { SearchMode, SpecialSearchMode } from '../utils/searchModes';
 import { searchClient } from '../services/searchClient';
@@ -34,6 +40,9 @@ export function useSearchResults() {
   const [codeSearchEnabled, setCodeSearchEnabledState] = useState(getCodeSearchEnabled);
   // 검색 폴더의 코드 파일 수. 0이면 Tab 안내를 숨겨 코드와 무관한 사용자에게 보이지 않게 한다.
   const [codeFileCount, setCodeFileCount] = useState(0);
+  // 코드 내용 색인을 만드는 중인지. 끝날 때마다 codeIndexVersion을 올려 코드 검색을 다시 실행한다.
+  const [codeIndexBuilding, setCodeIndexBuilding] = useState(false);
+  const [codeIndexVersion, setCodeIndexVersion] = useState(0);
   // 실제 상태 전환이 발생한 뒤에만 네이티브 창 리사이즈를 예약한다.
   const previousExpandedRef = useRef(isWindowExpanded);
 
@@ -130,18 +139,39 @@ export function useSearchResults() {
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [query, hasQuery, searchMode]);
+  }, [query, hasQuery, searchMode, codeIndexVersion]);
 
-  // 모드를 바꾸면 이전 모드의 결과를 바로 지운다. (칩 아래에 다른 모드 결과가 남지 않게)
   const searchModeRef = useRef(searchMode);
   const setSearchMode = useCallback((mode: SearchMode) => {
-    if (searchModeRef.current === mode) return;
+    const previous = searchModeRef.current;
+    if (previous === mode) return;
     searchModeRef.current = mode;
     setSearchModeState(mode);
-    setResults([]);
-    setSelectedIndex(0);
-    // 코드 모드에 들어올 때 오래된 코드 파일 목록을 다시 훑는다. (30초 이내면 그대로 쓴다)
-    if (mode === 'code') void refreshCodeFiles().then(setCodeFileCount);
+    // 새 모드의 검색이 끝날 때까지 이전 모드의 결과를 그대로 보여주고, 끝나면 한 번에 바꾼다.
+    // 화면의 결과가 이전 모드에서 왔다는 것을 settledSearchMode로 알린다.
+    setSettledSearchMode(previous);
+    // 코드 모드에 들어올 때 오래된 코드 파일 목록을 다시 훑고, 바뀐 파일만 내용 색인에 반영한다.
+    if (mode === 'code') {
+      void refreshCodeFiles().then((count) => {
+        setCodeFileCount(count);
+        if (count > 0) void syncCodeIndex();
+      });
+    }
+  }, []);
+
+  // 내용 색인이 끝나면 코드 모드의 결과를 새 색인으로 다시 찾는다.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    void isCodeIndexBuilding().then(setCodeIndexBuilding);
+    void listen<{ building: boolean }>('code-index-state', ({ payload }) => {
+      setCodeIndexBuilding(payload.building);
+      if (!payload.building && searchModeRef.current === 'code') setCodeIndexVersion((value) => value + 1);
+    })
+      .then((stop) => {
+        unlisten = stop;
+      })
+      .catch(() => { });
+    return () => unlisten?.();
   }, []);
 
   // 설정에서 코드 검색을 끄면 코드 모드도 끝낸다.
@@ -225,9 +255,12 @@ export function useSearchResults() {
     /** 현재 화면에 표시 중인 결과를 만들어낸 검색어 */
     settledQuery,
     searchMode,
+    /** 화면에 표시 중인 결과를 만들어낸 검색 모드 */
+    settledSearchMode,
     setSearchMode,
     availableModes,
     hasCodeFiles: codeFileCount > 0,
+    codeIndexBuilding,
     isWindowExpanded,
     orderedResults,
     deferredResults,

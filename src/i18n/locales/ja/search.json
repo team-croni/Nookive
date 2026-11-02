@@ -4,6 +4,6 @@
   "webSearch": "ウェブ検索",
   "googleSearch": "Googleで「{{query}}」を検索",
   "footer": {"webOpen": "ウェブで開く"},
-  "code": {"placeholder": "ファイル名やパスでコードを検索", "placeholderNoFiles": "検索フォルダにコードファイルがありません", "noResults": "名前やパスが一致するコードファイルはありません。", "noFiles": "検索フォルダにコードファイルはありません。", "contentHint": "コード検索はファイルの内容ではなく、ファイル名とパスで探します。"},
+  "code": {"placeholder": "ファイル名、パス、コードの内容で検索", "placeholderNoFiles": "検索フォルダにコードファイルがありません", "noResults": "名前、パス、内容が一致するコードはありません。", "noFiles": "検索フォルダにコードファイルはありません。", "contentHint": "コードの内容は3文字以上で検索します。", "indexing": "コードの内容をインデックスしています。完了するまで一部の内容は見つからない場合があります。"},
   "modes": {"all": {"name": "すべてを検索"}, "code": {"chip": "コード", "name": "コード検索"}}
 }

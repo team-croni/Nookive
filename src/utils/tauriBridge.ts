@@ -60,6 +60,6 @@ export {
   deleteAppData,
 } from './tauri/indexing';
 
-export { refreshCodeFiles, searchCodeFiles } from './tauri/codeSearch';
+export { isCodeIndexBuilding, refreshCodeFiles, searchCodeFiles, syncCodeIndex } from './tauri/codeSearch';
 
 export { loadSearchFeedback, saveSearchFeedback, resetSearchFeedback } from './tauri/searchFeedback';

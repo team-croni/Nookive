@@ -217,6 +217,8 @@ pub async fn mark_index_files_ready(
 
 #[tauri::command]
 pub fn reset_index(app: AppHandle) -> Result<IndexSyncStatus, String> {
+    // 코드 내용 색인도 함께 지운다. 다음에 코드 모드에 들어오면 다시 만든다.
+    crate::code_index::delete_index(&app)?;
     runtime::reset_index(app)
 }
 
