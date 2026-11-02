@@ -37,29 +37,31 @@ export function CodeSearchSection() {
           <p>{t('codeSearch.description')}</p>
         </div>
       </div>
-      <div className={styles.webSearchRow}>
-        <span className={styles.webSearchOptionLabel}>{t('codeSearch.option')}</span>
-        <label className={styles.switch}>
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(event) => handleChange(event.target.checked)}
-            aria-label={t('codeSearch.option')}
-          />
-          <span className={styles.switchTrack} aria-hidden="true" />
-        </label>
-      </div>
-      {enabled && (
+      <div className={styles.optionGroup}>
         <div className={styles.webSearchRow}>
-          <span className={styles.webSearchOptionLabel}>{t('codeSearch.editor')}</span>
-          <OptionPicker
-            options={editorOptions}
-            value={editorOptions.some((option) => option.value === preference) ? preference : 'auto'}
-            onChange={setCodeEditor}
-            ariaLabel={t('codeSearch.editor')}
-          />
+          <span className={styles.webSearchOptionLabel}>{t('codeSearch.option')}</span>
+          <label className={styles.switch}>
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={(event) => handleChange(event.target.checked)}
+              aria-label={t('codeSearch.option')}
+            />
+            <span className={styles.switchTrack} aria-hidden="true" />
+          </label>
         </div>
-      )}
+        {enabled && (
+          <div className={styles.webSearchRow}>
+            <span className={styles.webSearchOptionLabel}>{t('codeSearch.editor')}</span>
+            <OptionPicker
+              options={editorOptions}
+              value={editorOptions.some((option) => option.value === preference) ? preference : 'auto'}
+              onChange={setCodeEditor}
+              ariaLabel={t('codeSearch.editor')}
+            />
+          </div>
+        )}
+      </div>
     </section>
   );
 }
