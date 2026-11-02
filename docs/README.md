@@ -1,6 +1,6 @@
 ---
-date: 2026-10-28
-version: 1.7.1
+date: 2026-11-03
+version: 1.8.0
 ---
 
 # Nookive - Documentation Index
@@ -13,12 +13,13 @@ Nookive의 공식 아키텍처, 디자인 시스템, 인덱싱 파이프라인 �
 
 | 문서 파일                                        |  버전  | 최종 수정일 | 주요 내용 요약                                                                                            |
 | :----------------------------------------------- | :----: | :---------: | :-------------------------------------------------------------------------------------------------------- |
-| [system-architecture.md](system-architecture.md) | v1.9.0 | 2026-10-26  | macOS Apple Silicon 전용 Tauri 쉘, 멀티모달 검색, PDF 실제 매칭 페이지 미리보기 구조 |
-| [design-system.md](design-system.md)             | v1.7.0 | 2026-10-23  | 수동/시스템 테마 선택, 라이트/다크 색상 토큰과 파일 포맷 아이콘 규격 |
-| [indexer-pipeline.md](indexer-pipeline.md)       | v1.4.1 | 2026-10-28  | macOS 네이티브 미디어 처리와 텍스트·이미지·오디오·비디오 색인 파이프라인 |
-| [settings-and-menu-bar.md](settings-and-menu-bar.md) | v1.2.0 | 2026-10-23  | 메뉴바 상주 정책, 필수 AI 모델(임베딩+ASR) 전체 자동 설치 마법사 및 다운로드 안전 취소·이어받기, 설정 창 UX |
+| [system-architecture.md](system-architecture.md) | v2.0.0 | 2026-11-03  | macOS Apple Silicon 전용 Tauri 쉘, 멀티모달 검색, PDF 매칭 페이지 미리보기, 검색 개인화, 코드 검색(이름·경로·내용, 에디터 열기, 실시간 갱신)과 검색 모드 |
+| [design-system.md](design-system.md)             | v1.8.0 | 2026-11-03  | 수동/시스템 테마, 라이트/다크 색상 토큰, 코드 미리보기 토큰, 설정 창 레이아웃, 키보드 규격, 파일 포맷 아이콘 |
+| [indexer-pipeline.md](indexer-pipeline.md)       | v1.5.0 | 2026-11-03  | macOS 네이티브 미디어 처리와 텍스트·이미지·오디오·비디오 색인 파이프라인, 임베딩 대상 규칙과 파일 감시 |
+| [settings-and-menu-bar.md](settings-and-menu-bar.md) | v1.3.0 | 2026-11-03  | 메뉴바 상주 정책, 필수 모델 설치 마법사, 사이드바 설정 창(검색 데이터·검색 방식·일반·데이터 관리·정보), 로그인 시 열기 |
 | [release-checklist.md](release-checklist.md) | v1.2.0 | 2026-10-28 | PDF 검색/미리보기 검증, macOS 파일 접근, 제3자 라이선스 고지, DMG 배포 전 점검 |
-| [search-evaluation.md](search-evaluation.md) | v1.0.0 | 2026-11-01 | 검색 회귀 평가셋(CI)과 공개 벤치마크(MIRACL-ko, Crossmodal-3600) 실행 방법, 결과, 데이터 라이선스 |
+| [search-evaluation.md](search-evaluation.md) | v1.1.0 | 2026-11-02 | 검색 회귀 평가셋(CI)과 공개 벤치마크(MIRACL-ko, Crossmodal-3600) 실행 방법, 결과, 데이터 라이선스 |
+| [indexing-roadmap.md](indexing-roadmap.md) | v1.1.0 | 2026-11-03 | 인덱싱 고도화 로드맵: SQLite store, 임베딩 worker, watcher 정책, 단계별 계획과 구현된 항목 |
 
 ---
 

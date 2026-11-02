@@ -1,6 +1,6 @@
 ---
-date: 2026-10-23
-version: 1.7.0
+date: 2026-11-03
+version: 1.8.0
 ---
 
 # Design System Specification
@@ -42,7 +42,9 @@ Nookive는 macOS의 **Raycast**, **Spotlight** 및 미니멀 프리미엄 툴들
 | `--text-secondary`     | `rgba(29, 29, 31, 0.68)`        | `rgba(245, 245, 247, 0.65)`           | 보조 텍스트                    |
 | `--text-tertiary`      | `rgba(29, 29, 31, 0.45)`        | `rgba(245, 245, 247, 0.38)`           | 3차 텍스트                     |
 
-기타 보조 토큰(칩/키캡 `--surface-chip*`, 아이콘 `--icon-*`, 에러 `--error-*`, 그림자 `--shadow-*`, 스크롤바 `--scrollbar-thumb*`, 하이라이트 `--highlight-bg`)도 동일하게 라이트/다크 쌍으로 정의되어 있습니다.
+기타 보조 토큰(칩/키캡 `--surface-chip*`, 아이콘 `--icon-*`, 에러 `--error-*`, 그림자 `--shadow-*`, 스크롤바 `--scrollbar-thumb*`, 하이라이트 `--highlight-bg`, 검색창 커서 `--caret-color`)도 동일하게 라이트/다크 쌍으로 정의되어 있습니다. 검색창 커서는 라이트에서 `--accent-blue`, 다크에서 `--text-primary`(흰색)입니다.
+
+**코드 미리보기 토큰 (`--code-*`)**: 코드 검색 결과 미리보기는 테마와 관계없이 VS Code Dark+ 색을 씁니다. 배경 `--code-bg`(라이트 `#1e1e1e`, 다크 패널과 구분되도록 `#141416`과 `--code-border` 테두리), 줄 번호 `--code-gutter*`, 일치 줄 `--code-line-active`·`--code-line-accent*`, 검색어 `--code-find-match`, 문법 색 `--code-keyword`·`--code-string`·`--code-comment`·`--code-function`·`--code-type`·`--code-variable` 등입니다.
 
 ### 2.2. 액션 버튼 (Action Buttons)
 
@@ -82,10 +84,18 @@ Nookive는 macOS의 **Raycast**, **Spotlight** 및 미니멀 프리미엄 툴들
 
 ---
 
+### 2.5. 설정 창 레이아웃
+
+- 왼쪽 분류 목록(사이드바)과 오른쪽 내용으로 나눕니다. 선택한 분류는 진한 배경과 왼쪽 `--accent-blue` 막대로 표시합니다.
+- 분류와 카드 사이는 선 없이 간격으로 나눕니다. 선은 한 가지 뜻(같은 상자 안의 줄 구분)으로만 씁니다.
+- 카드 안의 옵션 줄, 폴더 목록, 바로가기 줄, 링크 줄은 `--surface-chip`을 채운 상자(모서리 10px)에 모으고 줄 사이에만 `--border-chip` 선을 둡니다. 줄 높이는 44px 이상입니다.
+- 설명이 필요한 항목은 ⓘ 툴팁(`InfoTip`)을 쓰고, 선택 메뉴는 `OptionPicker`를 씁니다.
+
 ## 3. 키보드 인터랙션 규격 (Keyboard Map)
 
 - `↑` / `↓`: 결과 리스트 이전/다음 탐색 (자동 스크롤)
-- `Enter`: 기본 액션 (OS 기본 프로그램으로 파일 열기)
+- `Enter`: 기본 액션. 파일은 기본 앱으로 열고, 코드 결과는 설정한 에디터에서 일치한 줄로 엽니다.
 - `Cmd/Ctrl + Enter`: 파일 위치 Finder/탐색기에서 표시
-- `Tab`: 본문 미리보기 패널로 포커스 이동
-- `Esc`: 검색어 지우기 또는 창 닫기
+- `Tab` / `Shift + Tab`: 검색 모드 순환(전체 → 코드 → 전체). IME 조합 중이거나 ⌘/⌃/⌥와 함께 누르면 동작하지 않습니다.
+- `Esc`: 검색어 지우기 → 전체 검색으로 돌아가기 → 창 닫기 순서. 빈 입력에서 `Backspace`도 전체 검색으로 돌아갑니다.
+- 설정 창: `↑` / `↓`로 분류 이동
