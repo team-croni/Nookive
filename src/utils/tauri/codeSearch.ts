@@ -40,3 +40,29 @@ export async function isCodeIndexBuilding(): Promise<boolean> {
     return false;
   }
 }
+
+export interface CodeEditor {
+  id: string;
+  name: string;
+}
+
+let editorsPromise: Promise<CodeEditor[]> | null = null;
+
+/** 설치된 에디터 (자동 선택 순서). 앱이 떠 있는 동안은 한 번만 찾는다. */
+export function listCodeEditors(): Promise<CodeEditor[]> {
+  editorsPromise ??= invoke<CodeEditor[]>('list_code_editors').catch((err) => {
+    console.warn('[Tauri] list_code_editors 실패:', err);
+    editorsPromise = null;
+    return [];
+  });
+  return editorsPromise;
+}
+
+/** 코드 파일을 에디터에서 해당 줄로 연다. 에디터가 없거나 실패하면 Rust가 기본 앱으로 연다. */
+export async function openCodeFile(path: string, line: number | undefined, editor: string): Promise<void> {
+  try {
+    await invoke('open_code_file', { path, line, editor });
+  } catch (err) {
+    console.warn('[Tauri] open_code_file 실패:', err);
+  }
+}

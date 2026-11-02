@@ -1,18 +1,33 @@
 // src/features/settings/components/CodeSearchSection.tsx
-// 코드 검색(검색창의 Tab / "code:") 켜고 끄기. 모든 검색 폴더가 대상이며 파일 내용은 색인하지 않는다.
+// 코드 검색(검색창의 Tab / "code:") 켜고 끄기와, 코드 결과를 열 에디터 선택.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getCodeSearchEnabled, setCodeSearchEnabled } from '../../../utils/codeSearchPreference';
+import { getCodeSearchEnabled, setCodeEditor, setCodeSearchEnabled } from '../../../utils/codeSearchPreference';
+import { useCodeEditor } from '../../../hooks/useCodeEditor';
+import { OptionPicker } from './OptionPicker';
 import styles from '../SettingsApp.module.css';
 
 export function CodeSearchSection() {
   const { t } = useTranslation('settings');
   const [enabled, setEnabled] = useState(getCodeSearchEnabled);
+  const { preference, editors } = useCodeEditor();
 
   const handleChange = (nextEnabled: boolean) => {
     setEnabled(nextEnabled);
     setCodeSearchEnabled(nextEnabled);
   };
+
+  // 자동은 실제로 열릴 에디터 이름을 함께 보여준다. 고른 에디터가 지워졌으면 자동으로 보인다.
+  const editorOptions = [
+    {
+      value: 'auto',
+      label: editors[0]
+        ? t('codeSearch.editorAutoWith', { app: editors[0].name })
+        : t('codeSearch.editorAuto'),
+    },
+    ...editors.map((editor) => ({ value: editor.id, label: editor.name })),
+    { value: 'default', label: t('codeSearch.editorDefault') },
+  ];
 
   return (
     <section className={styles.card}>
@@ -34,6 +49,17 @@ export function CodeSearchSection() {
           <span className={styles.switchTrack} aria-hidden="true" />
         </label>
       </div>
+      {enabled && (
+        <div className={styles.webSearchRow}>
+          <span className={styles.webSearchOptionLabel}>{t('codeSearch.editor')}</span>
+          <OptionPicker
+            options={editorOptions}
+            value={editorOptions.some((option) => option.value === preference) ? preference : 'auto'}
+            onChange={setCodeEditor}
+            ariaLabel={t('codeSearch.editor')}
+          />
+        </div>
+      )}
     </section>
   );
 }

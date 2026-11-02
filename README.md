@@ -34,8 +34,9 @@ locally with EmbeddingGemma 2 and llama.cpp.
 - PDF pages and Markdown/text files. Code and configuration files are left out
   of semantic search (see code search below); credential files are never read.
 - Code in your search folders by file name, path, or contents, with the
-  matching line: press Tab or type `code:` in the search window. You can turn
-  this off in Settings.
+  matching line: press Tab or type `code:` in the search window. Results open
+  at that line in your editor (VS Code, Cursor, Zed, Sublime Text, JetBrains
+  IDEs, or Xcode). You can turn this off in Settings.
 - Images by visual content, with macOS Vision labels/OCR where available.
 - Audio and video by content, with results pointing to a relevant time range.
 - Installed macOS applications by localized name, original name, or bundle

@@ -12,7 +12,7 @@
   "dynamic": {"documentsAndMedia": "可以从 {{documents}} 个文档和 {{media}} 个图片、音频、视频中创建搜索数据。", "documents": "可以从 {{count}} 个文档中创建搜索数据。", "media": "可以从 {{count}} 个图片、音频、视频中创建搜索数据。", "action": "正在为 {{count}} 个文件创建搜索数据。", "refreshHint": "检查文件夹变化或刷新搜索状态。"},
   "models": {"title": "本地模型", "embedding": "搜索模型", "embeddingDescription": "开始搜索前请安装本地模型。", "embeddingSize": "约 825MB。下载一次后保存在此 Mac 上。", "speech": "语音搜索", "speechDescription": "可选功能，支持语音识别和逐词时间标记，约 1.9GB。", "readyDescription": "模型仅保存在此 Mac 上，不会与文件一起上传。", "download": "下载", "installed": "已安装", "downloading": "正在下载模型…", "error": "模型下载失败。请检查连接后重试。"},
   "webSearch": {"title": "网页搜索", "description": "本地搜索没有结果时使用 Google 建议和网页搜索。", "option": "使用 Google 搜索", "privacyNotice": "启用网页搜索后，输入的搜索词可能会发送到 Google。不会发送文件内容和本地搜索数据。"},
-  "codeSearch": {"title": "代码搜索", "description": "在搜索窗口按 Tab 或输入“code:”，即可按名称、路径或内容查找搜索文件夹中的代码文件。内容索引只保存在这台 Mac 上。", "option": "使用代码搜索"},
+  "codeSearch": {"title": "代码搜索", "description": "在搜索窗口按 Tab 或输入“code:”，即可按名称、路径或内容查找搜索文件夹中的代码文件。内容索引只保存在这台 Mac 上。", "option": "使用代码搜索", "editor": "打开代码文件的方式", "editorAuto": "自动", "editorAutoWith": "自动（{{app}}）", "editorDefault": "默认应用"},
   "about": {"version": "版本 {{version}}", "maintainer": "Croni OpenSource Project", "github": "GitHub", "license": "MIT 许可证", "thirdParty": "开源许可证", "issues": "报告问题"},
   "theme": {"title": "外观", "description": "选择 Nookive 的显示模式。", "options": {"light": "浅色模式", "dark": "深色模式", "system": "跟随系统"}},
   "dataManagement": {"title": "应用数据管理", "description": "删除下载的模型和 Nookive 创建的搜索数据。", "sourceFilesHint": "不会删除你选择的文件夹和原始文件。", "confirm": "确定要删除吗？", "button": "删除模型和应用数据", "hint": "删除模型、搜索结果和应用设置。", "error": "无法删除应用数据。请重启应用后重试。"},
