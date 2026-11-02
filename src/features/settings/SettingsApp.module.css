@@ -232,8 +232,8 @@ h1 {
   padding: 8px 10px;
   border: 1px solid var(--border-chip);
   border-radius: 8px;
-  background: var(--surface-settings, var(--surface-primary));
-  box-shadow: var(--shadow-window);
+  background: var(--surface-popover);
+  box-shadow: var(--shadow-popover);
   color: var(--text-secondary);
   font: inherit;
   font-size: 11px;
@@ -333,15 +333,15 @@ h2 {
 .languageMenu {
   position: fixed;
   z-index: 10;
-  height: 220px;
+  /* 높이는 항목 수에 맞추고, 많으면 220px에서 스크롤한다. */
   max-height: min(220px, calc(100vh - 16px));
   overflow-y: auto;
   min-width: 100%;
   padding: 4px;
-  background: var(--surface-settings, var(--surface-primary));
+  background: var(--surface-popover);
   border: 1px solid var(--border-chip);
   border-radius: 10px;
-  box-shadow: var(--shadow-window);
+  box-shadow: var(--shadow-popover);
 }
 .languageOption {
   display: flex;

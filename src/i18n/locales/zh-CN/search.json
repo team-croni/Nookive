@@ -2,8 +2,9 @@
   "placeholder": "搜索我的电脑",
   "searching": "正在搜索…",
   "webSearch": "网页搜索",
-  "googleSearch": "在 Google 中搜索“{{query}}”",
+  "engineSearch": "在 {{engine}} 中搜索“{{query}}”",
   "footer": {"webOpen": "在网页中打开"},
   "code": {"placeholder": "按文件名、路径或代码内容搜索", "placeholderNoFiles": "搜索文件夹中没有代码文件", "noResults": "没有名称、路径或内容匹配的代码。", "noFiles": "搜索文件夹中没有代码文件。", "contentHint": "输入 3 个或以上字符时搜索代码内容。", "indexing": "正在创建代码搜索数据。完成前可能找不到部分内容。"},
-  "modes": {"all": {"name": "全部搜索"}, "code": {"chip": "代码", "name": "代码搜索"}}
+  "web": {"placeholder": "在网上搜索"},
+  "modes": {"all": {"name": "全部搜索"}, "web": {"chip": "网页", "name": "网页搜索"}, "code": {"chip": "代码", "name": "代码搜索"}}
 }

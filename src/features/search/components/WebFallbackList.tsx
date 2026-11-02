@@ -1,5 +1,5 @@
 // src/features/search/components/WebFallbackList.tsx
-// 로컬 검색 결과가 없을 때 보여주는 Google 자동완성/웹 검색 폴백 목록.
+// 웹 폴백(로컬 결과 없음)과 웹 검색 모드에서 보여주는 검색 엔진 자동완성/웹 검색 목록.
 import React, { useEffect, useRef } from 'react';
 import { Globe, Loader2, Search } from 'lucide-react';
 import { scrollChildIntoView } from '../../../utils/scroll';
@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 
 interface WebFallbackListProps {
   query: string;
+  /** 설정에서 고른 검색 엔진 이름 (예: Google) */
+  engineName: string;
   openQuery?: string;
   suggestions: string[];
   isLoading: boolean;
@@ -18,6 +20,7 @@ interface WebFallbackListProps {
 
 export const WebFallbackList: React.FC<WebFallbackListProps> = ({
   query,
+  engineName,
   openQuery = query,
   suggestions,
   isLoading,
@@ -60,7 +63,7 @@ export const WebFallbackList: React.FC<WebFallbackListProps> = ({
           </span>
           <span className={styles.contentCol}>
             <span className={styles.label}>
-            {t('googleSearch', { query })}
+            {t('engineSearch', { engine: engineName, query })}
             </span>
           </span>
           <span className={styles.enterHint}>Enter</span>

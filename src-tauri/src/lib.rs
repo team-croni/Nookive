@@ -116,7 +116,7 @@ pub fn run() {
             files::read_file_bytes,
             files::check_file_access,
             files::render_pdf_page_native,
-            web::google_suggest,
+            web::web_suggest,
             web::open_url,
             licenses::open_license_document,
             window::hide_window,

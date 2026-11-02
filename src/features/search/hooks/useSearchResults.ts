@@ -14,6 +14,7 @@ import {
   syncCodeIndex,
 } from '../../../utils/tauriBridge';
 import { getCodeSearchEnabled, subscribeCodeSearchEnabled } from '../../../utils/codeSearchPreference';
+import { getWebSearchEnabled, subscribeWebSearchEnabled } from '../../../utils/webSearchPreference';
 import type { SearchMode, SpecialSearchMode } from '../utils/searchModes';
 import { searchClient } from '../services/searchClient';
 import { feedbackClient } from '../services/feedbackClient';
@@ -34,9 +35,11 @@ export function useSearchResults() {
   // isLoading은 effect에서 뒤늦게 true가 되므로, 입력 직후 첫 렌더에서
   // "빈 결과"를 확정 상태로 오인해 웹 폴백이 먼저 마운트되는 것을 막는 데 쓴다.
   const [settledQuery, setSettledQuery] = useState('');
-  // 검색 모드(Tab 순환 또는 "code:" 같은 접두어). 'code'는 코드 파일 이름/경로만 찾는다.
+  // 검색 모드(Tab 순환 또는 "web:" / "code:" 같은 접두어). 'web'은 검색 엔진 자동완성만, 'code'는 코드 파일만 찾는다.
   const [searchMode, setSearchModeState] = useState<SearchMode>('all');
   const [settledSearchMode, setSettledSearchMode] = useState<SearchMode>('all');
+  // 설정의 웹 검색 스위치. 꺼져 있으면 웹 모드(Tab, "web:")를 쓸 수 없다.
+  const [webSearchEnabled, setWebSearchEnabledState] = useState(getWebSearchEnabled);
   // 설정의 코드 검색 스위치. 꺼져 있으면 Tab과 "code:"가 동작하지 않는다.
   const [codeSearchEnabled, setCodeSearchEnabledState] = useState(getCodeSearchEnabled);
   // 검색 폴더의 코드 파일 수. 0이면 Tab 안내를 숨겨 코드와 무관한 사용자에게 보이지 않게 한다.
@@ -123,7 +126,12 @@ export function useSearchResults() {
 
     const timer = setTimeout(async () => {
       try {
-        const data = searchMode === 'code' ? await searchCodeFiles(query) : await searchClient.search(query);
+        // 웹 모드는 로컬 파일을 찾지 않는다. 화면은 App이 검색 엔진 자동완성 목록으로 채운다.
+        const data = searchMode === 'web'
+          ? []
+          : searchMode === 'code'
+            ? await searchCodeFiles(query)
+            : await searchClient.search(query);
         if (isMounted) {
           setResults(data);
           setSelectedIndex(0);
@@ -187,10 +195,24 @@ export function useSearchResults() {
     });
   }, [setSearchMode]);
 
-  // Tab 순환과 접두어로 들어갈 수 있는 모드. 설정에서 꺼진 모드는 빠진다.
+  // 설정에서 웹 검색을 끄면 웹 모드도 끝낸다.
+  useEffect(
+    () =>
+      subscribeWebSearchEnabled((enabled) => {
+        setWebSearchEnabledState(enabled);
+        if (!enabled && searchModeRef.current === 'web') setSearchMode('all');
+      }),
+    [setSearchMode],
+  );
+
+  // Tab 순환과 접두어로 들어갈 수 있는 모드. 설정에서 꺼진 모드와, 코드 파일이 없을 때의 코드 모드는 빠진다.
+  // (순서는 SEARCH_MODES가 정한다)
   const availableModes = useMemo<SpecialSearchMode[]>(
-    () => (codeSearchEnabled ? ['code'] : []),
-    [codeSearchEnabled],
+    () => [
+      ...(webSearchEnabled ? (['web'] as const) : []),
+      ...(codeSearchEnabled && codeFileCount > 0 ? (['code'] as const) : []),
+    ],
+    [webSearchEnabled, codeSearchEnabled, codeFileCount],
   );
 
   // 코드 파일 수: 시작할 때, 검색 폴더가 바뀔 때, 스위치를 켤 때 다시 센다.

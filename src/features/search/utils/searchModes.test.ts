@@ -18,6 +18,11 @@ describe('parseModePrefix', () => {
     expect(parseModePrefix('CODE:main.rs', ['code'])).toEqual({ mode: 'code', rest: 'main.rs' });
   });
 
+  it('detects the web prefix', () => {
+    expect(parseModePrefix('web: weather', ['web', 'code'])).toEqual({ mode: 'web', rest: 'weather' });
+    expect(parseModePrefix('web: weather', ['code'])).toBeNull();
+  });
+
   it('ignores unavailable modes and text without the prefix', () => {
     expect(parseModePrefix('code: main', [])).toBeNull();
     expect(parseModePrefix('code', ['code'])).toBeNull();
@@ -31,6 +36,23 @@ describe('cycleSearchMode', () => {
     expect(cycleSearchMode('all', ['code'])).toBe('code');
     expect(cycleSearchMode('code', ['code'])).toBe('all');
     expect(cycleSearchMode('all', ['code'], true)).toBe('code');
+  });
+
+  it('goes all → web → code → all, and backward with Shift+Tab', () => {
+    const both = ['web', 'code'] as const;
+    expect(cycleSearchMode('all', both)).toBe('web');
+    expect(cycleSearchMode('web', both)).toBe('code');
+    expect(cycleSearchMode('code', both)).toBe('all');
+    expect(cycleSearchMode('all', both, true)).toBe('code');
+    expect(cycleSearchMode('code', both, true)).toBe('web');
+    // 순서는 넘겨준 목록이 아니라 SEARCH_MODES를 따른다.
+    expect(cycleSearchMode('all', ['code', 'web'])).toBe('web');
+  });
+
+  it('skips modes that are not available', () => {
+    expect(cycleSearchMode('all', ['code'])).toBe('code');
+    expect(cycleSearchMode('all', ['web'])).toBe('web');
+    expect(cycleSearchMode('web', ['web'])).toBe('all');
   });
 
   it('stays on all when no mode is available and leaves a disabled mode', () => {

@@ -1,12 +1,26 @@
-import { useState } from 'react';
+// src/features/settings/components/WebSearchSection.tsx
+// 웹 검색 켜고 끄기와 검색 엔진 선택. 웹 폴백(로컬 결과 없음)과 웹 검색 모드에 함께 적용된다.
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getWebSearchEnabled, setWebSearchEnabled } from '../../../utils/webSearchPreference';
+import { sortedWebSearchEngines, webSearchEngineName } from '../../../utils/webSearchEngines';
+import {
+  getWebSearchEnabled,
+  getWebSearchEngine,
+  setWebSearchEnabled,
+  setWebSearchEngine,
+  subscribeWebSearchEngine,
+} from '../../../utils/webSearchPreference';
 import { InfoTip } from './InfoTip';
+import { OptionPicker } from './OptionPicker';
 import styles from '../SettingsApp.module.css';
 
 export function WebSearchSection() {
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
+  const language = i18n.resolvedLanguage ?? i18n.language;
   const [enabled, setEnabled] = useState(getWebSearchEnabled);
+  const [engine, setEngine] = useState(getWebSearchEngine);
+
+  useEffect(() => subscribeWebSearchEngine(setEngine), []);
 
   const handleChange = (nextEnabled: boolean) => {
     setEnabled(nextEnabled);
@@ -25,7 +39,7 @@ export function WebSearchSection() {
         <div className={styles.webSearchRow}>
           <span className={styles.webSearchOptionLabel}>
             <span>{t('webSearch.option')}</span>
-            <InfoTip id="web-search-privacy-tooltip" text={t('webSearch.privacyNotice')} />
+            <InfoTip id="web-search-privacy-tooltip" text={t('webSearch.privacyNotice', { engine: webSearchEngineName(engine, language) })} />
           </span>
           <label className={styles.switch}>
             <input
@@ -37,6 +51,17 @@ export function WebSearchSection() {
             <span className={styles.switchTrack} aria-hidden="true" />
           </label>
         </div>
+        {enabled && (
+          <div className={styles.webSearchRow}>
+            <span className={styles.webSearchOptionLabel}>{t('webSearch.engine')}</span>
+            <OptionPicker
+              options={sortedWebSearchEngines(language).map((item) => ({ value: item.id, label: webSearchEngineName(item, language) }))}
+              value={engine.id}
+              onChange={setWebSearchEngine}
+              ariaLabel={t('webSearch.engine')}
+            />
+          </div>
+        )}
       </div>
     </section>
   );

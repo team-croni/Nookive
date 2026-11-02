@@ -1,6 +1,6 @@
 ---
 date: 2026-11-03
-version: 2.1.0
+version: 2.2.0
 ---
 
 # System Architecture Specification
@@ -152,15 +152,25 @@ macOS에서는 Tauri command인 `render_pdf_page_native`가 Core Graphics를
 - 순위: 이름 정확 일치(확장자 제외 포함) > 이름 시작 > 이름 포함 > 모든 단어가 이름에 > 경로 일치.
   검색어의 모든 단어가 이름이나 경로에 있어야 한다. 같은 단계에서는 얕은 경로가 먼저다.
   파일 이름은 NFC·소문자로 맞춰 비교한다.
-- 진입: 검색 모드 목록(`src/features/search/utils/searchModes.ts`)의 한 모드다. Tab은 전체 → 각 모드 →
-  전체 순으로 돌고 Shift+Tab은 반대로 돈다. 빈 입력에서 Backspace나 Esc는 전체 검색으로 돌아간다.
-  `code:` 접두어로도 들어간다. 설정에서 꺼진 모드는 순환과 접두어에서 빠진다.
+- 진입: 검색 모드 목록(`src/features/search/utils/searchModes.ts`)의 한 모드다. Tab은 전체 → 웹 → 코드 →
+  전체 순으로 돌고 Shift+Tab은 반대로 돈다(누구나 쓰는 웹을 개발자만 쓰는 코드보다 앞에 둔다). 빈 입력에서
+  Backspace나 Esc는 전체 검색으로 돌아간다. `web:`·`code:` 접두어로도 들어간다. 설정에서 꺼진 모드(웹 검색,
+  코드 검색 스위치)와 검색 폴더에 코드 파일이 없을 때의 코드 모드는 순환과 접두어에서 빠진다.
+- 웹 모드: 로컬 파일은 찾지 않고, 로컬 결과와 관계없이 검색 엔진 자동완성 목록(웹 폴백과 같은 목록)을 보여준다.
+  Enter는 검색어나 고른 제안으로 웹 검색을 연다. 전체 검색에서 결과가 없을 때의 자동 웹 폴백은 그대로 둔다.
+  웹 검색 설정은 다른 창의 변경도 storage 이벤트로 따라간다(`subscribeWebSearchEnabled`).
+- 검색 엔진: Google, Bing, DuckDuckGo, Brave Search, Ecosia, Naver, Baidu 중 설정에서 고른다
+  (`nookive.webSearchEngine`, `src/utils/webSearchEngines.ts`). 고르지 않았으면 화면 언어의 기본 엔진을 쓴다: 간체
+  중국어는 Baidu(중국 본토에서는 Google에 접속할 수 없다), 나머지는 Google. 이름은 고유 명사로 두되 자국 브랜드는
+  그 언어의 공식 이름으로 보인다(한국어 네이버, 중국어 百度). 메뉴는 Google, 지금 언어의 지역 엔진, 나머지 순서다. 검색 결과 주소는 프론트엔드가, 자동완성 요청은 Rust `web_suggest`가 같은 엔진
+  id 목록으로만 만든다(임의 주소 요청 불가). 자동완성 응답은 OpenSearch 형식(Google·Bing·DuckDuckGo·Brave·Ecosia·Baidu)과
+  Naver 형식을 파싱하고, 캐시 키에 엔진과 언어를 함께 넣는다.
   ⌘/⌃/⌥ 조합과 IME 조합 중인 Tab은 건드리지 않는다. 코드 모드에서는 일반 결과와 웹 폴백을 쓰지 않는다.
   모드를 바꿔도 새 모드의 검색이 끝날 때까지 이전 결과(또는 빈 결과 안내, 웹 폴백)를 그대로 두고 한 번에 바꾼다.
   어떤 모드의 결과가 화면에 있는지는 `settledSearchMode`로 판단한다.
 - 칩: 아이콘과 번역된 짧은 라벨(`modes.<id>.chip`)을 보여준다. 접두어는 언어와 관계없이 영어로 둔다.
-  하단 Tab 안내는 다음 모드 이름(`modes.<id>.name`)을 보여주며, 전체 검색에서는 검색 폴더에 코드 파일이
-  있을 때만 보인다. 새 모드는 `SEARCH_MODES`, 칩 아이콘, 번역 키를 더해 추가한다.
+  하단 Tab 안내는 다음 모드 이름(`modes.<id>.name`)을 보여주며, 들어갈 모드가 없으면 숨긴다.
+  새 모드는 `SEARCH_MODES`, 칩 아이콘, 번역 키를 더해 추가한다.
 - 미리보기: 선택한 코드 파일(1MB 이하)을 에디터처럼 보여준다. 테마와 관계없이 VS Code Dark+ 색의 어두운 면에
   줄 번호와 highlight.js 문법 강조를 쓴다(`codeHighlight.ts`, 언어 모듈은 처음 볼 때 따로 불러온다).
   에디터처럼 줄바꿈하지 않고 가로로 스크롤하며, 줄 번호는 왼쪽에 고정된다. 검색어가 오른쪽에 가려 있으면 보이도록 가로로 스크롤한다.

@@ -1,6 +1,6 @@
 // src/features/settings/components/OptionPicker.tsx
 // 설정 카드의 드롭다운. 메뉴는 설정 페이지 안에 들어오도록 위치를 잡아 body에 띄운다.
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import styles from '../SettingsApp.module.css';
@@ -22,7 +22,8 @@ export function OptionPicker<T extends string>({ options, value, onChange, ariaL
   const controlRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 120 });
+  // 첫 그리기에서는 화면 밖에 두고 실제 크기를 잰 뒤 옮긴다.
+  const [menuPosition, setMenuPosition] = useState({ top: -9999, left: -9999, width: 120 });
   const selected = options.find((option) => option.value === value) ?? options[0];
 
   useEffect(() => {
@@ -47,27 +48,30 @@ export function OptionPicker<T extends string>({ options, value, onChange, ariaL
     setIsOpen(false);
   };
 
-  const toggleMenu = () => {
-    if (!isOpen) {
-      const rect = triggerRef.current?.getBoundingClientRect();
-      const page = triggerRef.current?.closest(`.${styles.page}`)?.getBoundingClientRect();
-      if (rect && page) {
-        const menuWidth = Math.max(rect.width, 120);
-        const menuHeight = Math.min(220, options.length * 32 + 12);
-        const inset = 8;
-        const opensBelow = rect.bottom + 6 + menuHeight <= page.bottom - inset;
-        const top = opensBelow
-          ? rect.bottom + 6
-          : Math.max(page.top + inset, rect.top - menuHeight - 6);
-        const left = Math.min(
-          Math.max(page.left + inset, rect.right - menuWidth),
-          page.right - menuWidth - inset,
-        );
-        setMenuPosition({ top, left, width: menuWidth });
-      }
-    }
-    setIsOpen((open) => !open);
-  };
+  // 메뉴를 그린 뒤 실제 높이로 위치를 잡는다. 아래 공간이 부족하면 위로 연다.
+  // (추정 높이로 잡으면 항목 높이가 달라질 때 메뉴가 버튼을 덮는다)
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    const rect = triggerRef.current?.getBoundingClientRect();
+    const page = triggerRef.current?.closest(`.${styles.page}`)?.getBoundingClientRect();
+    const menu = menuRef.current;
+    if (!rect || !page || !menu) return;
+    const menuWidth = Math.max(rect.width, menu.offsetWidth, 120);
+    const menuHeight = menu.offsetHeight;
+    const inset = 8;
+    const gap = 6;
+    const opensBelow = rect.bottom + gap + menuHeight <= page.bottom - inset;
+    const top = opensBelow
+      ? rect.bottom + gap
+      : Math.max(page.top + inset, rect.top - menuHeight - gap);
+    const left = Math.min(
+      Math.max(page.left + inset, rect.right - menuWidth),
+      page.right - menuWidth - inset,
+    );
+    setMenuPosition({ top, left, width: rect.width });
+  }, [isOpen, options.length]);
+
+  const toggleMenu = () => setIsOpen((open) => !open);
 
   return (
     <div className={styles.languageControl} ref={controlRef}>

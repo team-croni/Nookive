@@ -2,8 +2,9 @@
   "placeholder": "Pesquisar no computador",
   "searching": "Pesquisando…",
   "webSearch": "Pesquisa na web",
-  "googleSearch": "Pesquisar “{{query}}” no Google",
+  "engineSearch": "Pesquisar “{{query}}” em {{engine}}",
   "footer": {"webOpen": "Abrir na web"},
   "code": {"placeholder": "Busque código pelo nome do arquivo, caminho ou conteúdo", "placeholderNoFiles": "Não há arquivos de código nas suas pastas de pesquisa", "noResults": "Nenhum código corresponde a esse nome, caminho ou conteúdo.", "noFiles": "Não há arquivos de código nas suas pastas de pesquisa.", "contentHint": "O conteúdo do código é buscado a partir de 3 caracteres.", "indexing": "Criando os dados de pesquisa de código. Parte do conteúdo pode não aparecer até terminar."},
-  "modes": {"all": {"name": "Buscar tudo"}, "code": {"chip": "Código", "name": "Busca de código"}}
+  "web": {"placeholder": "Buscar na web"},
+  "modes": {"all": {"name": "Buscar tudo"}, "web": {"chip": "Web", "name": "Busca na web"}, "code": {"chip": "Código", "name": "Busca de código"}}
 }

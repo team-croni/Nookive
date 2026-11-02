@@ -18,6 +18,9 @@
   --glass-bg-panel: rgba(245, 245, 247, 0.58);
   --glass-bg-footer: rgba(0, 0, 0, 0.04);
   --surface-settings: #f6f6f8;
+  /* 드롭다운·툴팁처럼 떠 있는 면. 다크에서는 macOS 메뉴처럼 바탕보다 밝게 둔다. */
+  --surface-popover: #ffffff;
+  --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
   --glass-blur: blur(40px) saturate(190%);
 
   /* 🧩 Component surfaces */
@@ -147,6 +150,9 @@
     --glass-bg-panel: rgba(15, 15, 18, 0.55);
     --glass-bg-footer: rgba(0, 0, 0, 0.25);
     --surface-settings: #202022;
+    /* 드롭다운·툴팁처럼 떠 있는 면. 다크에서는 macOS 메뉴처럼 바탕보다 밝게 둔다. */
+    --surface-popover: #2c2c2e;
+    --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
 
     --surface-chip: rgba(255, 255, 255, 0.06);
     --surface-chip-strong: rgba(255, 255, 255, 0.08);
@@ -221,6 +227,9 @@
   --glass-bg-panel: rgba(245, 245, 247, 0.58);
   --glass-bg-footer: rgba(0, 0, 0, 0.04);
   --surface-settings: #f6f6f8;
+  /* 드롭다운·툴팁처럼 떠 있는 면. 다크에서는 macOS 메뉴처럼 바탕보다 밝게 둔다. */
+  --surface-popover: #ffffff;
+  --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
   --surface-chip: rgba(0, 0, 0, 0.06);
   --surface-chip-strong: rgba(0, 0, 0, 0.08);
   --surface-icon: rgba(0, 0, 0, 0.04);
@@ -285,6 +294,9 @@
   --glass-bg-panel: rgba(15, 15, 18, 0.55);
   --glass-bg-footer: rgba(0, 0, 0, 0.25);
   --surface-settings: #202022;
+  /* 드롭다운·툴팁처럼 떠 있는 면. 다크에서는 macOS 메뉴처럼 바탕보다 밝게 둔다. */
+  --surface-popover: #2c2c2e;
+  --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
   --surface-chip: rgba(255, 255, 255, 0.06);
   --surface-chip-strong: rgba(255, 255, 255, 0.08);
   --surface-icon: rgba(255, 255, 255, 0.05);
