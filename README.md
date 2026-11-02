@@ -19,7 +19,7 @@ Apple App Store and release builds are not Apple-notarized.
 [Download Nookive for macOS (Apple Silicon)](https://github.com/team-croni/Nookive/releases) · [View all releases](https://github.com/team-croni/Nookive/releases)
 
 Nookive is an open-source, on-device semantic search app for macOS. Search
-your documents, images, recordings, videos, and code by describing what you
+your documents, images, recordings, and videos by describing what you
 remember instead of guessing a filename. Nookive runs the embedding pipeline
 locally with EmbeddingGemma 2 and llama.cpp.
 
@@ -31,10 +31,12 @@ locally with EmbeddingGemma 2 and llama.cpp.
 
 - Semantic matches such as “the clause about pets in the lease” or “payment
   declined screenshot”.
-- PDF pages, Markdown/text files, JSON, and source code.
+- PDF pages and Markdown/text files. Code, configuration, and credential files
+  are not indexed.
 - Images by visual content, with macOS Vision labels/OCR where available.
 - Audio and video by content, with results pointing to a relevant time range.
-- Installed macOS applications by display name and bundle identifier.
+- Installed macOS applications by localized name, original name, or bundle
+  identifier.
 - Exact terms and filenames alongside semantic ranking.
 
 PDF results are scanned in the background so a result can show the page where
