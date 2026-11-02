@@ -1,6 +1,6 @@
 // src/features/search/components/SearchHeader.tsx
 import React, { useRef, useEffect, useState } from 'react';
-import { CodeXml, Search, type LucideIcon } from 'lucide-react';
+import { CodeXml, Globe, Search, type LucideIcon } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import styles from './SearchHeader.module.css';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,7 @@ import {
 } from '../utils/searchModes';
 
 // 칩 아이콘: 라벨을 읽지 않아도 모드를 알아볼 수 있게 한다.
-const MODE_ICONS: Record<SpecialSearchMode, LucideIcon> = { code: CodeXml };
+const MODE_ICONS: Record<SpecialSearchMode, LucideIcon> = { web: Globe, code: CodeXml };
 
 interface SearchHeaderProps {
   query: string;
@@ -104,7 +104,9 @@ const SearchHeaderComponent: React.FC<SearchHeaderProps> = ({
         placeholder={
           searchMode === 'code'
             ? t(hasCodeFiles ? 'code.placeholder' : 'code.placeholderNoFiles')
-            : t('placeholder')
+            : searchMode === 'web'
+              ? t('web.placeholder')
+              : t('placeholder')
         }
         value={inputValue}
         onKeyDown={(e) => {

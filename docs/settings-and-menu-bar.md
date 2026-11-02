@@ -1,6 +1,6 @@
 ---
 date: 2026-11-03
-version: 1.3.0
+version: 1.4.0
 ---
 
 # 메뉴바와 설정 UX
@@ -65,7 +65,10 @@ Nookive 아이콘
     내용으로 찾는다. 코드 검색 데이터(`code-index.sqlite`)는 검색 데이터 초기화 때 함께 지운다. 켜져 있으면
     "코드 파일 열기"에서 자동(설치된 첫 에디터), 감지된 에디터, 기본 앱 중 하나를 고른다(`nookive.codeEditor`).
     설정은 localStorage(`nookive.codeSearchEnabled`)에 두고 검색 창은 storage 이벤트로 따라간다
-  - 웹 검색 켜기/끄기
+  - 웹 검색 켜기/끄기: 끄면 결과가 없을 때의 웹 폴백과 웹 검색 모드(Tab, `web:`)를 모두 쓰지 않는다. 켜져 있으면
+    검색 엔진(Google, Bing, DuckDuckGo, Brave Search, Ecosia, Naver, Baidu)을 고른다(`nookive.webSearchEngine`).
+    고르지 않았으면 간체 중국어는 Baidu, 나머지는 Google이다. 메뉴는 Google 다음에 지금 언어의 지역 엔진을 올린다. ⓘ 안내에는
+    검색어가 고른 엔진으로 전송될 수 있다고 엔진 이름을 넣어 보여준다
   - 검색 개인화 초기화: 열어본 결과 기록(`search-feedback.json`)만 지우며 검색 데이터 초기화와 따로 동작
 - **일반**: 바로가기 키, 언어, 화면 모드(라이트, 다크, 시스템), 로그인 시 열기
   - 로그인 시 열기: macOS 13+의 `SMAppService.mainApp`으로 등록해 시스템 설정 > 일반 > 로그인 항목의

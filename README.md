@@ -24,8 +24,9 @@ remember instead of guessing a filename. Nookive runs the embedding pipeline
 locally with EmbeddingGemma 2 and llama.cpp.
 
 > Your indexed content stays on your Mac. Nookive does not require an account
-> or a hosted AI service. Model downloads and Google autocomplete/web-search
-> actions are network operations; they are separate from local indexing.
+> or a hosted AI service. Model downloads and web suggestions/web-search
+> actions (Google by default) are network operations; they are separate from
+> local indexing.
 
 ## What it can find
 
@@ -34,9 +35,12 @@ locally with EmbeddingGemma 2 and llama.cpp.
 - PDF pages and Markdown/text files. Code and configuration files are left out
   of semantic search (see code search below); credential files are never read.
 - Code in your search folders by file name, path, or contents, with the
-  matching line: press Tab or type `code:` in the search window. Results open
+  matching line: switch to code mode with Tab or type `code:`. Results open
   at that line in your editor (VS Code, Cursor, Zed, Sublime Text, JetBrains
   IDEs, or Xcode). You can turn this off in Settings.
+- The web, without leaving Nookive: press Tab or type `web:` to see search
+  suggestions for your query, even when local files match. Choose Google,
+  Bing, DuckDuckGo, Brave Search, Ecosia, Naver, or Baidu in Settings.
 - Images by visual content, with macOS Vision labels/OCR where available.
 - Audio and video by content, with results pointing to a relevant time range.
 - Installed macOS applications by localized name, original name, or bundle
@@ -158,8 +162,9 @@ macOS application folders for installed app names and bundle identifiers; app
 bundle contents are not indexed. To rank results you open a little higher
 next time, Nookive keeps your search words and the opened paths in the
 application data directory; reset them under Settings → Search
-personalization. Nookive does not upload indexed file contents. If you use autocomplete or web search, the typed query and the app
-language are sent to Google and the selected URL is opened in your browser. The temporary
+personalization. Nookive does not upload indexed file contents. If you use autocomplete or web search, the typed query (and, for Google,
+the app language) is sent to the search engine you chose in Settings
+(Google by default) and the selected URL is opened in your browser. The temporary
 embedding server listens on loopback (`127.0.0.1`) and should not be exposed
 publicly. Local indexes, logs, model caches, and selected paths may be
 sensitive and should be handled accordingly.

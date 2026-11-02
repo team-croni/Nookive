@@ -3,8 +3,9 @@
 //
 // - 칩 라벨은 화면 글자라 언어별로 번역하고, 접두어는 언어와 관계없이 같은 영어 단어로 둔다.
 // - Tab은 전체 → 각 모드 → 전체 순으로 돌고, Shift+Tab은 반대로 돈다. 설정에서 꺼진 모드는 건너뛴다.
+// - 순서는 SEARCH_MODES 순서다. 누구나 쓰는 웹 검색을 개발자만 쓰는 코드 검색보다 앞에 둔다.
 
-export type SearchMode = 'all' | 'code';
+export type SearchMode = 'all' | 'web' | 'code';
 export type SpecialSearchMode = Exclude<SearchMode, 'all'>;
 
 export interface SearchModeDefinition {
@@ -13,7 +14,10 @@ export interface SearchModeDefinition {
   prefix: string;
 }
 
-export const SEARCH_MODES: readonly SearchModeDefinition[] = [{ id: 'code', prefix: 'code:' }];
+export const SEARCH_MODES: readonly SearchModeDefinition[] = [
+  { id: 'web', prefix: 'web:' },
+  { id: 'code', prefix: 'code:' },
+];
 
 /**
  * 입력이 사용할 수 있는 모드의 접두어로 시작하면 모드와 나머지 입력을, 아니면 null을 돌려준다.

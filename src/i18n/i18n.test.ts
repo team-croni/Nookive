@@ -16,6 +16,8 @@ const ALLOWED_FILES = new Set([
   'features/search/services/scoring.ts',
   // Rust의 저장 공간 부족 오류 문구를 알아보는 정규식
   'features/settings/indexingWorker.ts',
+  // 검색 엔진의 현지 브랜드 이름(네이버). 번역 문구가 아니라 고유 명사다.
+  'utils/webSearchEngines.ts',
 ]);
 
 const flatKeys = (value: unknown, prefix = ''): string[] =>

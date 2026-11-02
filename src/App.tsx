@@ -12,7 +12,7 @@ import { useSearchResults } from './features/search/hooks/useSearchResults';
 import { useWebSuggestions } from './features/search/hooks/useWebSuggestions';
 import { usePreviewSelection } from './features/search/hooks/usePreviewSelection';
 import { usePdfMatchScan } from './features/search/hooks/usePdfMatchScan';
-import { openGoogleSearch } from './features/search/services/webSearchClient';
+import { openWebSearch } from './features/search/services/webSearchClient';
 import { feedbackClient } from './features/search/services/feedbackClient';
 import { cycleSearchMode } from './features/search/utils/searchModes';
 import { openCodeFile, openFileInOS, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
@@ -104,13 +104,16 @@ export function App() {
     return merged;
   }, [scannedPdfPages, viewerResolvedPdfPages, previewQuery]);
 
-  // 로컬 검색이 "현재 쿼리에 대해 끝났고" 결과가 없을 때만 Google 자동완성 폴백을 노출한다.
+  // 로컬 검색이 "현재 쿼리에 대해 끝났고" 결과가 없을 때만 검색 엔진 자동완성 폴백을 노출한다.
   // (검색 중이거나 결과가 있는 동안에는 폴백을 마운트하지 않고 네트워크 요청도 보내지 않는다.
   //  입력 직후 첫 렌더에서 폴백이 먼저 마운트되면 네이티브 창 확장과 겹쳐 레이아웃이 흔들린다.)
   // 코드 검색 결과가 보이는 동안에는 웹 폴백 대신 빈 결과 안내를 보여준다.
+  // 웹 검색 모드에서는 로컬 결과와 관계없이 검색 엔진 자동완성 목록을 보여준다.
   const isCodeMode = searchMode === 'code';
   // 화면에 보이는 결과를 만든 모드. 모드를 바꾼 직후에는 새 결과가 올 때까지 이전 모드의 화면을 유지한다.
-  const showsCodeResults = (isSettled ? searchMode : settledSearchMode) === 'code';
+  const displayedMode = isSettled ? searchMode : settledSearchMode;
+  const showsCodeResults = displayedMode === 'code';
+  const showsWebResults = displayedMode === 'web';
   const localWebMode = !isCodeMode && isSettled && !isLoading && orderedResults.length === 0;
   const {
     suggestions: webSuggestions,
@@ -118,12 +121,13 @@ export function App() {
     displayQuery: webDisplayQuery,
     isLoading: isWebLoading,
     isEnabled: isWebSearchEnabled,
+    engineName: webEngineName,
   } = useWebSuggestions(
     query,
     // 검색어가 바뀌는 동안에도 확장된 웹 폴백 화면을 유지한다.
     // 이 순간 localWebMode만 false로 바꾸면 훅이 기존 목록을 []로
     // 반환해 결과 영역이 매 입력마다 사라졌다가 다시 나타난다.
-    localWebMode || (!showsCodeResults && isWindowExpanded && !isSettled),
+    localWebMode || searchMode === 'web' || showsWebResults || (!showsCodeResults && isWindowExpanded && !isSettled),
   );
   const webMode = localWebMode && isWebSearchEnabled;
   const [webFallbackWasVisible, setWebFallbackWasVisible] = useState(false);
@@ -133,10 +137,10 @@ export function App() {
   // 앱 결과가 먼저 도착한 중간 렌더에서도 웹 폴백을 유지해 빈 화면을 방지한다.
   const keepWebFallbackDuringSearch =
     isWindowExpanded && isLoading && webFallbackWasVisible;
-  const showWebFallback = !showsCodeResults && (
+  const showWebFallback = showsWebResults || (!showsCodeResults && (
     (orderedResults.length === 0 && (webMode || (isWindowExpanded && !isSettled)))
     || keepWebFallbackDuringSearch
-  );
+  ));
 
   // 웹 폴백에서 새 로컬 검색으로 전환할 때, 앱 결과가 확정될 때까지
   // 웹 폴백을 유지할 수 있도록 마지막 표시 상태를 기억한다.
@@ -164,7 +168,7 @@ export function App() {
   }, [hasQuery, isSettled, isWindowExpanded, orderedResults.length, showWebFallback, webFallbackWasVisible]);
   const webItemCount = showWebFallback ? 1 + webSuggestions.length : 0;
 
-  // 웹 폴백으로 전환되면 선택 인덱스를 첫 항목(Google 검색)으로 되돌린다.
+  // 웹 폴백으로 전환되면 선택 인덱스를 첫 항목(검색 엔진에서 검색)으로 되돌린다.
   useEffect(() => {
     if (webMode) setSelectedIndex(0);
   }, [webMode, query, setSelectedIndex]);
@@ -203,7 +207,7 @@ export function App() {
       const target = idx === 0 ? webQuery : webSuggestions[idx - 1];
       if (!target) return;
       void hideDesktopWindow();
-      void openGoogleSearch(target);
+      void openWebSearch(target);
       return;
     }
     const selected = deferredResults[idx];
@@ -262,11 +266,11 @@ export function App() {
     }
   };
 
-  // 하단 Tab 안내: 다음 모드 이름을 보여준다. 들어갈 모드가 없거나,
-  // 전체 검색에서 코드 파일이 없으면(코드와 무관한 사용자) 숨긴다.
+  // 하단 Tab 안내: 다음 모드 이름을 보여준다. 들어갈 모드가 없으면 숨긴다.
+  // (코드 파일이 없으면 코드 모드는 availableModes에서 이미 빠져 있다)
   const nextMode = cycleSearchMode(searchMode, availableModes);
   const modeHint =
-    nextMode !== searchMode && (searchMode !== 'all' || hasCodeFiles)
+    nextMode !== searchMode
       ? { label: t(`modes.${nextMode}.name`), onClick: () => setSearchMode(nextMode) }
       : undefined;
 
@@ -292,7 +296,7 @@ export function App() {
           />
 
           {/* 2. 본문 영역: 결과가 있으면 항상 2열(로딩 중에도 유지),
-                 표시할 결과가 없을 때는 Google 자동완성 폴백을 노출 */}
+                 표시할 결과가 없을 때는 검색 엔진 자동완성 폴백을 노출 */}
           {hasQuery && isWindowExpanded && (
             showsCodeResults && orderedResults.length === 0 ? (
               // 코드 검색 결과가 없으면 빈 미리보기 패널 없이 본문 전체에 안내를 보여준다.
@@ -304,12 +308,13 @@ export function App() {
               <div className="web-fallback-pane">
                 <WebFallbackList
                   query={webDisplayQuery}
+                  engineName={webEngineName}
                   openQuery={webQuery}
                   suggestions={webSuggestions}
                   isLoading={isWebLoading}
                   selectedIndex={selectedIndex}
                   onSelectIndex={setSelectedIndex}
-                  onOpen={(target) => void openGoogleSearch(target)}
+                  onOpen={(target) => void openWebSearch(target)}
                 />
               </div>
             ) : (

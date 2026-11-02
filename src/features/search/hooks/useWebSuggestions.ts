@@ -1,8 +1,15 @@
 // src/features/search/hooks/useWebSuggestions.ts
-// 로컬 검색 결과가 비었을 때만 Google 자동완성을 조회한다.
+// 고른 검색 엔진의 자동완성을 조회한다. 로컬 검색 결과가 비었을 때(웹 폴백)와 웹 검색 모드에서만 켜진다.
 import { useEffect, useState } from 'react';
-import { fetchGoogleSuggestions } from '../services/webSearchClient';
-import { getWebSearchEnabled, WEB_SEARCH_PREFERENCE_EVENT } from '../../../utils/webSearchPreference';
+import { useTranslation } from 'react-i18next';
+import { webSearchEngineName } from '../../../utils/webSearchEngines';
+import { fetchWebSuggestions } from '../services/webSearchClient';
+import {
+  getWebSearchEnabled,
+  getWebSearchEngine,
+  subscribeWebSearchEnabled,
+  subscribeWebSearchEngine,
+} from '../../../utils/webSearchPreference';
 
 const SUGGEST_DEBOUNCE_MS = 180;
 
@@ -17,11 +24,13 @@ export function useWebSuggestions(query: string, enabled: boolean) {
   const [state, setState] = useState<SuggestState>({ query: '', suggestions: [] });
   const [isPreferenceEnabled, setIsPreferenceEnabled] = useState(getWebSearchEnabled);
 
-  useEffect(() => {
-    const refresh = () => setIsPreferenceEnabled(getWebSearchEnabled());
-    window.addEventListener(WEB_SEARCH_PREFERENCE_EVENT, refresh);
-    return () => window.removeEventListener(WEB_SEARCH_PREFERENCE_EVENT, refresh);
-  }, []);
+  // 고른 검색 엔진. 바뀌면 자동완성을 그 엔진으로 다시 조회한다. 이름은 화면 언어로 보여준다. (네이버, 百度)
+  const [engine, setEngine] = useState(getWebSearchEngine);
+  const { i18n } = useTranslation();
+
+  // 설정 창에서 바꾼 값도 따라간다. (같은 창은 커스텀 이벤트, 다른 창은 storage 이벤트)
+  useEffect(() => subscribeWebSearchEnabled(setIsPreferenceEnabled), []);
+  useEffect(() => subscribeWebSearchEngine(setEngine), []);
 
   useEffect(() => {
     // 검색창이 축소되거나 웹 검색 설정이 꺼지면 이전 요청 결과를 버린다.
@@ -39,7 +48,7 @@ export function useWebSuggestions(query: string, enabled: boolean) {
 
     let cancelled = false;
     const timer = setTimeout(async () => {
-      const data = await fetchGoogleSuggestions(query);
+      const data = await fetchWebSuggestions(query);
       if (!cancelled) {
         setState({ query, suggestions: data });
       }
@@ -49,7 +58,7 @@ export function useWebSuggestions(query: string, enabled: boolean) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [query, enabled, isPreferenceEnabled]);
+  }, [query, enabled, isPreferenceEnabled, engine]);
 
   return {
     // 새 응답이 도착할 때까지 이전 목록을 유지해 목록 높이가 줄었다가
@@ -62,5 +71,6 @@ export function useWebSuggestions(query: string, enabled: boolean) {
         : query,
     isLoading: enabled && isPreferenceEnabled && state.query !== query,
     isEnabled: isPreferenceEnabled,
+    engineName: webSearchEngineName(engine, i18n.resolvedLanguage ?? i18n.language),
   };
 }
