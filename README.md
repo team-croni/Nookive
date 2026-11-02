@@ -40,7 +40,7 @@ locally with EmbeddingGemma 2 and llama.cpp.
 - Images by visual content, with macOS Vision labels/OCR where available.
 - Audio and video by content, with results pointing to a relevant time range.
 - Installed macOS applications by localized name, original name, or bundle
-  identifier.
+  identifier. Newly installed or removed apps show up within a few seconds.
 - Exact terms and filenames alongside semantic ranking.
 
 PDF results are scanned in the background so a result can show the page where

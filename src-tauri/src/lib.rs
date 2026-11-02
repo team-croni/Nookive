@@ -1,5 +1,6 @@
 // src-tauri/src/lib.rs
 // 앱 진입점: 모듈 구성, Tauri 빌더 설정, 커맨드 등록.
+mod app_watcher;
 mod applications;
 mod code_index;
 mod code_search;
@@ -41,6 +42,7 @@ pub fn run() {
         .manage(IndexingBusyState::default())
         .manage(code_search::CodeSearchState::default())
         .manage(code_index::CodeIndexState::default())
+        .manage(app_watcher::AppWatcherState::default())
         .manage(index::IndexErrorState::default())
         .plugin(
             tauri_plugin_log::Builder::default()
@@ -82,6 +84,8 @@ pub fn run() {
             models::start_model_watcher(app.handle().clone());
             // 등록된 검색 폴더를 감시해 변경 시 자동으로 색인한다.
             index::watcher::start_index_watcher(app.handle().clone());
+            // 앱 설치·삭제를 검색 창의 앱 목록에 바로 반영한다.
+            app_watcher::start_application_watcher(app.handle().clone());
             let _ = app
                 .global_shortcut()
                 .on_shortcut("Alt+Space", |app, _, event| {
