@@ -27,7 +27,8 @@ import { useTranslation } from 'react-i18next';
 interface PreviewContentProps {
   selectedItem: SearchResultItem;
   query: string;
-  onOpenFile?: (path: string) => void;
+  onOpenItem?: (item: SearchResultItem) => void;
+  openLabel?: string;
   onRevealFile?: (path: string) => void;
   /** PDF 뷰어가 실제로 렌더한 페이지와 매칭 여부를 상위로 알린다. */
   onPdfPageResolved?: (page: number, matched: boolean) => void;
@@ -37,7 +38,8 @@ interface PreviewContentProps {
 export const PreviewContent: React.FC<PreviewContentProps> = ({
   selectedItem,
   query,
-  onOpenFile,
+  onOpenItem,
+  openLabel,
   onRevealFile,
   onPdfPageResolved,
   showPaneShell = true,
@@ -308,8 +310,8 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
           )}
         </div>
         <div className={styles.actionRow}>
-          <Button variant="primary" size="xs" onClick={() => onOpenFile?.(file.path)}>
-            <span>{t('actions.open', { ns: 'common' })}</span>
+          <Button variant="primary" size="xs" onClick={() => onOpenItem?.(selectedItem)}>
+            <span>{openLabel ?? t('actions.open', { ns: 'common' })}</span>
           </Button>
           <Button variant="secondary" size="xs" onClick={() => onRevealFile?.(file.path)}>
             <span>{t('file.finder', { ns: 'common' })}</span>

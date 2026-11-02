@@ -15,11 +15,13 @@ import { usePdfMatchScan } from './features/search/hooks/usePdfMatchScan';
 import { openGoogleSearch } from './features/search/services/webSearchClient';
 import { feedbackClient } from './features/search/services/feedbackClient';
 import { cycleSearchMode } from './features/search/utils/searchModes';
-import { openFileInOS, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
+import { openCodeFile, openFileInOS, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
+import { getCodeEditor } from './utils/codeSearchPreference';
 import type { SearchResultItem } from './types/search';
 import './App.css';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from './hooks/useTheme';
+import { useCodeEditor } from './hooks/useCodeEditor';
 
 export function App() {
   useTheme();
@@ -174,10 +176,25 @@ export function App() {
   useEffect(() => {
     settledQueryRef.current = settledQuery;
   }, [settledQuery]);
-  const handleOpenFile = useCallback((path: string) => {
+  // 코드 결과는 설정한 에디터에서 일치한 줄로 연다. (에디터가 없으면 Rust가 기본 앱으로 연다)
+  // ResultItem(memo)에 전달되는 콜백이므로 참조가 안정적이어야 한다.
+  const handleOpenItem = useCallback((item: SearchResultItem) => {
+    const { path } = item.file;
     void feedbackClient.recordOpen(settledQueryRef.current, path);
-    openFileInOS(path);
+    if (item.category === 'code') {
+      const line = item.bestChunk.lineStart ?? item.chunks?.find((chunk) => chunk.lineStart)?.lineStart;
+      void openCodeFile(path, line, getCodeEditor());
+    } else {
+      openFileInOS(path);
+    }
   }, []);
+
+  // 코드 결과의 열기 버튼·Enter 안내는 열릴 에디터 이름을 보여준다.
+  const { editor: codeEditor } = useCodeEditor();
+  const openLabelFor = (item: SearchResultItem | undefined) =>
+    item?.category === 'code' && codeEditor
+      ? t('common:actions.openIn', { app: codeEditor.name })
+      : t('common:actions.open');
 
   // 선택 항목 열기 (Enter / 하단 열기 버튼)
   // 열린 앱이 포커스를 가져가 blur가 발생할 때까지 기다리지 않고 창을 바로 숨긴다.
@@ -192,7 +209,7 @@ export function App() {
     const selected = deferredResults[idx];
     if (!selected) return;
     void hideDesktopWindow();
-    handleOpenFile(selected.file.path);
+    handleOpenItem(selected);
   };
 
   // 키보드 네비게이션 등록
@@ -238,12 +255,6 @@ export function App() {
       unlisten?.();
     };
   }, []);
-
-  // ResultItem(memo)에 전달되는 콜백은 참조가 안정적이어야 재렌더가 최소화된다.
-  const handleOpenItem = useCallback(
-    (item: SearchResultItem) => handleOpenFile(item.file.path),
-    [handleOpenFile],
-  );
 
   const handleCopyPath = () => {
     if (currentSelected) {
@@ -323,7 +334,8 @@ export function App() {
                   <PreviewPane
                     selectedItem={previewSelected}
                     query={previewQuery}
-                    onOpenFile={handleOpenFile}
+                    onOpenItem={handleOpenItem}
+                    openLabel={openLabelFor(previewSelected)}
                     onRevealFile={revealFileInOS}
                     onPdfPageResolved={handlePdfPageResolved}
                   />
@@ -337,7 +349,7 @@ export function App() {
             <AppFooter
               canOpen={showWebFallback ? webItemCount > 0 : Boolean(currentSelected)}
               canCopyPath={!showWebFallback && Boolean(currentSelected)}
-              openLabel={showWebFallback ? t('footer.webOpen') : t('common:actions.open')}
+              openLabel={showWebFallback ? t('footer.webOpen') : openLabelFor(currentSelected)}
               onOpen={() => openSelectedAt(selectedIndex)}
               onCopyPath={handleCopyPath}
               modeHint={modeHint}

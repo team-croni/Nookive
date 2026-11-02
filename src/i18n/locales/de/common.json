@@ -1,5 +1,5 @@
 {
-  "actions": {"open": "Öffnen", "cancel": "Abbrechen", "close": "Schließen", "remove": "Entfernen", "copyPath": "Pfad kopieren", "refresh": "Aktualisieren", "stop": "Stoppen", "start": "Index erstellen", "details": "Details", "enabled": "Ein", "disabled": "Aus"},
+  "actions": {"open": "Öffnen", "openIn": "In {{app}} öffnen", "cancel": "Abbrechen", "close": "Schließen", "remove": "Entfernen", "copyPath": "Pfad kopieren", "refresh": "Aktualisieren", "stop": "Stoppen", "start": "Index erstellen", "details": "Details", "enabled": "Ein", "disabled": "Aus"},
   "fileTypes": {"document": "Dokumente", "image": "Bilder", "video": "Videos", "audio": "Audio", "code": "Code"},
   "file": {"application": "App", "folder": "Ordner", "page": "Seite {{count}}", "timestamp": "Zeitstempel {{value}}", "finder": "Im Finder anzeigen", "installedApp": "Installierte App", "pageOf": "Seite {{page}}/{{total}}"},
   "language": {"label": "Sprache", "korean": "한국어", "english": "English", "japanese": "日本語", "chineseSimplified": "简体中文", "chineseTraditional": "繁體中文", "spanish": "Español", "french": "Français", "german": "Deutsch", "portuguese": "Português (Brasil)"}

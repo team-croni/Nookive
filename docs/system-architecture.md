@@ -176,3 +176,11 @@ macOS에서는 Tauri command인 `render_pdf_page_native`가 Core Graphics를
 - 크기: 공개 Rust 크레이트 소스 1만 개(199MB, 생성된 대형 파일 포함)를 release 빌드로 색인하면 34초,
   색인 파일 488MB였다. 변경이 없을 때 다시 맞추는 데 5ms, 검색은 10~90ms였다.
 - 초기화: 검색 데이터 초기화(`reset_index`)가 `code-index.sqlite`도 지운다. 스위치를 끄면 갱신만 멈춘다.
+- 열기: 코드 결과는 `open_code_file`(`editors.rs`)이 설정한 에디터에서 일치한 줄로 연다. 이름/경로 결과는 줄 없이 연다.
+  에디터는 셸 PATH 대신 번들 ID로 찾는다(NSWorkspace). VS Code·Cursor·Windsurf(Devin)는 번들 안 CLI
+  (`-g <경로>:<줄>`; URL 스킴은 열 때마다 확인 창을 띄워 쓰지 않는다), Zed·Sublime Text는 번들 안 CLI
+  (`<경로>:<줄>`), JetBrains IDE는 번들 안 실행 파일
+  (`--line N <경로>`), Xcode는 `/usr/bin/xed --line N`을 셸 없이 실행한다. 검색 폴더 안의 실제 코드 파일
+  (실제 경로 기준)만 넘기고, 에디터가 없거나 실행에 실패하면 기본 앱으로 연다. 설정은 localStorage
+  (`nookive.codeEditor`: `auto` = 처음 찾은 에디터, `default` = 기본 앱, 또는 에디터 id)이고, 코드 결과의
+  열기 버튼과 하단 Enter 안내는 열릴 에디터 이름(Finder의 앱 이름)을 보여준다.
