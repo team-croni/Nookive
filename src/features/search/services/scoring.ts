@@ -10,6 +10,7 @@
 // - 키워드 일치는 coverage(쿼리 단어 중 몇 %가 파일명/스니펫에 있는가)로 반영한다.
 import type { SearchMatchChunk, SearchResultItem } from '../../../types/search';
 import { getFileSection, type FileSection } from '../../../utils/fileType';
+import type { RankBoost } from './feedback';
 import { hangulCompletionPattern, nfc } from './textUtils';
 
 const Z_GATE = 2.0;
@@ -689,14 +690,24 @@ export function groupAndDeduplicate(
 /**
  * z-score 게이트를 통과한 결과만 정렬해 반환한다.
  * 검색어가 비어 있으면 상위 10개만 반환한다.
+ * boost(개인화)는 게이트를 통과한 결과의 rankScore에만 곱한다. similarityScore는 그대로 두어
+ * 섹션 순서는 바꾸지 않고 섹션 안의 순서만 바뀐다.
  */
-export function rankResults(sorted: SearchResultItem[], query: string): SearchResultItem[] {
+export function rankResults(
+  sorted: SearchResultItem[],
+  query: string,
+  boost?: RankBoost,
+): SearchResultItem[] {
   if (!query.trim()) {
     return sorted.slice(0, 10);
   }
 
   const gated = sorted
     .filter((item) => (item.rankScore ?? 0) > 0)
+    .map((item) => {
+      const factor = boost?.(item.file.path) ?? 1;
+      return factor === 1 ? item : { ...item, rankScore: (item.rankScore ?? 0) * factor };
+    })
     .sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0));
 
   const limitedResults: SearchResultItem[] = [];

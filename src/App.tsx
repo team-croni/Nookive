@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { FloatingWindow } from './components/layout/FloatingWindow/FloatingWindow';
 import { AppFooter } from './components/layout/AppFooter';
@@ -13,6 +13,7 @@ import { useWebSuggestions } from './features/search/hooks/useWebSuggestions';
 import { usePreviewSelection } from './features/search/hooks/usePreviewSelection';
 import { usePdfMatchScan } from './features/search/hooks/usePdfMatchScan';
 import { openGoogleSearch } from './features/search/services/webSearchClient';
+import { feedbackClient } from './features/search/services/feedbackClient';
 import { openFileInOS, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
 import type { SearchResultItem } from './types/search';
 import './App.css';
@@ -154,6 +155,18 @@ export function App() {
     if (webMode) setSelectedIndex(0);
   }, [webMode, query, setSelectedIndex]);
 
+  // 로컬 결과를 여는 모든 경로(Enter, 열기 버튼, 더블클릭, 미리보기 열기)가 여기를 지난다.
+  // 화면 결과를 만든 검색어(settledQuery)로 개인화 기록을 남긴다. 웹 검색은 기록하지 않는다.
+  // 검색어는 ref로 읽어 콜백 참조를 고정한다. (ResultItem memo 재렌더 방지)
+  const settledQueryRef = useRef(settledQuery);
+  useEffect(() => {
+    settledQueryRef.current = settledQuery;
+  }, [settledQuery]);
+  const handleOpenFile = useCallback((path: string) => {
+    void feedbackClient.recordOpen(settledQueryRef.current, path);
+    openFileInOS(path);
+  }, []);
+
   // 선택 항목 열기 (Enter / 하단 열기 버튼)
   // 열린 앱이 포커스를 가져가 blur가 발생할 때까지 기다리지 않고 창을 바로 숨긴다.
   const openSelectedAt = (idx: number) => {
@@ -167,7 +180,7 @@ export function App() {
     const selected = deferredResults[idx];
     if (!selected) return;
     void hideDesktopWindow();
-    openFileInOS(selected.file.path);
+    handleOpenFile(selected.file.path);
   };
 
   // 키보드 네비게이션 등록
@@ -210,10 +223,6 @@ export function App() {
       window.removeEventListener('blur', handleBlur);
       unlisten?.();
     };
-  }, []);
-
-  const handleOpenFile = useCallback((path: string) => {
-    openFileInOS(path);
   }, []);
 
   // ResultItem(memo)에 전달되는 콜백은 참조가 안정적이어야 재렌더가 최소화된다.

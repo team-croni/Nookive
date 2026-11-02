@@ -13,6 +13,7 @@ import { ShortcutSection } from './components/ShortcutSection';
 import { StatusSection } from './components/StatusSection';
 import { IndexingSection } from './components/IndexingSection';
 import { ResetSection } from './components/ResetSection';
+import { SearchHistorySection } from './components/SearchHistorySection';
 import { LanguageSection } from './components/LanguageSection';
 import { ModelSection } from './components/ModelSection';
 import { ThemeSection } from './components/ThemeSection';
@@ -242,6 +243,8 @@ export default function SettingsApp() {
           onStart={() => void startIndexing()}
           onAbort={abortIndexing}
         />
+
+        <SearchHistorySection />
 
         <ResetSection
           resetMessage={resetMessage}

@@ -7,6 +7,7 @@ import type { SearchResultItem } from '../../../types/search';
 import i18n from '../../../i18n';
 import { getIndexStatus } from '../../../utils/tauriBridge';
 import { searchClient } from '../services/searchClient';
+import { feedbackClient } from '../services/feedbackClient';
 import { orderResultsBySection } from '../utils/orderResults';
 import { clearPdfMatchCache } from '../../preview/pdf/pdfTextSearch';
 import { clearPdfRenderCache } from '../../preview/pdf/pdfRender';
@@ -137,6 +138,17 @@ export function useSearchResults() {
     return () => {
       unlisten?.();
     };
+  }, []);
+
+  // 설정에서 검색 개인화를 초기화하면 메모리 기록도 비운다.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    void listen('search-feedback-reset', () => feedbackClient.clear())
+      .then((un) => {
+        unlisten = un;
+      })
+      .catch(() => { });
+    return () => unlisten?.();
   }, []);
 
   // 앱 이름은 화면 언어로 표시하므로, 설정에서 언어를 바꾸면 앱 목록을 다시 불러온다.
