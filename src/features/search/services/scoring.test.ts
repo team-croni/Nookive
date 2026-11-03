@@ -46,6 +46,8 @@ const records = [
   app('Slack', 'com.tinyspeck.slackmacgap'),
   // 한국어 환경에서는 현지화 이름을 표시하고 Info.plist 이름을 검색용 이름으로 둔다.
   app('카카오톡', 'com.kakao.KakaoTalkMac', 'KakaoTalk', ['KakaoTalk']),
+  // macOS의 "나의 찾기"는 이름 가운데 공백이 줄바꿈 없는 공백(U+00A0)이다.
+  app('나의\u00a0찾기', 'com.apple.findmy', 'FindMy', ['Find My']),
   file('studio-booking.md', 'md', 'The photo studio is booked for March.', UNRELATED),
   file('receipt.png', 'png', '[사진 이미지] 사물/객체: 문서 서류. Vision: document', UNRELATED),
 ];
@@ -83,6 +85,12 @@ describe('application names', () => {
   it('matches both the localized name and the Info.plist name', () => {
     expect(search('카카오톡')).toEqual(['카카오톡']);
     expect(search('kakaotalk')).toEqual(['카카오톡']);
+  });
+
+  it('treats non-breaking spaces in names as spaces', () => {
+    for (const query of ['나의', '나의 ', '나의 찾기']) {
+      expect(search(query), query).toEqual(['나의\u00a0찾기']);
+    }
   });
 
   it('matches the bundle file name when the display name differs', () => {

@@ -11,7 +11,7 @@
 import type { SearchMatchChunk, SearchResultItem } from '../../../types/search';
 import { getFileSection, type FileSection } from '../../../utils/fileType';
 import type { RankBoost } from './feedback';
-import { hangulCompletionPattern, nfc } from './textUtils';
+import { hangulCompletionPattern, nfc, nfcName } from './textUtils';
 
 const Z_GATE = 2.0;
 const WORD_WEIGHT = 2.0;
@@ -139,13 +139,13 @@ interface KeywordMatch {
  * 다를 수 있으므로 모두 이름으로 본다.
  */
 function searchableNames(item: SearchResultItem): string[] {
-  const names = [nfc(item.file.name).toLowerCase()];
+  const names = [nfcName(item.file.name).toLowerCase()];
   for (const alternate of item.file.alternateNames ?? []) {
-    const name = nfc(alternate).toLowerCase();
+    const name = nfcName(alternate).toLowerCase();
     if (!names.includes(name)) names.push(name);
   }
   if (item.file.kind === 'application') {
-    const bundleName = nfc(item.file.path.split('/').pop() ?? '')
+    const bundleName = nfcName(item.file.path.split('/').pop() ?? '')
       .replace(/\.app$/i, '')
       .toLowerCase();
     if (bundleName && !names.includes(bundleName)) names.push(bundleName);

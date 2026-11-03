@@ -2,7 +2,7 @@
 // 입력창 인라인 자동완성: 첫 번째 결과가 앱이고 이름이 검색어로 시작하면 나머지 글자를 이어서 보여준다.
 // 완성은 항상 Enter로 열리는 결과(첫 줄)와 같아야 한다. (I/O 없는 순수 함수)
 import type { SearchResultItem } from '../../../types/search';
-import { nfc } from '../services/textUtils';
+import { nfcName } from '../services/textUtils';
 
 export interface InlineCompletion {
   /** Enter로 열릴 앱 */
@@ -21,10 +21,11 @@ const isApplication = (item: SearchResultItem) =>
 /** 앱의 이름 중 검색어로 시작하는 것을 찾아 완성을 만든다. 없으면 null. */
 export function completeFromItem(query: string, item: SearchResultItem | undefined): InlineCompletion | null {
   if (!item || !isApplication(item) || !query || /^\s/.test(query)) return null;
-  const typed = nfc(query);
+  const typed = nfcName(query);
   const lowered = typed.toLowerCase();
   for (const name of [item.file.name, ...(item.file.alternateNames ?? [])]) {
-    const normalized = nfc(name);
+    // 이름의 줄바꿈 없는 공백(U+00A0)도 일반 공백으로 맞춘다. ("나의 " → "나의 찾기")
+    const normalized = nfcName(name);
     if (!normalized.toLowerCase().startsWith(lowered)) continue;
     return {
       item,
