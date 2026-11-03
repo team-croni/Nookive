@@ -25,6 +25,8 @@ const ALLOWED_FILES = new Set([
   'features/search/utils/weatherPlaces.ts',
   // 세계 시각 검색어를 알아보는 한국어·중국어·일본어 단어(시간, 몇 시, 오후, 今何時, 下午). 입력 해석 규칙이다.
   'features/search/utils/timeQuery.ts',
+  // 날짜 질문을 알아보는 한국어·중국어·일본어 단어(후, 까지, 무슨 요일, 크리스마스). 입력 해석 규칙이다.
+  'features/search/utils/dateQuery.ts',
 ]);
 
 const flatKeys = (value: unknown, prefix = ''): string[] =>

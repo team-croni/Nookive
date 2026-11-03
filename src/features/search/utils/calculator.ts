@@ -122,10 +122,12 @@ function evaluateTokens(tokens: Token[]): number | null {
 
 /** 날짜(2026-11-03, 11/3/2026)와 전화번호(010-1234-5678)처럼 생긴 입력 */
 const DATE_OR_PHONE = /^\d+([-/.])\d+\1\d+$/;
+/** 식 안의 날짜(2026-12-25). 날짜가 들어간 식("2026-12-25 - 2026-11-04")은 날짜 계산이 답한다. */
+const DATE_TOKEN = /(?:^|[^\d.])\d{4}([-/.])\d{1,2}\1\d{1,2}(?![\d.])/;
 
 function evaluateMath(input: string): Calculation | null {
   const trimmed = input.trim();
-  if (DATE_OR_PHONE.test(trimmed)) return null;
+  if (DATE_OR_PHONE.test(trimmed) || DATE_TOKEN.test(trimmed)) return null;
   // "15% of 80" → 15% × 80
   const normalized = trimmed.replace(/(\d)\s*%\s*of\s+/gi, '$1% * ');
   const tokens = tokenize(normalized);

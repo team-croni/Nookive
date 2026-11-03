@@ -458,7 +458,12 @@ export const WeatherPreview: React.FC<WeatherPreviewProps> = ({ result, onOpenWe
         </ul>
       </section>
 
+      {/* 파일 미리보기처럼 동작 버튼은 아래 왼쪽에 두고, 출처는 그 오른쪽에 작게 둔다. */}
       <footer className={styles.footer}>
+        <Button variant="primary" size="xs" className={styles.footerButton} onClick={onOpenWeb}>
+          <ExternalLink size={14} aria-hidden="true" />
+          <span>{t('weather.openWeb')}</span>
+        </Button>
         {/* 출처는 "·" 단위로만 줄을 바꾼다. (단어 가운데나 "©" 뒤에서 끊기지 않게) */}
         <span className={styles.attribution}>
           {t('weather.attribution').split(' · ').map((part, index, parts) => (
@@ -468,10 +473,6 @@ export const WeatherPreview: React.FC<WeatherPreviewProps> = ({ result, onOpenWe
             </span>
           ))}
         </span>
-        <Button variant="primary" size="xs" className={styles.footerButton} onClick={onOpenWeb}>
-          <ExternalLink size={14} aria-hidden="true" />
-          <span>{t('weather.openWeb')}</span>
-        </Button>
       </footer>
     </div>
   );

@@ -144,7 +144,7 @@ export const WorldTimePreview: React.FC<WorldTimePreviewProps> = ({ result, copi
         <p className={styles.legend}>{t('time.workingHours')}</p>
       </section>
 
-      {/* 다른 미리보기(파일, 날씨)처럼 동작 버튼은 아래 오른쪽에 둔다. */}
+      {/* 파일 미리보기처럼 동작 버튼은 아래 왼쪽에 둔다. */}
       <footer className={styles.footer}>
         <Button variant="primary" size="xs" onClick={onCopy}>
           {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
