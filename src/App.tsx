@@ -363,7 +363,8 @@ export function App() {
             availableModes={availableModes}
             hasCodeFiles={hasCodeFiles}
             onSearchModeChange={setSearchMode}
-            completion={completion}
+            // 자동완성은 첫 결과의 예측이라, 선택이 첫 줄을 떠나면 숨겨 Enter로 열릴 항목과 어긋나지 않게 한다.
+            completion={selectedIndex === 0 ? completion : null}
           />
 
           {/* 2. 본문 영역: 결과가 있으면 항상 2열(로딩 중에도 유지),
