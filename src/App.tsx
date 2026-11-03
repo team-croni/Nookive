@@ -20,6 +20,9 @@ import { calculate, copyTextForCalculation } from './features/search/utils/calcu
 import { CalculatorPreview, CalculatorRow } from './features/search/components/CalculatorResult';
 import { WeatherPreview, WeatherRow } from './features/search/components/WeatherResult';
 import { useWeather } from './features/search/hooks/useWeather';
+import { WorldTimePreview, WorldTimeRow } from './features/search/components/WorldTimeResult';
+import { useWorldTimeText, worldTimeCopyText } from './features/search/hooks/useWorldTimeText';
+import { useWorldTime } from './features/search/hooks/useWorldTime';
 import { getInlineCompletionEnabled, subscribeInlineCompletionEnabled } from './utils/inlineCompletionPreference';
 import { searchClient } from './features/search/services/searchClient';
 import { rankQuery } from './features/search/services/rankQuery';
@@ -60,10 +63,17 @@ export function App() {
   // 날씨: "수원 날씨", "내일 날씨"처럼 물으면 계산 결과와 같은 자리에 보인다. 첫 답이 오기 전에는 줄을 두지 않고
   // 지금 화면(로컬 결과, 웹 폴백)을 그대로 둔다.
   const { result: weather, pending: isWeatherPending } = useWeather(query, searchMode === 'all' && !calculation);
-  const hasAnswerRow = calculation !== null || weather !== null;
+  // 세계 시각: "뉴욕 시간", "3pm PST in KST". 계산·날씨 질문이 아닐 때만 본다. (날씨와 같은 자리, 같은 규칙)
+  const { result: worldTime, pending: isWorldTimePending } = useWorldTime(
+    query,
+    searchMode === 'all' && !calculation && !weather && !isWeatherPending,
+  );
+  const worldTimeText = useWorldTimeText();
+  const hasAnswerRow = calculation !== null || weather !== null || worldTime !== null;
   const listOffset = hasAnswerRow ? 1 : 0;
   const isCalculationSelected = calculation !== null && selectedIndex === 0;
   const isWeatherSelected = weather !== null && selectedIndex === 0;
+  const isWorldTimeSelected = worldTime !== null && selectedIndex === 0;
   const resultIndex = selectedIndex - listOffset;
   const currentSelected = resultIndex >= 0 ? deferredResults[resultIndex] : undefined;
   const { previewQuery, previewSelected } = usePreviewSelection(query, currentSelected);
@@ -86,17 +96,24 @@ export function App() {
     return () => clearTimeout(timer);
   }, [copiedQuery]);
   const isCalculationCopied = copiedQuery !== null && copiedQuery === query;
+  // 세계 시각의 Enter·⌘C·더블클릭도 계산 결과처럼 시각을 복사한다.
+  const copyWorldTime = () => {
+    if (worldTime?.status !== 'ready') return;
+    void navigator.clipboard.writeText(worldTimeCopyText(worldTime, worldTimeText, Date.now()));
+    setCopiedQuery(query);
+  };
 
   // 날씨 줄은 답이 온 뒤에 생기므로, 그사이 아래 결과를 고르고 있었다면 같은 결과가 계속 선택되게 한 칸 옮긴다.
+  // (세계 시각 줄도 지명을 찾은 뒤에 생기므로 같이 본다)
+  const hasLateAnswerRow = weather !== null || worldTime !== null;
   const hadWeatherRowRef = useRef(false);
   useEffect(() => {
-    const hasWeatherRow = weather !== null;
-    if (hasWeatherRow === hadWeatherRowRef.current) return;
-    hadWeatherRowRef.current = hasWeatherRow;
-    if (selectedIndex > 0) setSelectedIndex(selectedIndex + (hasWeatherRow ? 1 : -1));
+    if (hasLateAnswerRow === hadWeatherRowRef.current) return;
+    hadWeatherRowRef.current = hasLateAnswerRow;
+    if (selectedIndex > 0) setSelectedIndex(selectedIndex + (hasLateAnswerRow ? 1 : -1));
     // 줄이 생기고 사라질 때만 맞춘다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [weather !== null]);
+  }, [hasLateAnswerRow]);
 
   // 날씨 줄의 Enter: 기본 지역이 없으면 설정을, 그 밖에는 웹 검색으로 자세한 예보를 연다.
   const openWeather = () => {
@@ -266,7 +283,7 @@ export function App() {
   useEffect(() => subscribeInlineCompletionEnabled(setInlineCompletionEnabledState), []);
   const completion = useMemo(
     () =>
-      inlineCompletionEnabled && searchMode === 'all' && !calculation && !weather && !isWeatherPending
+      inlineCompletionEnabled && searchMode === 'all' && !calculation && !weather && !isWeatherPending && !worldTime && !isWorldTimePending
         ? pickInlineCompletion({
           query,
           settledQuery: settledSearchMode === 'all' ? settledQuery : '',
@@ -277,7 +294,7 @@ export function App() {
             : [],
         })
         : null,
-    [inlineCompletionEnabled, calculation, weather, isWeatherPending, query, searchMode, settledQuery, settledSearchMode, orderedResults],
+    [inlineCompletionEnabled, calculation, weather, isWeatherPending, worldTime, isWorldTimePending, query, searchMode, settledQuery, settledSearchMode, orderedResults],
   );
 
   // 선택 항목 열기 (Enter / 하단 열기 버튼)
@@ -290,6 +307,10 @@ export function App() {
     }
     if (weather && idx === 0) {
       openWeather();
+      return;
+    }
+    if (worldTime && idx === 0) {
+      copyWorldTime();
       return;
     }
     // 자동완성이 보이면 첫 줄은 그 앱이다. 검색이 끝나기 전에 Enter를 눌러도 보이는 앱을 연다.
@@ -363,6 +384,10 @@ export function App() {
       copyCalculation();
       return;
     }
+    if (isWorldTimeSelected) {
+      copyWorldTime();
+      return;
+    }
     if (currentSelected) {
       navigator.clipboard.writeText(currentSelected.file.path);
     }
@@ -433,6 +458,15 @@ export function App() {
                       onCopy={copyCalculation}
                     />
                   )}
+                  {worldTime && (
+                    <WorldTimeRow
+                      result={worldTime}
+                      isActive={isWorldTimeSelected}
+                      copied={isCalculationCopied}
+                      onSelect={() => setSelectedIndex(0)}
+                      onCopy={copyWorldTime}
+                    />
+                  )}
                   {weather && (
                     <WeatherRow
                       result={weather}
@@ -461,6 +495,8 @@ export function App() {
                 <div className="preview-pane-wrapper">
                   {isCalculationSelected ? (
                     <CalculatorPreview result={calculation} copied={isCalculationCopied} onCopy={copyCalculation} />
+                  ) : isWorldTimeSelected ? (
+                    <WorldTimePreview result={worldTime} copied={isCalculationCopied} onCopy={copyWorldTime} />
                   ) : isWeatherSelected ? (
                     <WeatherPreview
                       result={weather}
@@ -485,13 +521,14 @@ export function App() {
           {/* 3. 앱 전체 하단 액션 단축키 바 (확장된 검색 화면에서만 노출) */}
           {hasQuery && isWindowExpanded && (
             <AppFooter
-              canOpen={showWebFallback ? webItemCount > 0 : isCalculationSelected || isWeatherSelected || Boolean(currentSelected)}
+              canOpen={showWebFallback ? webItemCount > 0 : isCalculationSelected || isWeatherSelected || worldTime?.status === 'ready' && isWorldTimeSelected || Boolean(currentSelected)}
               canCopyPath={!showWebFallback && Boolean(currentSelected)}
               openLabel={
                 showWebFallback ? t('footer.webOpen')
                   : isCalculationSelected ? t('calculator.copy')
-                    : isWeatherSelected ? t(weather.status === 'needsLocation' ? 'weather.needsLocation.action' : 'footer.webOpen')
-                      : openLabelFor(currentSelected)
+                    : isWorldTimeSelected ? t('time.copy')
+                      : isWeatherSelected ? t(weather.status === 'needsLocation' ? 'weather.needsLocation.action' : 'footer.webOpen')
+                        : openLabelFor(currentSelected)
               }
               onOpen={() => openSelectedAt(selectedIndex)}
               onCopyPath={handleCopyPath}

@@ -125,6 +125,7 @@ pub fn run() {
             web::open_url,
             weather::weather_places,
             weather::weather_forecast,
+            weather::place_timezone,
             system_locale::get_system_locale,
             licenses::open_license_document,
             window::hide_window,

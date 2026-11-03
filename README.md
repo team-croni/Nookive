@@ -25,7 +25,7 @@ locally with EmbeddingGemma 2 and llama.cpp.
 
 > Your indexed content stays on your Mac. Nookive does not require an account
 > or a hosted AI service. Model downloads, web suggestions/web-search
-> actions (Google by default), and weather lookups are network operations;
+> actions (Google by default), and weather and world-time place lookups are network operations;
 > they are separate from local indexing.
 
 ## What it can find
@@ -51,6 +51,9 @@ locally with EmbeddingGemma 2 and llama.cpp.
   `10 km in mi`, `100f in c`); press Enter to copy the result.
 - The weather for a place, right in the search field (`Paris weather`,
   `수원 날씨`, `weather tomorrow`), with hourly and daily forecasts in the preview.
+- The time somewhere else and time zone conversion (`time in London`,
+  `뉴욕 시간`, `3pm PST in KST`), with an hour-by-hour comparison for picking a
+  meeting time.
 - Exact terms and filenames alongside semantic ranking.
 
 PDF results are scanned in the background so a result can show the page where
@@ -172,7 +175,9 @@ personalization. Nookive does not upload indexed file contents. If you use autoc
 the app language) is sent to the search engine you chose in Settings
 (Google by default) and the selected URL is opened in your browser. For a
 weather query, only the place name is sent to Photon (OpenStreetMap) and the
-place's coordinates to Open-Meteo; you can turn weather off in Settings. The temporary
+place's coordinates to Open-Meteo; you can turn weather off in Settings. World
+time sends a place name the same way to find its time zone (abbreviations such
+as KST or PST send nothing) and can also be turned off. The temporary
 embedding server listens on loopback (`127.0.0.1`) and should not be exposed
 publicly. Local indexes, logs, model caches, and selected paths may be
 sensitive and should be handled accordingly.

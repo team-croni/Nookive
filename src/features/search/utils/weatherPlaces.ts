@@ -21,6 +21,8 @@ export interface WeatherPlace {
   longitude: number;
   kind: string;
   population?: number | null;
+  /** IANA 시간대. Open-Meteo 결과에만 있고, 세계 시각이 Photon 결과에 따로 채운다. */
+  timezone?: string | null;
 }
 
 /** 지명 뒤에 붙는 행정구역 단위. "수원" = "수원시" */
