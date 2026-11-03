@@ -68,3 +68,13 @@ describe('pickInlineCompletion', () => {
     expect(pickInlineCompletion(stale)?.matchedName).toBe('Calendar');
   });
 });
+
+describe('names with non-breaking spaces', () => {
+  it('completes after a typed space', () => {
+    // macOS의 "나의 찾기" 이름은 가운데 공백이 U+00A0이다.
+    const findMy = app('나의\u00a0찾기', ['Find My']);
+    expect(completeFromItem('나의', findMy)?.suffix).toBe(' 찾기');
+    expect(completeFromItem('나의 ', findMy)?.suffix).toBe('찾기');
+    expect(completeFromItem('나의 찾', findMy)?.suffix).toBe('기');
+  });
+});
