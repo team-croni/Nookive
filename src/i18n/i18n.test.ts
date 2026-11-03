@@ -27,6 +27,8 @@ const ALLOWED_FILES = new Set([
   'features/search/utils/timeQuery.ts',
   // 날짜 질문을 알아보는 한국어·중국어·일본어 단어(후, 까지, 무슨 요일, 크리스마스). 입력 해석 규칙이다.
   'features/search/utils/dateQuery.ts',
+  // 환율 검색어를 알아보는 한국어·중국어·일본어 통화 이름과 조사(달러, 원화로, 円, 美元). 입력 해석 규칙이다.
+  'features/search/utils/currencyQuery.ts',
 ]);
 
 const flatKeys = (value: unknown, prefix = ''): string[] =>

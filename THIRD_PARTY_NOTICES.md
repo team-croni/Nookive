@@ -84,9 +84,11 @@ the minimum needed and does not send indexed file contents.
 | --- | --- | --- | --- |
 | [Photon](https://photon.komoot.io) by komoot | Finding the place in a weather or world-time query | The place name | Public fair-use API. Data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), ODbL |
 | [Open-Meteo](https://open-meteo.com) | Place lookup, weather forecasts, and a place's time zone | The place name, or rounded coordinates | Free for non-commercial use. Data under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); geocoding data from GeoNames (CC BY 4.0) |
+| [ExchangeRate-API](https://www.exchangerate-api.com) open access | Exchange rates for currency conversion | Nothing from the query (one US-dollar rate table, at most once a day) | Free open access with attribution; caching allowed, redistribution not allowed ([terms](https://www.exchangerate-api.com/terms)) |
 | The search engine chosen in Settings | Web suggestions and web search | The typed query | The search engine's own terms |
 
-The weather preview shows the Open-Meteo and OpenStreetMap attribution.
+The weather preview shows the Open-Meteo and OpenStreetMap attribution, and the
+currency preview links to ExchangeRate-API ("Rates By Exchange Rate API").
 
 ## Build-only tools (not distributed)
 
