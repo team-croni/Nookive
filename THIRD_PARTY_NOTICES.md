@@ -82,8 +82,8 @@ the minimum needed and does not send indexed file contents.
 
 | Service | Used for | What is sent | Terms |
 | --- | --- | --- | --- |
-| [Photon](https://photon.komoot.io) by komoot | Finding the place in a weather query | The place name | Public fair-use API. Data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), ODbL |
-| [Open-Meteo](https://open-meteo.com) | Place lookup and weather forecasts | The place name, or rounded coordinates | Free for non-commercial use. Data under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); geocoding data from GeoNames (CC BY 4.0) |
+| [Photon](https://photon.komoot.io) by komoot | Finding the place in a weather or world-time query | The place name | Public fair-use API. Data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), ODbL |
+| [Open-Meteo](https://open-meteo.com) | Place lookup, weather forecasts, and a place's time zone | The place name, or rounded coordinates | Free for non-commercial use. Data under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); geocoding data from GeoNames (CC BY 4.0) |
 | The search engine chosen in Settings | Web suggestions and web search | The typed query | The search engine's own terms |
 
 The weather preview shows the Open-Meteo and OpenStreetMap attribution.

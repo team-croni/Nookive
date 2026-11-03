@@ -26,6 +26,7 @@ import { WebSearchSection } from './components/WebSearchSection';
 import { CodeSearchSection } from './components/CodeSearchSection';
 import { InlineCompletionSection } from './components/InlineCompletionSection';
 import { WeatherSection } from './components/WeatherSection';
+import { WorldTimeSection } from './components/WorldTimeSection';
 import { OnboardingWizard } from '../onboarding/OnboardingWizard';
 import { applyLaunchAtLoginDefault, getModelStatus, SETTINGS_TAB_REQUEST_KEY } from '../../utils/tauriBridge';
 import { useTheme } from '../../hooks/useTheme';
@@ -286,6 +287,7 @@ export default function SettingsApp() {
               <CodeSearchSection />
               <WebSearchSection />
               <WeatherSection />
+              <WorldTimeSection />
               <SearchHistorySection />
             </>
           )}

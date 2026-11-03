@@ -33,6 +33,8 @@ pub struct WeatherPlace {
     /// Photon: city, district, county, locality / Open-Meteo: GeoNames 지물 코드(PPLC, PPLA …)
     kind: String,
     population: Option<u64>,
+    /// IANA 시간대 (Open-Meteo만 준다. Photon 결과는 place_timezone으로 따로 묻는다)
+    timezone: Option<String>,
 }
 
 /// URL 쿼리 컴포넌트용 퍼센트 인코딩 (web.rs와 같은 규칙)
@@ -132,6 +134,7 @@ fn parse_photon(json: &serde_json::Value) -> Vec<WeatherPlace> {
                 longitude,
                 kind: text(props, "type").unwrap_or_default(),
                 population: None,
+                timezone: None,
             })
         })
         .collect()
@@ -155,6 +158,7 @@ fn parse_open_meteo_places(json: &serde_json::Value) -> Vec<WeatherPlace> {
                 longitude: item.get("longitude")?.as_f64()?,
                 kind: text(item, "feature_code").unwrap_or_default(),
                 population: item.get("population").and_then(|v| v.as_u64()),
+                timezone: text(item, "timezone").filter(|zone| is_time_zone_name(zone)),
             })
         })
         .collect()
@@ -216,6 +220,36 @@ pub async fn weather_places(
         .map_err(|e| format!("지명 요청 스레드 실패: {e}"))?
 }
 
+/// IANA 시간대 이름만 받는다. (예: "Asia/Seoul", "America/Argentina/Buenos_Aires", "UTC")
+fn is_time_zone_name(zone: &str) -> bool {
+    (1..=64).contains(&zone.len())
+        && zone
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '/' | '_' | '-' | '+'))
+}
+
+fn timezone_url(latitude: f64, longitude: f64) -> String {
+    // 날씨 변수 없이 부르면 좌표의 시간대만 돌려준다.
+    format!(
+        "https://api.open-meteo.com/v1/forecast?latitude={latitude:.2}&longitude={longitude:.2}&timezone=auto&forecast_days=1"
+    )
+}
+
+/// 좌표의 IANA 시간대. 세계 시각에서 Photon으로 찾은 곳(시간대를 주지 않는다)에 쓴다.
+#[tauri::command]
+pub async fn place_timezone(latitude: f64, longitude: f64) -> Result<String, String> {
+    if !(-90.0..=90.0).contains(&latitude) || !(-180.0..=180.0).contains(&longitude) {
+        return Err("좌표가 범위를 벗어났습니다".to_string());
+    }
+    let url = timezone_url(latitude, longitude);
+    let json = tauri::async_runtime::spawn_blocking(move || fetch_json(&url))
+        .await
+        .map_err(|e| format!("시간대 요청 스레드 실패: {e}"))??;
+    text(&json, "timezone")
+        .filter(|zone| is_time_zone_name(zone))
+        .ok_or_else(|| "시간대 응답이 없습니다".to_string())
+}
+
 /// 좌표의 예보. Open-Meteo 응답 JSON을 그대로 돌려주고, 해석은 프론트엔드가 한다.
 #[tauri::command]
 pub async fn weather_forecast(latitude: f64, longitude: f64) -> Result<serde_json::Value, String> {
@@ -266,15 +300,26 @@ mod tests {
     }
 
     #[test]
+    fn accepts_only_time_zone_names() {
+        assert!(is_time_zone_name("Asia/Seoul"));
+        assert!(is_time_zone_name("America/Argentina/Buenos_Aires"));
+        assert!(is_time_zone_name("Etc/GMT+9"));
+        assert!(!is_time_zone_name("Asia/Seoul; rm"));
+        assert!(!is_time_zone_name(""));
+        assert!(timezone_url(37.5, 127.0).contains("timezone=auto"));
+    }
+
+    #[test]
     fn parses_open_meteo_places() {
         let json: serde_json::Value = serde_json::from_str(
-            r#"{"results":[{"name":"파리","admin1":"일드프랑스","country":"프랑스","country_code":"FR","latitude":48.85,"longitude":2.35,"feature_code":"PPLC","population":2138551}]}"#,
+            r#"{"results":[{"name":"파리","admin1":"일드프랑스","country":"프랑스","country_code":"FR","latitude":48.85,"longitude":2.35,"feature_code":"PPLC","population":2138551,"timezone":"Europe/Paris"}]}"#,
         )
         .unwrap();
         let places = parse_open_meteo_places(&json);
         assert_eq!(places[0].source, "openMeteo");
         assert_eq!(places[0].kind, "PPLC");
         assert_eq!(places[0].population, Some(2138551));
+        assert_eq!(places[0].timezone.as_deref(), Some("Europe/Paris"));
         assert!(parse_open_meteo_places(&serde_json::json!({})).is_empty());
     }
 }

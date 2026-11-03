@@ -1,0 +1,155 @@
+/* src/features/search/components/WorldTimeResult.module.css */
+/* 결과 줄은 AnswerRow.module.css를 쓴다. 여기에는 미리보기 자리만 둔다. */
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  padding: 16px 18px 12px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.place {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.place strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place span {
+  color: var(--text-tertiary);
+  font-size: 11.5px;
+}
+
+.offset {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-chip);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.now {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.time {
+  color: var(--text-primary);
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.date {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.facts {
+  color: var(--text-tertiary);
+  font-size: 11.5px;
+}
+
+/* 두 시간대를 한 시간씩 나란히: 둘 다 업무 시간(9~18시)인 줄을 칠한다. */
+.compare {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-chip);
+}
+
+.compareRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.compareHead {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.compareHead span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.working {
+  background: var(--surface-chip);
+  color: var(--text-primary);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+.legend {
+  margin: 4px 8px 0;
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 24px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: center;
+}
+
+.loadingText {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+}
+
+.spinner {
+  animation: world-time-spin 0.9s linear infinite;
+}
+
+@keyframes world-time-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}

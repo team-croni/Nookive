@@ -1,5 +1,5 @@
 // src/features/search/services/weatherClient.ts
-// 날씨 검색 브리지 (Rust weather_places, weather_forecast).
+// 날씨·세계 시각 검색 브리지 (Rust weather_places, weather_forecast, place_timezone).
 // - 고른 지명은 Mac에 저장해 같은 지명은 다시 묻지 않는다. (지명이 밖으로 나가는 일을 줄인다)
 // - 예보는 좌표별로 15분 동안 메모리에 둔다.
 import { invoke } from '@tauri-apps/api/core';
@@ -84,6 +84,23 @@ export async function resolveWeatherPlace(query: string, language: string, prefe
   const [place] = await searchWeatherPlaces(query, language, preferredCountry, { quick: true });
   if (place) writePlaceCache(key, place);
   return place ?? null;
+}
+
+/**
+ * 세계 시각용: 지명과 그곳의 IANA 시간대. 시간대가 없는 결과(Photon)는 좌표로 한 번 물어 저장해 둔다.
+ * 날씨와 같은 지명 캐시를 쓰므로 "뉴욕 날씨"로 찾은 곳은 "뉴욕 시간"에서 다시 묻지 않는다.
+ */
+export async function resolvePlaceWithTimezone(
+  query: string,
+  language: string,
+  preferredCountry?: string,
+): Promise<(WeatherPlace & { timezone: string }) | null> {
+  const place = await resolveWeatherPlace(query, language, preferredCountry);
+  if (!place) return null;
+  if (place.timezone) return { ...place, timezone: place.timezone };
+  const timezone = await invoke<string>('place_timezone', { latitude: place.latitude, longitude: place.longitude });
+  writePlaceCache(placeCacheKey(query, language), { ...place, timezone });
+  return { ...place, timezone };
 }
 
 const forecastCache = new Map<string, { at: number; forecast: WeatherForecast }>();
