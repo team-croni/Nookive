@@ -45,6 +45,8 @@ locally with EmbeddingGemma 2 and llama.cpp.
 - Audio and video by content, with results pointing to a relevant time range.
 - Installed macOS applications by localized name, original name, or bundle
   identifier. Newly installed or removed apps show up within a few seconds.
+  As you type, the top app's name completes inline (`c` → Claude); press
+  Enter to open it. You can turn this off in Settings.
 - Exact terms and filenames alongside semantic ranking.
 
 PDF results are scanned in the background so a result can show the page where

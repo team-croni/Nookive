@@ -33,6 +33,11 @@ export class FeedbackClient {
     return createRankBoost(this.entries, query, Date.now());
   }
 
+  /** 이미 불러온 기록으로 바로 배율을 만든다. 아직 불러오지 않았으면 undefined. (인라인 자동완성용) */
+  peekBoost(query: string): RankBoost | undefined {
+    return createRankBoost(this.entries, query, Date.now());
+  }
+
   /** query는 화면 결과를 만든 검색어(settledQuery)여야 한다. */
   async recordOpen(query: string, path: string): Promise<void> {
     await this.load();

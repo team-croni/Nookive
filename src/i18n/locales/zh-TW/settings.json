@@ -13,6 +13,7 @@
   "dynamic": {"documentsAndMedia": "可以從 {{documents}} 個文件與 {{media}} 個圖片、音訊、影片建立搜尋資料。", "documents": "可以從 {{count}} 個文件建立搜尋資料。", "media": "可以從 {{count}} 個圖片、音訊、影片建立搜尋資料。", "action": "正在為 {{count}} 個檔案建立搜尋資料。"},
   "models": {"title": "本機模型", "embedding": "搜尋模型", "embeddingDescription": "開始搜尋前請安裝本機模型。", "embeddingSize": "約 825MB。下載一次後會儲存在此 Mac 上。", "speech": "語音搜尋", "speechDescription": "選用功能，支援語音辨識與逐字時間標記，約 1.9GB。", "readyDescription": "模型只會儲存在此 Mac 上，不會與檔案一起上傳。", "download": "下載", "installed": "已安裝", "downloading": "正在下載模型…", "error": "模型下載失敗。請檢查連線後再試。"},
   "webSearch": {"title": "網頁搜尋", "description": "本機搜尋沒有結果時以及在網頁搜尋模式（Tab、「web:」）下，使用搜尋引擎的建議與網頁搜尋。", "option": "使用網頁搜尋", "privacyNotice": "啟用網頁搜尋後，輸入的搜尋字詞可能會傳送至所選的搜尋引擎（{{engine}}）。不會傳送檔案內容與本機搜尋資料。", "engine": "搜尋引擎"},
+  "inlineCompletion": {"title": "App 自動完成", "description": "輸入時在搜尋欄中補全第一個結果的 App 名稱。按右方向鍵（→）接受，按 Enter 開啟 App。", "option": "使用 App 名稱自動完成"},
   "codeSearch": {"title": "程式碼搜尋", "description": "在搜尋視窗按 Tab 或輸入「code:」，即可依名稱、路徑或內容尋找搜尋資料夾中的程式碼檔案。搜尋資料只儲存在這台 Mac 上。", "option": "使用程式碼搜尋", "editor": "開啟程式碼檔案的方式", "editorAuto": "自動", "editorAutoWith": "自動（{{app}}）", "editorDefault": "預設 App"},
   "loginItem": {"title": "登入時開啟", "description": "登入 Mac 時自動啟動 Nookive，可立即用快速鍵搜尋。", "option": "登入時開啟 Nookive", "requiresApproval": "需要在系統設定中允許，才能在登入時開啟。", "openSettings": "開啟登入項目", "failed": "無法變更登入項目。你可以在系統設定中變更。"},
   "about": {"version": "版本 {{version}}", "maintainer": "Croni OpenSource Project", "github": "GitHub", "license": "MIT 授權條款", "thirdParty": "開源授權條款", "issues": "回報問題"},
