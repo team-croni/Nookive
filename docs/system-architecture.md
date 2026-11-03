@@ -1,6 +1,6 @@
 ---
 date: 2026-11-04
-version: 2.8.1
+version: 2.9.0
 ---
 
 # System Architecture Specification
@@ -63,6 +63,10 @@ flowchart TB
   3. 앱 실행 시 `llama-server` 자동 실행, 앱 종료 시 자식 프로세스 자동 파살(Kill).
   4. 로컬 파일 디스크 I/O, manifest 및 runtime JSON 인덱스 관리.
   5. macOS 앱 카탈로그(`/Applications`, `/System/Applications`, `~/Applications`)를 런타임에 수집.
+- **스레드**: Tauri v2는 `async`가 아닌 커맨드를 메인 스레드에서 실행해, 오래 걸리는 커맨드가 그동안 화면을 멈춘다. 앱·폴더 목록
+  (`list_applications`, `list_indexed_folders`)과 아이콘(`get_application_icon`, `get_folder_icon`, `plutil`·`sips`를 실행)은
+  `async` 커맨드로 두고 `spawn_blocking`에서 실행한다. (알파벳 한 글자로 앱이 많이 나올 때 아이콘을 처음 받는 동안 화면이
+  잠깐 멈추던 문제) 네트워크 커맨드(날씨, 환율, 웹 자동완성)도 같은 방식이다.
 
 ### 2.3. AI 추론 및 벡터 엔진 (멀티모달)
 
@@ -137,6 +141,28 @@ macOS에서는 Tauri command인 `render_pdf_page_native`가 Core Graphics를
   저장에 실패해도 검색은 메모리 기록으로 계속된다.
 - 초기화: 설정의 "검색 개인화" 카드. 파일을 지우고 `search-feedback-reset` 이벤트로 검색 창의
   메모리 기록도 비운다. 검색 데이터 초기화와는 따로 동작한다.
+
+### 2.6.0. 시스템 설정 화면
+
+시스템 설정의 화면(`개인정보 보호 및 보안`, `블루투스`, `디스플레이`)을 앱처럼 찾아 결과의 "설정" 묶음(앱 다음)에 보이고, Enter나
+미리보기의 열기 버튼으로 시스템 설정의 그 화면을 바로 연다(`settings_panes.rs`).
+
+- 목록은 직접 적지 않는다. macOS 13+의 설정 화면은 `/System/Library/ExtensionKit/Extensions/` 안의 설정 확장(`.appex`,
+  `EXExtensionPointIdentifier` = `com.apple.Settings.extension.ui`)이고, 다른 회사의 설정 화면은 `/Library/PreferencePanes`,
+  `~/Library/PreferencePanes`의 `.prefPane`이다. 앱 목록(`list_applications`)에 같은 모양(`kind: application`)으로 함께 담고,
+  확장자(`appex`, `prefPane`)로 "설정" 묶음을 가른다(`getFileSection`, `isSettingsPane`). 앱처럼 앱 감시가 다시 불러올 때 함께 읽는다.
+- 이름: 앱 이름과 같은 현지화 이름(`InfoPlist.loctable`, `<언어>.lproj`)을 화면 언어로 보이고, 영어 이름(예: "Privacy & Security")과
+  사람이 읽는 번들 이름(예: "Wi-Fi")을 다른 이름으로 둬 어느 화면 언어에서도 영어로 찾게 한다. 내부 이름("…SettingsExtension",
+  "_macOS")만 있는 확장은 시스템 설정 목록에 보이지 않는 내부용이라 빼고, 설정 확장의 파일명은 검색 이름으로 쓰지 않는다. 이름의
+  줄바꿈 없는 하이픈("Wi‑Fi", U+2011)은 키보드의 "-"로 비교하고(`nfcName`), 앱·설정 이름은 하이픈을 뺀 이름도
+  검색 이름으로 둬 `wifi`로도 찾는다(`searchableNames`).
+- 아이콘: 설정 확장은 아이콘 파일 없이 macOS 내장 아이콘 종류(`CFBundleIcons.ISGraphicIconConfiguration.ISTypeIdentifier`, 예:
+  `com.apple.graphic-icon.privacy`)만 적어 두므로 NSWorkspace로 그 종류의 아이콘을 받는다. `.prefPane`은 `NSPrefPaneIconFile`.
+- 열기(`open_settings_pane`): 위 폴더 안의 설정 화면만 받는다. 설정 확장은 Info.plist의 번들 ID로
+  `x-apple.systempreferences:<번들 ID>`를 열고(번들 ID 글자만 허용), 열지 못하면 시스템 설정 첫 화면을 연다. `.prefPane`은 `open`한다.
+- 미리보기: 앱과 같은 모양이되 종류 문구와 배지는 "시스템 설정"·SETTINGS로 보이고, Finder에서 보기 버튼은 두지 않는다. 인라인
+  자동완성도 설정 화면 이름으로 이어진다(`개인정보` → "개인정보 보호 및 보안").
+- 설정 화면 안의 항목으로 바로 가기("카메라 권한" 등)와 macOS 12 이하는 아직 지원하지 않는다.
 
 ### 2.6.1. 앱 인라인 자동완성
 

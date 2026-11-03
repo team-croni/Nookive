@@ -18,6 +18,7 @@ export {
   checkFileAccess,
   renderNativePdfPage,
   openFileInOS,
+  openSettingsPane,
   revealFileInOS,
   hideDesktopWindow,
   showSearchWindow,

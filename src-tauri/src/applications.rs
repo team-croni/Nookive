@@ -12,8 +12,7 @@ use crate::models::{ApplicationChunk, ApplicationFile, ApplicationSearchResult};
 ///
 /// `language`는 Nookive의 화면 언어다. 앱 이름도 같은 언어로 보여줘야 화면이 일관되므로
 /// macOS 시스템 언어보다 우선한다. 넘기지 않으면 macOS 선호 언어를 쓴다.
-#[tauri::command]
-pub fn list_applications(language: Option<String>) -> Vec<ApplicationSearchResult> {
+fn applications(language: Option<String>) -> Vec<ApplicationSearchResult> {
     #[cfg(not(target_os = "macos"))]
     {
         let _ = language;
@@ -35,6 +34,8 @@ pub fn list_applications(language: Option<String>) -> Vec<ApplicationSearchResul
         }
         apps.sort_by_key(|a| a.file.name.to_lowercase());
         apps.dedup_by(|a, b| a.file.path == b.file.path);
+        // 시스템 설정 화면도 같은 목록에 담는다. (확장자 appex·prefPane으로 "설정" 묶음을 가른다)
+        apps.extend(crate::settings_panes::list_settings_panes(&languages));
         apps
     }
 }
@@ -165,7 +166,7 @@ fn parse_apple_languages(output: &str) -> Vec<String> {
 
 /// 한 언어 코드에 대해 앱 리소스에서 찾아볼 이름 후보 ("ko-KR" → ko-KR, ko_KR, ko).
 #[cfg(any(target_os = "macos", test))]
-fn language_candidates(language: &str) -> Vec<String> {
+pub(crate) fn language_candidates(language: &str) -> Vec<String> {
     let mut candidates = vec![language.to_string(), language.replace('-', "_")];
     // 중국어는 앱에 따라 zh_CN/zh_TW 대신 zh-Hans/zh-Hant 폴더를 쓴다.
     match language.replace('_', "-").to_ascii_lowercase().as_str() {
@@ -181,7 +182,7 @@ fn language_candidates(language: &str) -> Vec<String> {
 }
 
 #[cfg(target_os = "macos")]
-fn read_plist_json(path: &Path) -> Option<serde_json::Value> {
+pub(crate) fn read_plist_json(path: &Path) -> Option<serde_json::Value> {
     let output = Command::new("plutil")
         .args(["-convert", "json", "-o", "-"])
         .arg(path)
@@ -195,7 +196,7 @@ fn read_plist_json(path: &Path) -> Option<serde_json::Value> {
 }
 
 #[cfg(target_os = "macos")]
-fn bundle_name_from(value: &serde_json::Value) -> Option<String> {
+pub(crate) fn bundle_name_from(value: &serde_json::Value) -> Option<String> {
     value
         .get("CFBundleDisplayName")
         .or_else(|| value.get("CFBundleName"))
@@ -257,8 +258,7 @@ fn application_names(localized_name: Option<String>, bundle_name: String) -> (St
 /// 앱 검색 결과에 표시할 macOS 앱 아이콘을 충분한 해상도의 PNG data URL로 반환한다.
 /// 앱 목록 자체에는 아이콘 바이너리를 넣지 않고, 실제 검색 결과에 표시되는
 /// 앱에 대해서만 호출해 초기 인덱스 payload와 앱 스캔 비용을 작게 유지한다.
-#[tauri::command]
-pub fn get_application_icon(path: String) -> Option<String> {
+fn application_icon(path: String) -> Option<String> {
     #[cfg(not(target_os = "macos"))]
     {
         let _ = path;
@@ -268,7 +268,8 @@ pub fn get_application_icon(path: String) -> Option<String> {
     #[cfg(target_os = "macos")]
     {
         let app_path = Path::new(&path);
-        if app_path.extension().and_then(|value| value.to_str()) != Some("app") {
+        let extension = app_path.extension().and_then(|value| value.to_str());
+        if !matches!(extension, Some("app" | "appex" | "prefPane")) {
             return None;
         }
 
@@ -284,6 +285,10 @@ pub fn get_application_icon(path: String) -> Option<String> {
             if let Some(icon_file) = value.get("CFBundleIconFile").and_then(|v| v.as_str()) {
                 candidates.push(icon_file.to_string());
             }
+            // 다른 회사의 설정 화면(.prefPane)은 설정 창에 보일 아이콘을 따로 적어 둔다.
+            if let Some(icon_file) = value.get("NSPrefPaneIconFile").and_then(|v| v.as_str()) {
+                candidates.insert(0, icon_file.to_string());
+            }
             if let Some(icon_files) = value.get("CFBundleIconFiles").and_then(|v| v.as_array()) {
                 candidates.extend(
                     icon_files
@@ -294,6 +299,15 @@ pub fn get_application_icon(path: String) -> Option<String> {
             }
         }
 
+        // 시스템 설정 화면(appex)은 아이콘 파일 없이 macOS 내장 아이콘 종류(예: com.apple.graphic-icon.privacy)만 적어 둔다.
+        let graphic_icon_type = (extension == Some("appex"))
+            .then(|| read_plist_json(&plist))
+            .flatten()
+            .and_then(|info| {
+                info.pointer("/CFBundleIcons/ISGraphicIconConfiguration/ISTypeIdentifier")
+                    .and_then(|v| v.as_str())
+                    .map(str::to_string)
+            });
         candidates.extend(["AppIcon.icns".to_string(), "application.icns".to_string()]);
         let icon_path = candidates
             .into_iter()
@@ -318,8 +332,20 @@ pub fn get_application_icon(path: String) -> Option<String> {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         path.hash(&mut hasher);
         let cache_key = format!("{:x}", hasher.finish());
-        let temporary_source = icon_path.is_none();
-        let source_path = if let Some(icon_path) = icon_path {
+        let temporary_source = icon_path.is_none() || graphic_icon_type.is_some();
+        let source_path = if let Some(icon_type) = graphic_icon_type {
+            use objc2_app_kit::NSWorkspace;
+            use objc2_foundation::NSString;
+
+            // 내장 아이콘 종류로 받은 아이콘(시스템 설정의 색 아이콘)
+            #[allow(deprecated)]
+            let icon =
+                NSWorkspace::sharedWorkspace().iconForFileType(&NSString::from_str(&icon_type));
+            let tiff = icon.TIFFRepresentation()?.to_vec();
+            let tiff_path = std::env::temp_dir().join(format!("nookive-app-icon-{cache_key}.tiff"));
+            std::fs::write(&tiff_path, tiff).ok()?;
+            tiff_path
+        } else if let Some(icon_path) = icon_path {
             icon_path
         } else {
             // Assets.car만 포함한 최신 앱은 번들 안에 읽을 수 있는 .icns가 없다.
@@ -359,6 +385,23 @@ pub fn get_application_icon(path: String) -> Option<String> {
         let encoded = base64::engine::general_purpose::STANDARD.encode(bytes?);
         Some(format!("data:image/png;base64,{encoded}"))
     }
+}
+
+// Tauri v2는 async가 아닌 커맨드를 메인 스레드에서 실행한다. 아래 커맨드는 plutil·sips를 실행하거나
+// 폴더를 훑어 오래 걸리므로, 메인 스레드(화면)를 막지 않게 블로킹 작업 스레드에서 실행한다.
+#[tauri::command]
+pub async fn get_application_icon(path: String) -> Option<String> {
+    tauri::async_runtime::spawn_blocking(move || application_icon(path))
+        .await
+        .ok()
+        .flatten()
+}
+
+#[tauri::command]
+pub async fn list_applications(language: Option<String>) -> Vec<ApplicationSearchResult> {
+    tauri::async_runtime::spawn_blocking(move || applications(language))
+        .await
+        .unwrap_or_default()
 }
 
 #[cfg(test)]

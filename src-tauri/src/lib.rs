@@ -17,6 +17,7 @@ mod mask_png;
 mod models;
 mod paths;
 mod search_feedback;
+mod settings_panes;
 mod system_locale;
 mod tray_labels;
 #[cfg(target_os = "macos")]
@@ -143,6 +144,7 @@ pub fn run() {
             window::restore_tray_menu,
             applications::list_applications,
             applications::get_application_icon,
+            settings_panes::open_settings_pane,
             folders::list_indexed_folders,
             folders::get_folder_icon,
             embedding::get_embedding_status,

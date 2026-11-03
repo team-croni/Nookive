@@ -31,7 +31,8 @@ import { useCurrencyText } from './features/search/hooks/useCurrencyText';
 import { getInlineCompletionEnabled, subscribeInlineCompletionEnabled } from './utils/inlineCompletionPreference';
 import { searchClient } from './features/search/services/searchClient';
 import { rankQuery } from './features/search/services/rankQuery';
-import { openCodeFile, openFileInOS, openSettingsWindow, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
+import { openCodeFile, openFileInOS, openSettingsPane, openSettingsWindow, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
+import { isSettingsPane } from './utils/fileType';
 import { getCodeEditor } from './utils/codeSearchPreference';
 import type { SearchResultItem } from './types/search';
 import './App.css';
@@ -289,6 +290,9 @@ export function App() {
     if (item.category === 'code') {
       const line = item.bestChunk.lineStart ?? item.chunks?.find((chunk) => chunk.lineStart)?.lineStart;
       void openCodeFile(path, line, getCodeEditor());
+    } else if (isSettingsPane(item.file.extension)) {
+      // 시스템 설정 화면은 파일로 열 수 없어 시스템 설정의 그 화면을 연다.
+      void openSettingsPane(path);
     } else {
       openFileInOS(path);
     }

@@ -47,6 +47,8 @@ locally with EmbeddingGemma 2 and llama.cpp.
   identifier. Newly installed or removed apps show up within a few seconds.
   As you type, the top app's name completes inline (`c` → Claude); press
   Enter to open it. You can turn this off in Settings.
+- System Settings panes by name in your language or in English
+  (`개인정보 보호 및 보안`, `privacy`, `Bluetooth`); press Enter to open the pane.
 - Quick math and unit conversions right in the search field (`12*7`,
   `10 km in mi`, `100f in c`); press Enter to copy the result.
 - The weather for a place, right in the search field (`Paris weather`,

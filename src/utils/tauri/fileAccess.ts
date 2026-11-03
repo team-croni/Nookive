@@ -87,6 +87,15 @@ export async function openFileInOS(path: string): Promise<void> {
   }
 }
 
+/** 시스템 설정 화면(.appex, .prefPane)을 연다. 시스템 설정의 그 화면으로 바로 이동한다. */
+export async function openSettingsPane(path: string): Promise<void> {
+  try {
+    await invoke('open_settings_pane', { path });
+  } catch (err) {
+    console.warn('[Tauri] open_settings_pane invoke 실패:', err);
+  }
+}
+
 /** 파일이 있는 위치를 OS 파일 관리자에서 표시 */
 export async function revealFileInOS(path: string): Promise<void> {
   try {

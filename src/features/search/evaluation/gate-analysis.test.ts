@@ -42,7 +42,7 @@ interface QueryInfo {
 type GateVariant = (item: ScoredSearchResult, info: QueryInfo) => boolean;
 
 const FLOORS: Record<FileSection, number> = {
-  applications: 0.69, folders: 0.69, documents: 0.69, code: 0.69, images: 0.64, audio: 0.71, video: 0.71,
+  applications: 0.69, settings: 0.69, folders: 0.69, documents: 0.69, code: 0.69, images: 0.64, audio: 0.71, video: 0.71,
 };
 
 // 변형은 현재 게이트(semanticPass) 위에 조건을 더하거나 뺀다. 새 규칙을 시험할 때 여기에 추가한다.

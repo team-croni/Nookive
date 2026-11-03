@@ -84,9 +84,11 @@ export const ResultList: React.FC<ResultListProps> = ({
                 <span className={styles.sectionLabel}>
                   {section === 'applications'
                     ? t('file.application')
-                    : section === 'folders'
-                      ? t('file.folder')
-                      : t(`fileTypes.${section === 'documents' ? 'document' : section === 'images' ? 'image' : section}`)}
+                    : section === 'settings'
+                      ? t('file.settings')
+                      : section === 'folders'
+                        ? t('file.folder')
+                        : t(`fileTypes.${section === 'documents' ? 'document' : section === 'images' ? 'image' : section}`)}
                 </span>
                 <span className={styles.sectionRule} />
               </div>

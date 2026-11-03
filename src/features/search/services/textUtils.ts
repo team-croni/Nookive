@@ -8,9 +8,13 @@ export const nfc = (s: string): string => (s || '').normalize('NFC');
 /**
  * 이름 비교용: NFC로 맞추고 모든 공백 문자를 일반 공백으로 바꾼다.
  * macOS 앱 이름에는 줄바꿈 없는 공백(U+00A0)이 들어 있기도 해서("나의\u00a0찾기")
- * 키보드로 친 공백과 같은 글자로 보이게 한다.
+ * 키보드로 친 공백과 같은 글자로 보이게 한다. 하이픈도 마찬가지다.
  */
-export const nfcName = (s: string): string => nfc(s).replace(/\s/g, ' ');
+export const nfcName = (s: string): string =>
+  nfc(s)
+    .replace(/\s/g, ' ')
+    // macOS 설정 화면 이름의 줄바꿈 없는 하이픈("Wi‑Fi", U+2011) 같은 하이픈도 키보드의 "-"로 본다.
+    .replace(/[\u2010-\u2015\u2212]/g, '-');
 
 // 키워드 매칭에서 제외할 영문 불용어: "the/in/and" 등이 모든 문서에 우연 매칭되어
 // 시맨틱 매칭(오디오/이미지)을 밀어내는 노이즈를 방지한다.

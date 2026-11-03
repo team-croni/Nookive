@@ -21,6 +21,7 @@ const FILE_ICON_BY_EXT: Record<string, string> = {
 
 const SECTION_ICON_FILE: Record<FileSection, string> = {
   applications: 'applications',
+  settings: 'applications',
   folders: 'folder',
   documents: 'documents',
   images: 'image',

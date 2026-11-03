@@ -1,6 +1,6 @@
 ---
 date: 2026-11-04
-version: 2.5.0
+version: 2.6.0
 ---
 
 # Design System Specification
@@ -52,7 +52,7 @@ Nookive는 macOS의 **Raycast**, **Spotlight** 및 미니멀 프리미엄 툴들
 
 - **Primary**: 가장 중요한 행동에만 `--button-primary` 배경과 흰색 텍스트를 사용하고, hover에는 `--button-primary-hover`를 사용합니다. 현재 미리보기 패널의 `열기`가 해당합니다.
 - **Secondary**: 보조 행동은 테두리 없이 `--button-secondary` 배경을 사용하고, hover에는 `--button-secondary-hover`를 사용합니다. 현재 `Finder에서 보기`가 해당합니다.
-- 미리보기 패널의 동작 버튼은 모든 결과에서 같은 자리, 패널 아래 왼쪽(여백 20px)에 둡니다. 파일의 `열기`·`Finder에서 보기`, 계산 결과의 `복사`·`계산기 열기`, 환율 변환의 `복사`·`웹에서 보기`(출처는 버튼 오른쪽), 날짜·세계 시각의 `복사`·`시각 복사`, 날씨의 `웹에서 보기`가 해당합니다(날씨 출처는 버튼 오른쪽에 작게 둡니다).
+- 미리보기 패널의 동작 버튼은 모든 결과에서 같은 자리, 패널 아래 왼쪽(여백 20px)에 둡니다. 파일의 `열기`·`Finder에서 보기`(시스템 설정 화면은 `열기`만), 계산 결과의 `복사`·`계산기 열기`, 환율 변환의 `복사`·`웹에서 보기`(출처는 버튼 오른쪽), 날짜·세계 시각의 `복사`·`시각 복사`, 날씨의 `웹에서 보기`가 해당합니다(날씨 출처는 버튼 오른쪽에 작게 둡니다).
 - 버튼 높이는 30px, 모서리 반경은 6px, 좌우 패딩은 12px로 통일합니다. Secondary hover에서는 배경을 `--glass-bg-hover`로 전환해 상태만 가볍게 강조합니다.
 - 라이트/다크 테마 모두 컴포넌트에 색상을 직접 쓰지 않고 `src/styles/tokens.css`의 버튼 상태 토큰을 사용합니다. 버튼 상태 토큰은 `--button-primary`, `--button-primary-hover`, `--button-secondary`, `--button-secondary-hover`로 구분하며, Secondary는 border를 투명하게 유지합니다.
 
