@@ -4,6 +4,7 @@ mod app_watcher;
 mod applications;
 mod code_index;
 mod code_search;
+mod currency;
 mod editors;
 mod embedding;
 mod files;
@@ -126,6 +127,7 @@ pub fn run() {
             weather::weather_places,
             weather::weather_forecast,
             weather::place_timezone,
+            currency::currency_rates,
             system_locale::get_system_locale,
             licenses::open_license_document,
             window::hide_window,

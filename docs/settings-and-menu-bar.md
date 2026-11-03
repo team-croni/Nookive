@@ -1,6 +1,6 @@
 ---
 date: 2026-11-04
-version: 1.7.0
+version: 1.8.0
 ---
 
 # 메뉴바와 설정 UX
@@ -76,6 +76,8 @@ Nookive 아이콘
     검색 엔진(Google, Bing, DuckDuckGo, Brave Search, Ecosia, Naver, Baidu)을 고른다(`nookive.webSearchEngine`).
     고르지 않았으면 간체 중국어는 Baidu, 나머지는 Google이다. 메뉴는 Google 다음에 지금 언어의 지역 엔진을 올린다. ⓘ 안내에는
     검색어가 고른 엔진으로 전송될 수 있다고 엔진 이름을 넣어 보여준다
+  - 환율 변환 켜기/끄기(기본 켜짐, `nookive.currencyEnabled`). ⓘ 안내에는 미국 달러 기준 환율표 하나를 하루에 한 번 받으며
+    검색어·금액·통화는 전송되지 않는다고 보여준다
   - 세계 시각 켜기/끄기(기본 켜짐, `nookive.worldTimeEnabled`). ⓘ 안내에는 지명이 들어간 질문만 지명이 Photon·Open-Meteo로
     전송되고, KST·PST 같은 약어만 쓰면 아무것도 전송되지 않는다고 보여준다
   - 날씨 켜기/끄기(기본 켜짐, `nookive.weatherEnabled`)와 기본 지역(`nookive.weatherLocation`). 기본 지역은 "오늘 날씨"처럼

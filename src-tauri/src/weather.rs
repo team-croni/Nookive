@@ -177,7 +177,7 @@ fn client() -> &'static reqwest::blocking::Client {
     })
 }
 
-fn fetch_json(url: &str) -> Result<serde_json::Value, String> {
+pub(crate) fn fetch_json(url: &str) -> Result<serde_json::Value, String> {
     let response = client()
         .get(url)
         .send()

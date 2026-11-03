@@ -25,7 +25,7 @@ locally with EmbeddingGemma 2 and llama.cpp.
 
 > Your indexed content stays on your Mac. Nookive does not require an account
 > or a hosted AI service. Model downloads, web suggestions/web-search
-> actions (Google by default), and weather and world-time place lookups are network operations;
+> actions (Google by default), weather and world-time place lookups, and daily exchange rates are network operations;
 > they are separate from local indexing.
 
 ## What it can find
@@ -54,6 +54,8 @@ locally with EmbeddingGemma 2 and llama.cpp.
 - The time somewhere else and time zone conversion (`time in London`,
   `뉴욕 시간`, `3pm PST in KST`), with an hour-by-hour comparison for picking a
   meeting time.
+- Currency conversion (`100 usd in krw`, `50달러 원화로`, `€20 to usd`) with
+  daily reference rates.
 - Date questions, offline (`100일 후`, `days until Christmas`,
   `2026-12-25 무슨 요일`, `2026-12-25 - 2026-11-04`).
 - Exact terms and filenames alongside semantic ranking.
@@ -179,7 +181,9 @@ the app language) is sent to the search engine you chose in Settings
 weather query, only the place name is sent to Photon (OpenStreetMap) and the
 place's coordinates to Open-Meteo; you can turn weather off in Settings. World
 time sends a place name the same way to find its time zone (abbreviations such
-as KST or PST send nothing) and can also be turned off. The temporary
+as KST or PST send nothing) and can also be turned off. Currency conversion
+downloads one exchange-rate table (based on the US dollar) once a day from
+ExchangeRate-API; your query, amounts, and currencies are not sent. The temporary
 embedding server listens on loopback (`127.0.0.1`) and should not be exposed
 publicly. Local indexes, logs, model caches, and selected paths may be
 sensitive and should be handled accordingly.
