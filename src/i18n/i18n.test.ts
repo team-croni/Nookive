@@ -18,6 +18,8 @@ const ALLOWED_FILES = new Set([
   'features/settings/indexingWorker.ts',
   // 검색 엔진의 현지 브랜드 이름(네이버). 번역 문구가 아니라 고유 명사다.
   'utils/webSearchEngines.ts',
+  // 계산기가 알아듣는 한국어 단위 이름과 조사(킬로미터, 평, ~를 ~로). 화면 문구가 아니라 입력 해석 규칙이다.
+  'features/search/utils/calculator.ts',
 ]);
 
 const flatKeys = (value: unknown, prefix = ''): string[] =>
