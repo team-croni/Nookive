@@ -75,6 +75,8 @@
   /* 🎨 Semantic Accents */
   --accent-blue: #2563eb;
   --accent-blue-soft: rgba(37, 99, 235, 0.14);
+  /* 인라인 자동완성으로 이어진 글자. macOS 텍스트 선택처럼 또렷하게 보인다. */
+  --completion-bg: rgba(37, 99, 235, 0.24);
   --accent-blue-text: #1d4ed8;
   --caret-color: var(--accent-blue);
   --accent-emerald: #059669;
@@ -190,6 +192,8 @@
 
     --accent-blue: #3b82f6;
     --accent-blue-soft: rgba(59, 130, 246, 0.18);
+    /* 인라인 자동완성으로 이어진 글자. macOS 텍스트 선택처럼 또렷하게 보인다. */
+    --completion-bg: rgba(59, 130, 246, 0.45);
     --accent-blue-text: #60a5fa;
     --caret-color: var(--text-primary);
     --accent-emerald: #10b981;
@@ -262,6 +266,8 @@
   --text-placeholder: rgba(29, 29, 31, 0.38);
   --accent-blue: #2563eb;
   --accent-blue-soft: rgba(37, 99, 235, 0.14);
+  /* 인라인 자동완성으로 이어진 글자. macOS 텍스트 선택처럼 또렷하게 보인다. */
+  --completion-bg: rgba(37, 99, 235, 0.24);
   --accent-blue-text: #1d4ed8;
   --caret-color: var(--accent-blue);
   --accent-emerald: #059669;
@@ -329,6 +335,8 @@
   --text-placeholder: rgba(245, 245, 247, 0.32);
   --accent-blue: #3b82f6;
   --accent-blue-soft: rgba(59, 130, 246, 0.18);
+  /* 인라인 자동완성으로 이어진 글자. macOS 텍스트 선택처럼 또렷하게 보인다. */
+  --completion-bg: rgba(59, 130, 246, 0.45);
   --accent-blue-text: #60a5fa;
   --caret-color: var(--text-primary);
   --accent-emerald: #10b981;

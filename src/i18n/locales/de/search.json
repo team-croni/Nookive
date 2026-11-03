@@ -5,6 +5,7 @@
   "engineSearch": "„{{query}}“ bei {{engine}} suchen",
   "footer": {"webOpen": "Im Web öffnen"},
   "code": {"placeholder": "Code nach Dateiname, Pfad oder Inhalt suchen", "placeholderNoFiles": "Keine Codedateien in deinen Suchordnern", "noResults": "Kein Code passt zu diesem Namen, Pfad oder Inhalt.", "noFiles": "In deinen Suchordnern gibt es keine Codedateien.", "contentHint": "Codeinhalte werden ab 3 Zeichen durchsucht.", "indexing": "Suchdaten für Code werden erstellt. Bis dahin werden manche Inhalte noch nicht gefunden."},
+  "completion": {"open": "Öffnen", "openApp": "{{app}} öffnen"},
   "web": {"placeholder": "Im Web suchen"},
   "modes": {"all": {"name": "Alles durchsuchen"}, "web": {"chip": "Web", "name": "Websuche"}, "code": {"chip": "Code", "name": "Codesuche"}}
 }

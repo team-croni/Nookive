@@ -67,6 +67,9 @@
   background: transparent;
   border: none;
   outline: none;
+  padding: 0;
+  /* 자동완성 글자와 폭이 정확히 같도록 같은 글꼴을 쓴다. */
+  font-family: inherit;
   font-size: 22px;
   font-weight: 400;
   color: var(--text-primary);
@@ -82,4 +85,51 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* 인라인 자동완성: 입력창 위에 같은 글꼴로 겹쳐 그린다. */
+.inputWrap {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+}
+
+.completion {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  white-space: pre;
+}
+
+.completionTyped {
+  color: transparent;
+}
+
+.completionSuffix {
+  color: var(--text-primary);
+  background: var(--completion-bg);
+  border-radius: 3px;
+}
+
+/* "— 열기" 안내는 입력 글자보다 작게 둔다. */
+.completionHint {
+  margin-left: 8px;
+  color: var(--text-tertiary);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.completionIcon {
+  flex-shrink: 0;
+  /* 아이콘이 생겨도 헤더 높이가 그대로이도록 줄 높이 계산에서 빼 둔다. (위아래로 넘친 만큼 음수 여백) */
+  margin: -8px 0;
 }

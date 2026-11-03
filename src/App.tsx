@@ -15,6 +15,10 @@ import { usePdfMatchScan } from './features/search/hooks/usePdfMatchScan';
 import { openWebSearch } from './features/search/services/webSearchClient';
 import { feedbackClient } from './features/search/services/feedbackClient';
 import { cycleSearchMode } from './features/search/utils/searchModes';
+import { pickInlineCompletion } from './features/search/utils/inlineCompletion';
+import { getInlineCompletionEnabled, subscribeInlineCompletionEnabled } from './utils/inlineCompletionPreference';
+import { searchClient } from './features/search/services/searchClient';
+import { rankQuery } from './features/search/services/rankQuery';
 import { openCodeFile, openFileInOS, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
 import { getCodeEditor } from './utils/codeSearchPreference';
 import type { SearchResultItem } from './types/search';
@@ -200,9 +204,36 @@ export function App() {
       ? t('common:actions.openIn', { app: codeEditor.name })
       : t('common:actions.open');
 
+  // 인라인 자동완성: 첫 번째 결과 앱의 이름을 입력창에 이어 보여준다. 전체 검색에서만 쓴다.
+  // 검색이 끝나기 전에는 메모리의 앱 목록으로 바로 계산해 첫 키 입력부터 보이게 한다.
+  // 설정의 자동완성 스위치 (기본 켜짐). 설정 창에서 바꾸면 바로 따라간다.
+  const [inlineCompletionEnabled, setInlineCompletionEnabledState] = useState(getInlineCompletionEnabled);
+  useEffect(() => subscribeInlineCompletionEnabled(setInlineCompletionEnabledState), []);
+  const completion = useMemo(
+    () =>
+      inlineCompletionEnabled && searchMode === 'all'
+        ? pickInlineCompletion({
+          query,
+          settledQuery: settledSearchMode === 'all' ? settledQuery : '',
+          settledResults: orderedResults,
+          // 실제 검색과 같은 점수(이름 일치·개인화)로 앱을 정렬해, 검색이 끝난 뒤 첫 결과와 어긋나지 않게 한다.
+          rankedApplications: query.trim()
+            ? rankQuery(searchClient.applications(), query, null, feedbackClient.peekBoost(query))
+            : [],
+        })
+        : null,
+    [inlineCompletionEnabled, query, searchMode, settledQuery, settledSearchMode, orderedResults],
+  );
+
   // 선택 항목 열기 (Enter / 하단 열기 버튼)
   // 열린 앱이 포커스를 가져가 blur가 발생할 때까지 기다리지 않고 창을 바로 숨긴다.
   const openSelectedAt = (idx: number) => {
+    // 자동완성이 보이면 첫 줄은 그 앱이다. 검색이 끝나기 전에 Enter를 눌러도 보이는 앱을 연다.
+    if (idx === 0 && completion) {
+      void hideDesktopWindow();
+      handleOpenItem(completion.item);
+      return;
+    }
     if (showWebFallback) {
       const target = idx === 0 ? webQuery : webSuggestions[idx - 1];
       if (!target) return;
@@ -293,6 +324,7 @@ export function App() {
             availableModes={availableModes}
             hasCodeFiles={hasCodeFiles}
             onSearchModeChange={setSearchMode}
+            completion={completion}
           />
 
           {/* 2. 본문 영역: 결과가 있으면 항상 2열(로딩 중에도 유지),

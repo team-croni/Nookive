@@ -70,6 +70,11 @@ export class SearchClient {
     ];
   }
 
+  /** 메모리에 있는 앱 목록. 인라인 자동완성이 검색을 기다리지 않고 바로 쓴다. 아직 불러오지 않았으면 빈 목록. */
+  applications(): SearchResultItem[] {
+    return this.localIndex?.filter((record) => record.category === 'application') ?? [];
+  }
+
   /** 인덱스를 미리 로드해 즉시 검색을 가능하게 한다 (앱 시작 시 호출) */
   async preload(): Promise<void> {
     try {

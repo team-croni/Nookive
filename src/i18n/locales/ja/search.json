@@ -5,6 +5,7 @@
   "engineSearch": "{{engine}}で「{{query}}」を検索",
   "footer": {"webOpen": "ウェブで開く"},
   "code": {"placeholder": "ファイル名、パス、コードの内容で検索", "placeholderNoFiles": "検索フォルダにコードファイルがありません", "noResults": "名前、パス、内容が一致するコードはありません。", "noFiles": "検索フォルダにコードファイルはありません。", "contentHint": "コードの内容は3文字以上で検索します。", "indexing": "コードの検索データを作成しています。完了するまで一部の内容は見つからない場合があります。"},
+  "completion": {"open": "開く", "openApp": "{{app}}を開く"},
   "web": {"placeholder": "ウェブで検索"},
   "modes": {"all": {"name": "すべてを検索"}, "web": {"chip": "ウェブ", "name": "ウェブ検索"}, "code": {"chip": "コード", "name": "コード検索"}}
 }

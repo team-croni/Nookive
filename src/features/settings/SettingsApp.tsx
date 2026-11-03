@@ -24,6 +24,7 @@ import { LoginItemSection } from './components/LoginItemSection';
 import { AppDataSection } from './components/AppDataSection';
 import { WebSearchSection } from './components/WebSearchSection';
 import { CodeSearchSection } from './components/CodeSearchSection';
+import { InlineCompletionSection } from './components/InlineCompletionSection';
 import { OnboardingWizard } from '../onboarding/OnboardingWizard';
 import { applyLaunchAtLoginDefault, getModelStatus } from '../../utils/tauriBridge';
 import { useTheme } from '../../hooks/useTheme';
@@ -259,6 +260,7 @@ export default function SettingsApp() {
           )}
           {activeTab === 'searchOptions' && (
             <>
+              <InlineCompletionSection />
               <CodeSearchSection />
               <WebSearchSection />
               <SearchHistorySection />
