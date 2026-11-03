@@ -23,7 +23,8 @@ describe('calculate: arithmetic', () => {
   });
 
   it('shows nothing for inputs that are not calculations', () => {
-    for (const input of ['2024', '2026-11-03', '11/3/2026', '010-1234-5678', '0.1.4', 'report-final', '(5)', '1/0', '2+', 'claude']) {
+    // 날짜가 들어간 식은 날짜 계산(dateQuery.ts)이 답한다.
+    for (const input of ['2024', '2026-11-03', '11/3/2026', '010-1234-5678', '0.1.4', 'report-final', '(5)', '1/0', '2+', 'claude', '2026-12-25 - 2026-11-04', '2026-12-25 + 30']) {
       expect(calculate(input), input).toBeNull();
     }
   });

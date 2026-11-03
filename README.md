@@ -54,6 +54,8 @@ locally with EmbeddingGemma 2 and llama.cpp.
 - The time somewhere else and time zone conversion (`time in London`,
   `뉴욕 시간`, `3pm PST in KST`), with an hour-by-hour comparison for picking a
   meeting time.
+- Date questions, offline (`100일 후`, `days until Christmas`,
+  `2026-12-25 무슨 요일`, `2026-12-25 - 2026-11-04`).
 - Exact terms and filenames alongside semantic ranking.
 
 PDF results are scanned in the background so a result can show the page where

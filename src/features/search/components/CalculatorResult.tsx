@@ -57,9 +57,9 @@ export const CalculatorPreview: React.FC<CalculatorPreviewProps> = ({ result, co
   const { t, i18n } = useTranslation('search');
   return (
     <div className={styles.preview}>
-      <span className={styles.previewInterpretation}>{result.interpretation}</span>
       <span className={styles.previewValue}>{formatCalculation(result, i18n.resolvedLanguage ?? i18n.language)}</span>
-      {/* 미리보기의 열기 버튼과 같은 공용 버튼을 쓴다. */}
+      <span className={styles.previewInterpretation}>{result.interpretation}</span>
+      {/* 파일 미리보기의 열기 버튼과 같은 공용 버튼을 같은 자리(아래 왼쪽)에 둔다. */}
       <div className={styles.previewActions}>
         <Button variant="primary" size="xs" onClick={onCopy}>
           {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}

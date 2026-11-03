@@ -7,7 +7,8 @@
   height: 100%;
   box-sizing: border-box;
   overflow-y: auto;
-  padding: 16px 18px 12px;
+  /* 파일·날짜·세계 시각 미리보기와 같은 20px (아래 왼쪽 버튼 자리를 맞춘다) */
+  padding: 20px;
 }
 
 .header {
@@ -346,17 +347,19 @@
 .footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  padding-top: 4px;
+  padding-top: 10px;
   margin-top: auto;
 }
 
 .attribution {
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
+  justify-content: flex-end;
   column-gap: 4px;
   min-width: 0;
+  text-align: right;
   color: var(--text-tertiary);
   font-size: 10.5px;
   line-height: 1.4;
