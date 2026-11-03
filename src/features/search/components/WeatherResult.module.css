@@ -1,0 +1,434 @@
+/* src/features/search/components/WeatherResult.module.css */
+/* 미리보기 자리 */
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  padding: 16px 18px 12px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.place {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.place strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place span,
+.period {
+  color: var(--text-tertiary);
+  font-size: 11.5px;
+}
+
+.period {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-chip);
+  color: var(--text-secondary);
+}
+
+.now {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 4px;
+}
+
+.nowIcon {
+  display: inline-flex;
+  margin: -16px -10px -16px -14px;
+}
+
+.nowText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.temperature {
+  color: var(--text-primary);
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.temperatureLow {
+  color: var(--text-tertiary);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.condition {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.facts {
+  color: var(--text-tertiary);
+  font-size: 11.5px;
+}
+
+.section {
+  padding-top: 10px;
+  border-top: 1px solid var(--border-chip);
+}
+
+/* 시간별: 스크롤바 없이 양 끝 화살표로 넘긴다. */
+.hourStrip {
+  position: relative;
+}
+
+.hours {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.hours::-webkit-scrollbar {
+  display: none;
+}
+
+/* 넘길 곳이 있는 쪽 끝을 흐리게 한다. */
+.fadeStart {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 40px);
+  mask-image: linear-gradient(to right, transparent 0, #000 40px);
+}
+
+.fadeEnd {
+  -webkit-mask-image: linear-gradient(to left, transparent 0, #000 40px);
+  mask-image: linear-gradient(to left, transparent 0, #000 40px);
+}
+
+.fadeStart.fadeEnd {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 40px,
+    #000 calc(100% - 40px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 40px,
+    #000 calc(100% - 40px),
+    transparent 100%
+  );
+}
+
+/* Meteocons 그림은 위아래에 여백이 있어 조금 겹쳐 둔다. */
+.conditionIcon {
+  display: block;
+  flex-shrink: 0;
+  margin: -2px 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.conditionIcon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 결과 줄: 칩 배경 없이 그림이 아이콘 자리 전체를 채운다.
+   그림 안쪽 여백만큼 크게 그리고 바깥 여백을 음수로 둔다. (transform으로 키우면 작은 크기로 그린 그림을 늘려 흐려진다) */
+.rowIconImage {
+  background: transparent !important;
+}
+
+.rowIconImage .conditionIcon {
+  /* 움직이는 그림(span)은 크기를 인라인 style로 받으므로 !important로 덮는다. */
+  width: 46px !important;
+  height: 46px !important;
+  margin: -6px;
+}
+
+.hourNav {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border-chip);
+  border-radius: 50%;
+  background: var(--surface-popover);
+  box-shadow: var(--shadow-popover);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.hourNav:hover {
+  color: var(--text-primary);
+}
+
+/* 넘길 곳이 없으면 부드럽게 숨긴다. */
+.hourNavHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hourNav {
+  transition: opacity 0.18s ease;
+}
+
+.hourNavPrev {
+  left: -4px;
+}
+
+.hourNavNext {
+  right: -4px;
+}
+
+.hour {
+  position: relative;
+  display: flex;
+  flex: 0 0 44px;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-secondary);
+}
+
+/* 날짜가 바뀌는 칸: 앞에 옅은 세로선, 시각 자리에 그날 이름 */
+/* 날짜가 바뀌는 칸은 앞을 띄우고 그 틈 가운데에 선을 긋는다. (칸 사이 4px + 띄움 16px의 가운데) */
+.hourNewDay {
+  margin-left: 16px;
+}
+
+.hourNewDay::before {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: -10.5px;
+  width: 1px;
+  background: var(--border-chip);
+  content: "";
+  /* 레티나에서 물리 픽셀 한 줄로 그어 다른 구분선보다 한 단계 가늘게 */
+  transform: scaleX(0.5);
+}
+
+.hourDayName {
+  color: var(--text-secondary) !important;
+  font-weight: 600;
+}
+
+.hourTime {
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.hourRain {
+  color: var(--accent-blue-text);
+  font-size: 9.5px;
+  white-space: nowrap;
+}
+
+.hourRainNone {
+  color: var(--text-tertiary);
+}
+
+.hourTemp {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 일별 */
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px auto 30px minmax(20px, 52px) 30px;
+  align-items: center;
+  gap: 18px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.dayActive {
+  background: var(--surface-chip);
+  color: var(--text-primary);
+}
+
+.dayName {
+  overflow: hidden;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 물방울은 한 세로줄에 두고 숫자는 오른쪽 끝을 맞춘다. 숫자 칸은 "100%" 폭만 잡아
+   물방울이 숫자 바로 앞에 붙어 한 묶음으로 보이게 한다. */
+.dayRain {
+  display: grid;
+  /* "100 %"(프랑스어 등은 숫자와 % 사이에 좁은 공백)까지 들어가는 폭 */
+  grid-template-columns: 10px 4.6ch;
+  align-items: center;
+  gap: 2px;
+  color: var(--accent-blue-text);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.dayMin,
+.dayMax {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.dayMin {
+  color: var(--text-secondary);
+}
+
+.dayMax {
+  color: var(--text-primary);
+  text-align: left;
+}
+
+/* 최저~최고 기온 막대 (Apple 날씨 앱처럼 그 주의 범위 안에서 그날의 범위) */
+.rangeTrack {
+  position: relative;
+  /* 최저·막대·최고는 한 묶음이라 열 간격(18px)보다 가깝게 8px만 띄운다. (보이는 막대 폭은 열 폭 + 20px) */
+  margin: 0 -10px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-chip-strong, var(--border-chip));
+}
+
+.rangeFill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, #60a5fa, #fbbf24);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+  margin-top: auto;
+}
+
+.attribution {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 4px;
+  min-width: 0;
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+.attributionPart {
+  white-space: nowrap;
+}
+
+/* 버튼 글자는 줄을 바꾸지 않고, 자리가 모자라면 출처가 줄을 바꾼다. */
+.footerButton {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 기본 지역 안내·오류 */
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 24px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: center;
+}
+
+.message strong {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* 불러오는 중 */
+.spinner {
+  animation: weather-spin 0.9s linear infinite;
+}
+
+@keyframes weather-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+/* 불러오는 중 줄의 제목은 결과 값이 아니므로 작고 가볍게 */
+.rowLoadingText {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+}
+
+/* 다른 시간대 지역: 시각 기준 안내 */
+.localTime {
+  margin: 0 0 6px;
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+}
+
+/* "오후 11시"의 "오후" */
+.hourPeriod {
+  font-size: 9px;
+}

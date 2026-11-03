@@ -16,9 +16,11 @@ mod mask_png;
 mod models;
 mod paths;
 mod search_feedback;
+mod system_locale;
 mod tray_labels;
 #[cfg(target_os = "macos")]
 mod vibrancy;
+mod weather;
 mod web;
 mod window;
 
@@ -64,7 +66,10 @@ pub fn run() {
                 // A model-less DMG opens the setup window once so installation
                 // can happen in-app without asking the user to use a terminal.
                 window::show_installer_window(app.handle());
-                window::set_tray_install_required(app.handle().clone(), "ko".to_string())?;
+                window::set_tray_install_required(
+                    app.handle().clone(),
+                    window::current_tray_language(),
+                )?;
             }
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.set_size(Size::Logical(LogicalSize::new(
@@ -118,9 +123,13 @@ pub fn run() {
             files::render_pdf_page_native,
             web::web_suggest,
             web::open_url,
+            weather::weather_places,
+            weather::weather_forecast,
+            system_locale::get_system_locale,
             licenses::open_license_document,
             window::hide_window,
             window::hide_settings_window,
+            window::open_settings_window,
             window::hide_installer_window,
             window::show_search_window,
             window::resize_main_window,

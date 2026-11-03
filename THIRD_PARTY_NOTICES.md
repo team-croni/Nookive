@@ -38,6 +38,7 @@ production dependency, transitive ones included.
 | [Tauri JS API](https://github.com/tauri-apps/tauri) and `plugin-dialog` | 2.12.3 / 2.8.3 | Calls between the UI and the desktop shell | Apache-2.0 OR MIT |
 | [i18next](https://www.i18next.com/), [react-i18next](https://react.i18next.com/) | 26.5.4 / 17.1.0 | UI translations | MIT |
 | [lucide-react](https://lucide.dev/) | 1.56.0 | UI icons | ISC |
+| [Meteocons](https://meteocons.com/) (`@bybas/weather-icons`) | 2.0.0 | Weather icons in the search window | MIT |
 | [PDF.js](https://github.com/mozilla/pdf.js) (`pdfjs-dist`) | 6.2.108 | PDF preview in the UI | Apache-2.0 |
 | [pdf-parse](https://github.com/mehmet-kozan/pdf-parse) | 2.4.5 (ships `pdfjs-dist` 5.4.296) | PDF text extraction in the indexer | Apache-2.0 |
 | [@napi-rs/canvas](https://github.com/Brooooooklyn/canvas) | 0.1.80 | Canvas for `pdf-parse` | MIT |
@@ -73,6 +74,19 @@ Nookive does not redistribute them.
 The installer shows the model sources and licenses before downloading. If you
 redistribute these files yourself, include the upstream license and model card
 with them.
+
+## Online services used at run time
+
+These services are called only when you use the matching feature. Nookive sends
+the minimum needed and does not send indexed file contents.
+
+| Service | Used for | What is sent | Terms |
+| --- | --- | --- | --- |
+| [Photon](https://photon.komoot.io) by komoot | Finding the place in a weather query | The place name | Public fair-use API. Data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), ODbL |
+| [Open-Meteo](https://open-meteo.com) | Place lookup and weather forecasts | The place name, or rounded coordinates | Free for non-commercial use. Data under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); geocoding data from GeoNames (CC BY 4.0) |
+| The search engine chosen in Settings | Web suggestions and web search | The typed query | The search engine's own terms |
+
+The weather preview shows the Open-Meteo and OpenStreetMap attribution.
 
 ## Build-only tools (not distributed)
 

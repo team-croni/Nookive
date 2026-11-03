@@ -71,8 +71,13 @@ h1 {
   flex: 1 1 auto;
   min-height: 0;
 }
+/* 분류 이름이 긴 언어(스페인어, 포르투갈어 등)에서도 잘리지 않게 가장 긴 이름에 맞춰 넓어진다. */
 .sidebar {
-  flex: 0 0 184px;
+  flex: 0 0 auto;
+  width: max-content;
+  min-width: 184px;
+  max-width: 240px;
+  box-sizing: border-box;
   overflow-y: auto;
   padding: 14px 10px;
   border-right: 1px solid var(--border-chip);
@@ -101,8 +106,20 @@ h1 {
   cursor: default;
 }
 .sidebarItem span {
+  display: inline-flex;
+  flex-direction: column;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* 선택하면 굵어지므로 굵은 글자 폭을 보이지 않게 미리 잡아, 고를 때 사이드바 폭이 흔들리지 않게 한다. */
+.sidebarItem span::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  font-weight: 600;
+  visibility: hidden;
+  pointer-events: none;
 }
 .sidebarItem:hover {
   background: var(--surface-chip);
@@ -806,3 +823,86 @@ h2 {
   outline-offset: -2px;
 }
 
+/* 날씨 기본 지역: 지금 값과 바꾸기 버튼, 지명 검색 */
+.weatherLocationValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.weatherLocationName {
+  overflow: hidden;
+  max-width: 260px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.weatherPicker {
+  padding: 8px 8px 10px 14px;
+  border-top: 1px solid var(--border-chip);
+}
+.weatherSearchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.weatherSearchInput {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border: 1px solid var(--border-chip);
+  border-radius: 6px;
+  background: var(--surface-chip);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+.weatherSearchInput:focus {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 1px;
+  border-color: var(--accent-blue);
+}
+.card p.weatherPickerNote {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+}
+.weatherPlaceList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.weatherPlaceButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.weatherPlaceButton:hover,
+.weatherPlaceButton:focus-visible {
+  background: var(--glass-bg-hover);
+}
+.weatherPlaceName {
+  color: var(--text-primary);
+}
+.weatherPlaceDetail {
+  overflow: hidden;
+  color: var(--text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -22,6 +22,8 @@ export {
   hideDesktopWindow,
   showSearchWindow,
   hideSettingsWindow,
+  openSettingsWindow,
+  SETTINGS_TAB_REQUEST_KEY,
   hideInstallerWindow,
   setTrayInstalling,
   setTrayInstallRequired,

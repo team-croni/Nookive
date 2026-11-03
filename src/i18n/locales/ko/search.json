@@ -7,6 +7,7 @@
   "code": {"placeholder": "파일 이름, 경로, 코드 내용으로 찾기", "placeholderNoFiles": "검색 폴더에 코드 파일이 없습니다", "noResults": "이름, 경로, 내용이 일치하는 코드가 없습니다.", "noFiles": "검색될 폴더에 코드 파일이 없습니다.", "contentHint": "코드 내용은 3글자 이상 입력하면 찾습니다.", "indexing": "코드 검색 데이터를 만드는 중입니다. 끝나기 전까지는 일부 내용만 찾을 수 있습니다."},
   "completion": {"open": "열기", "openApp": "{{app}} 열기"},
   "calculator": {"copy": "복사", "copied": "복사됨", "copyHint": "Enter로 복사", "openApp": "계산기 열기"},
+  "weather": {"conditions": {"clear": "맑음", "partlyCloudy": "구름 조금", "cloudy": "흐림", "fog": "안개", "drizzle": "이슬비", "rain": "비", "snow": "눈", "thunderstorm": "뇌우"}, "periods": {"now": "지금", "today": "오늘", "tomorrow": "내일", "dayAfter": "모레", "week": "이번 주", "weekend": "이번 주말"}, "feelsLike": "체감 {{value}}", "humidity": "습도 {{value}}%", "wind": "바람 {{value}}", "precipitation": "강수 확률 {{value}}%", "previousHours": "이전 시간", "nextHours": "다음 시간", "precipitationLabel": "강수 확률", "lowLabel": "최저 기온", "highLabel": "최고 기온", "localTime": "현지 시각 ({{offset}})", "hourly": "시간별 예보", "daily": "일별 예보", "openWeb": "웹에서 보기", "openWebHint": "Enter로 웹에서 보기", "loading": "{{place}} 날씨 불러오는 중…", "unavailable": "이 기간의 예보가 없습니다", "needsLocation": {"title": "기본 지역을 정해 주세요", "description": "지역 없이 물으면 설정에서 고른 지역의 날씨를 보여줍니다.", "action": "설정 열기", "hint": "Enter로 설정 열기"}, "error": {"title": "날씨를 불러오지 못했습니다", "description": "인터넷 연결을 확인해 주세요."}, "attribution": "날씨 정보: Open-Meteo · © OpenStreetMap"},
   "web": {"placeholder": "웹에서 검색"},
   "modes": {"all": {"name": "전체 검색"}, "web": {"chip": "웹", "name": "웹 검색"}, "code": {"chip": "코드", "name": "코드 검색"}}
 }

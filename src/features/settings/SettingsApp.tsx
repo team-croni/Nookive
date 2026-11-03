@@ -25,8 +25,9 @@ import { AppDataSection } from './components/AppDataSection';
 import { WebSearchSection } from './components/WebSearchSection';
 import { CodeSearchSection } from './components/CodeSearchSection';
 import { InlineCompletionSection } from './components/InlineCompletionSection';
+import { WeatherSection } from './components/WeatherSection';
 import { OnboardingWizard } from '../onboarding/OnboardingWizard';
-import { applyLaunchAtLoginDefault, getModelStatus } from '../../utils/tauriBridge';
+import { applyLaunchAtLoginDefault, getModelStatus, SETTINGS_TAB_REQUEST_KEY } from '../../utils/tauriBridge';
 import { useTheme } from '../../hooks/useTheme';
 import styles from './SettingsApp.module.css';
 
@@ -148,6 +149,27 @@ export default function SettingsApp() {
     setActiveTab(tab);
     contentRef.current?.scrollTo({ top: 0 });
   };
+  // 검색 창이 특정 분류를 열어 달라고 하면 그 분류로 간다. (예: 날씨 기본 지역 → 검색 방식)
+  useEffect(() => {
+    const takeRequest = () => {
+      try {
+        const tab = localStorage.getItem(SETTINGS_TAB_REQUEST_KEY) as SettingsTab | null;
+        if (!tab) return;
+        localStorage.removeItem(SETTINGS_TAB_REQUEST_KEY);
+        if (tabs.some((item) => item.id === tab)) changeTab(tab);
+      } catch {
+        // localStorage를 쓸 수 없으면 마지막 분류를 그대로 둔다.
+      }
+    };
+    takeRequest();
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === SETTINGS_TAB_REQUEST_KEY && event.newValue) takeRequest();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+    // 탭 목록은 고정이고 changeTab은 상태 setter와 ref만 쓴다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAppDataDeleted = () => {
     // 로컬 설정을 비운 뒤 앱을 초기 설치 상태로 다시 시작한다.
@@ -263,6 +285,7 @@ export default function SettingsApp() {
               <InlineCompletionSection />
               <CodeSearchSection />
               <WebSearchSection />
+              <WeatherSection />
               <SearchHistorySection />
             </>
           )}

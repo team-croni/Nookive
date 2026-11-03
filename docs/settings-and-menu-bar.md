@@ -1,6 +1,6 @@
 ---
-date: 2026-11-03
-version: 1.5.0
+date: 2026-11-04
+version: 1.6.0
 ---
 
 # 메뉴바와 설정 UX
@@ -44,6 +44,11 @@ Nookive 아이콘
 인덱싱이 진행 중일 때 상태 메뉴는 `인덱싱 중 · 42%`와 `일시정지`로 바뀐다. 오류가 있으면 검색을 막지
 않고 `오류 2개 · 설정에서 보기`로 안내한다.
 
+메뉴 문구는 9개 언어로 `src-tauri/src/tray_labels.rs`에 둔다(트레이는 프론트엔드보다 먼저 만들어진다). 앱 언어를 받기
+전에는 macOS 선호 언어(`AppleLanguages`의 첫 언어)를 쓰고, 받은 뒤에는 그 언어를 기억해 Rust가 스스로 메뉴를 바꿀 때(모델
+감시, 트레이의 설치 중단)도 같은 언어를 쓴다. 모델 설치 중의 일시정지·재개는 메뉴 문구가 아니라 저장한 다운로드 상태로
+가른다. 테스트(`translates_every_label_in_every_language`)가 영어 문구가 남은 언어와 일시정지·재개 문구가 같은 언어를 막는다.
+
 ## 설정 창
 
 현재 구현은 별도 `settings` WebviewWindow(880×720, 그림자 여백 포함)를 만들고, GitHub·VS Code 설정처럼 왼쪽
@@ -71,6 +76,11 @@ Nookive 아이콘
     검색 엔진(Google, Bing, DuckDuckGo, Brave Search, Ecosia, Naver, Baidu)을 고른다(`nookive.webSearchEngine`).
     고르지 않았으면 간체 중국어는 Baidu, 나머지는 Google이다. 메뉴는 Google 다음에 지금 언어의 지역 엔진을 올린다. ⓘ 안내에는
     검색어가 고른 엔진으로 전송될 수 있다고 엔진 이름을 넣어 보여준다
+  - 날씨 켜기/끄기(기본 켜짐, `nookive.weatherEnabled`)와 기본 지역(`nookive.weatherLocation`). 기본 지역은 "오늘 날씨"처럼
+    지역 없이 물을 때 쓴다. 고르기를 누르면 검색 창과 같은 지명 검색으로 후보 5곳을 보여주고, Enter는 첫 후보를 고른다.
+    위치 권한은 쓰지 않는다. ⓘ 안내에는 지명이 Photon으로, 좌표가 Open-Meteo로 전송된다고 보여준다. 검색 창이
+    `open_settings_window`로 설정을 열며 localStorage(`nookive.settingsTabRequest`)에 분류를 남기면 설정 창이 그
+    분류로 간다
   - 검색 개인화 초기화: 열어본 결과 기록(`search-feedback.json`)만 지우며 검색 데이터 초기화와 따로 동작
 - **일반**: 바로가기 키, 언어, 화면 모드(라이트, 다크, 시스템), 로그인 시 열기
   - 로그인 시 열기: macOS 13+의 `SMAppService.mainApp`으로 등록해 시스템 설정 > 일반 > 로그인 항목의

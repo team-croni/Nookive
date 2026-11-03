@@ -42,6 +42,7 @@
     "desktop": "tauri dev"
   },
   "dependencies": {
+    "@bybas/weather-icons": "2.0.0",
     "@tauri-apps/api": "^2.12.4",
     "@tauri-apps/plugin-dialog": "^2.8.4",
     "highlight.js": "^11.12.0",
