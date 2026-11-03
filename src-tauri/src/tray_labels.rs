@@ -9,6 +9,7 @@ pub struct TrayLabels {
     /// `{percent}`를 진행률로 바꿔 쓴다.
     pub installing: &'static str,
     pub pause_installation: &'static str,
+    pub resume_installation: &'static str,
     pub cancel_installation: &'static str,
     pub installation_required: &'static str,
     pub start_installation: &'static str,
@@ -20,6 +21,7 @@ const KO: TrayLabels = TrayLabels {
     quit: "Nookive 종료",
     installing: "설치 중… ({percent}%)",
     pause_installation: "설치 일시정지",
+    resume_installation: "설치 재개",
     cancel_installation: "설치 중단",
     installation_required: "설치 필요",
     start_installation: "설치 시작",
@@ -31,6 +33,7 @@ const EN: TrayLabels = TrayLabels {
     quit: "Quit Nookive",
     installing: "Installing… ({percent}%)",
     pause_installation: "Pause installation",
+    resume_installation: "Resume installation",
     cancel_installation: "Cancel installation",
     installation_required: "Installation required",
     start_installation: "Start installation",
@@ -42,6 +45,7 @@ const JA: TrayLabels = TrayLabels {
     quit: "Nookive を終了",
     installing: "インストール中… ({percent}%)",
     pause_installation: "インストールを一時停止",
+    resume_installation: "インストールを再開",
     cancel_installation: "インストールを中止",
     installation_required: "インストールが必要です",
     start_installation: "インストールを開始",
@@ -53,6 +57,7 @@ const ZH_CN: TrayLabels = TrayLabels {
     quit: "退出 Nookive",
     installing: "正在安装… ({percent}%)",
     pause_installation: "暂停安装",
+    resume_installation: "继续安装",
     cancel_installation: "取消安装",
     installation_required: "需要安装",
     start_installation: "开始安装",
@@ -64,6 +69,7 @@ const ZH_TW: TrayLabels = TrayLabels {
     quit: "結束 Nookive",
     installing: "正在安裝… ({percent}%)",
     pause_installation: "暫停安裝",
+    resume_installation: "繼續安裝",
     cancel_installation: "取消安裝",
     installation_required: "需要安裝",
     start_installation: "開始安裝",
@@ -75,6 +81,7 @@ const ES: TrayLabels = TrayLabels {
     quit: "Salir de Nookive",
     installing: "Instalando… ({percent}%)",
     pause_installation: "Pausar instalación",
+    resume_installation: "Reanudar instalación",
     cancel_installation: "Cancelar instalación",
     installation_required: "Instalación necesaria",
     start_installation: "Iniciar instalación",
@@ -86,6 +93,7 @@ const FR: TrayLabels = TrayLabels {
     quit: "Quitter Nookive",
     installing: "Installation… ({percent} %)",
     pause_installation: "Suspendre l’installation",
+    resume_installation: "Reprendre l’installation",
     cancel_installation: "Annuler l’installation",
     installation_required: "Installation requise",
     start_installation: "Lancer l’installation",
@@ -97,6 +105,7 @@ const DE: TrayLabels = TrayLabels {
     quit: "Nookive beenden",
     installing: "Wird installiert… ({percent} %)",
     pause_installation: "Installation pausieren",
+    resume_installation: "Installation fortsetzen",
     cancel_installation: "Installation abbrechen",
     installation_required: "Installation erforderlich",
     start_installation: "Installation starten",
@@ -108,6 +117,7 @@ const PT_BR: TrayLabels = TrayLabels {
     quit: "Sair do Nookive",
     installing: "Instalando… ({percent}%)",
     pause_installation: "Pausar instalação",
+    resume_installation: "Retomar instalação",
     cancel_installation: "Cancelar instalação",
     installation_required: "Instalação necessária",
     start_installation: "Iniciar instalação",
@@ -154,6 +164,30 @@ mod tests {
         assert_eq!(tray_labels("zh-CN").open_search, "打开搜索");
         assert_eq!(tray_labels("pt-BR").settings, "Ajustes…");
         assert_eq!(tray_labels("it").quit, "Quit Nookive");
+    }
+
+    #[test]
+    fn translates_every_label_in_every_language() {
+        let en = tray_labels("en");
+        for language in ["ko", "ja", "zh-CN", "zh-TW", "es", "fr", "de", "pt-BR"] {
+            let labels = tray_labels(language);
+            // 일시정지와 재개는 같은 항목의 두 상태라 문구가 달라야 한다.
+            assert_ne!(
+                labels.pause_installation, labels.resume_installation,
+                "{language}"
+            );
+            // 영어 문구가 그대로 남은 항목이 없어야 한다.
+            for (label, english) in [
+                (labels.open_search, en.open_search),
+                (labels.pause_installation, en.pause_installation),
+                (labels.resume_installation, en.resume_installation),
+                (labels.cancel_installation, en.cancel_installation),
+                (labels.installation_required, en.installation_required),
+                (labels.start_installation, en.start_installation),
+            ] {
+                assert_ne!(label, english, "{language}");
+            }
+        }
     }
 
     #[test]

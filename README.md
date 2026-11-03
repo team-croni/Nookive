@@ -24,9 +24,9 @@ remember instead of guessing a filename. Nookive runs the embedding pipeline
 locally with EmbeddingGemma 2 and llama.cpp.
 
 > Your indexed content stays on your Mac. Nookive does not require an account
-> or a hosted AI service. Model downloads and web suggestions/web-search
-> actions (Google by default) are network operations; they are separate from
-> local indexing.
+> or a hosted AI service. Model downloads, web suggestions/web-search
+> actions (Google by default), and weather lookups are network operations;
+> they are separate from local indexing.
 
 ## What it can find
 
@@ -49,6 +49,8 @@ locally with EmbeddingGemma 2 and llama.cpp.
   Enter to open it. You can turn this off in Settings.
 - Quick math and unit conversions right in the search field (`12*7`,
   `10 km in mi`, `100f in c`); press Enter to copy the result.
+- The weather for a place, right in the search field (`Paris weather`,
+  `수원 날씨`, `weather tomorrow`), with hourly and daily forecasts in the preview.
 - Exact terms and filenames alongside semantic ranking.
 
 PDF results are scanned in the background so a result can show the page where
@@ -168,7 +170,9 @@ next time, Nookive keeps your search words and the opened paths in the
 application data directory; reset them under Settings → Search
 personalization. Nookive does not upload indexed file contents. If you use autocomplete or web search, the typed query (and, for Google,
 the app language) is sent to the search engine you chose in Settings
-(Google by default) and the selected URL is opened in your browser. The temporary
+(Google by default) and the selected URL is opened in your browser. For a
+weather query, only the place name is sent to Photon (OpenStreetMap) and the
+place's coordinates to Open-Meteo; you can turn weather off in Settings. The temporary
 embedding server listens on loopback (`127.0.0.1`) and should not be exposed
 publicly. Local indexes, logs, model caches, and selected paths may be
 sensitive and should be handled accordingly.

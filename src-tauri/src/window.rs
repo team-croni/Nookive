@@ -1,6 +1,7 @@
 // src-tauri/src/window.rs
 // 메인/설정 창 표시·배치, 트레이, 전역 단축키 관리.
 use crate::models;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Mutex, OnceLock};
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 
@@ -34,6 +35,30 @@ fn installing_cancel_item() -> &'static Mutex<Option<MenuItem<tauri::Wry>>> {
     static ITEM: OnceLock<Mutex<Option<MenuItem<tauri::Wry>>>> = OnceLock::new();
     ITEM.get_or_init(|| Mutex::new(None))
 }
+
+/// 트레이 메뉴의 언어. 프론트엔드가 앱 언어를 알려 주기 전에는 macOS 선호 언어를 쓴다.
+/// Rust가 스스로 메뉴를 바꿀 때(모델 감시, 트레이의 설치 중단)도 이 언어를 쓴다.
+fn tray_language() -> &'static Mutex<String> {
+    static LANGUAGE: OnceLock<Mutex<String>> = OnceLock::new();
+    LANGUAGE.get_or_init(|| Mutex::new(crate::system_locale::preferred_language()))
+}
+
+pub fn current_tray_language() -> String {
+    tray_language()
+        .lock()
+        .map(|language| language.clone())
+        .unwrap_or_else(|_| "en".to_string())
+}
+
+fn remember_tray_language(language: &str) {
+    if let Ok(mut current) = tray_language().lock() {
+        *current = language.to_string();
+    }
+}
+
+/// 설치 다운로드가 일시정지 상태인지. 트레이의 같은 항목으로 일시정지·재개를 오가는 데 쓴다.
+/// (메뉴 문구로 판단하면 한국어·영어 외의 언어에서 재개가 동작하지 않는다)
+static DOWNLOAD_PAUSED: AtomicBool = AtomicBool::new(false);
 
 /// 메인 검색 창의 논리 크기. CSS 토큰(`--window-width`, `--window-height`,
 /// `--window-compact-height`)과 반드시 동일하게 유지한다.
@@ -256,6 +281,8 @@ pub fn build_install_required_menu(
 
 #[tauri::command]
 pub fn set_tray_install_required(app: AppHandle, language: String) -> Result<(), String> {
+    remember_tray_language(&language);
+    DOWNLOAD_PAUSED.store(false, Ordering::SeqCst);
     // 이전 설치 메뉴의 아이템 참조를 먼저 비워야 다음 설치 시작 시
     // 새 메뉴가 정상적으로 생성되고 액션이 새 아이템에 연결된다.
     if let Ok(mut guard) = installing_status_item().lock() {
@@ -276,30 +303,22 @@ pub fn set_tray_install_required(app: AppHandle, language: String) -> Result<(),
 
 /// 설치 메뉴의 일시정지 액션을 현재 다운로드 상태에 맞게 바꾼다.
 pub fn set_tray_download_paused(paused: bool) {
+    DOWNLOAD_PAUSED.store(paused, Ordering::SeqCst);
     if let Ok(guard) = installing_pause_item().lock()
         && let Some(item) = guard.as_ref()
     {
-        let is_english = item
-            .text()
-            .map(|text| text.contains("Pause") || text.contains("Resume"))
-            .unwrap_or(false);
-        let label = if is_english {
-            if paused {
-                "Resume installation"
-            } else {
-                "Pause installation"
-            }
-        } else if paused {
-            "설치 재개"
+        let labels = tray_labels(&current_tray_language());
+        let label = if paused {
+            labels.resume_installation
         } else {
-            "설치 일시정지"
+            labels.pause_installation
         };
         let _ = item.set_text(label);
     }
 }
 
 pub fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
-    let menu = build_tray_menu(app, "ko")?;
+    let menu = build_tray_menu(app, &current_tray_language())?;
 
     let mut builder = TrayIconBuilder::with_id("main")
         .menu(&menu)
@@ -310,17 +329,8 @@ pub fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
             "show-settings" => show_settings_window(app),
             "installing-start" => show_installer_window(app),
             "installing-pause" => {
-                // 메뉴 라벨로 현재 상태를 판별해 같은 항목으로 일시정지/재개한다.
-                let paused = if let Ok(guard) = installing_pause_item().lock() {
-                    guard
-                        .as_ref()
-                        .and_then(|item| item.text().ok())
-                        .map(|text| text.contains("재개") || text.contains("Resume"))
-                        .unwrap_or(false)
-                } else {
-                    false
-                };
-                if paused {
+                // 같은 항목으로 일시정지/재개한다.
+                if DOWNLOAD_PAUSED.load(Ordering::SeqCst) {
                     models::resume_model_download(app.clone());
                 } else {
                     models::pause_model_download(app.clone());
@@ -332,7 +342,7 @@ pub fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
                 let handle = app.clone();
                 tauri::async_runtime::spawn(async move {
                     let _ = models::reset_model_download(handle.clone()).await;
-                    let _ = set_tray_install_required(handle.clone(), "ko".to_string());
+                    let _ = set_tray_install_required(handle.clone(), current_tray_language());
                 });
             }
             "quit" => app.exit(0),
@@ -356,6 +366,7 @@ pub fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
 
 #[tauri::command]
 pub fn set_tray_language(app: AppHandle, language: String) -> Result<(), String> {
+    remember_tray_language(&language);
     let menu = build_tray_menu(&app, &language).map_err(|error| error.to_string())?;
     let tray = app
         .tray_by_id("main")
@@ -366,6 +377,7 @@ pub fn set_tray_language(app: AppHandle, language: String) -> Result<(), String>
 /// 트레이 설치 상태 라벨만 갱신한다 (메뉴 교체 없음 → 열려 있는 메뉴가 닫히지 않음).
 #[tauri::command]
 pub fn set_tray_installing(app: AppHandle, language: String, percent: u32) -> Result<(), String> {
+    remember_tray_language(&language);
     // 이미 저장된 상태 아이템이 있으면 set_text로 라벨만 업데이트한다.
     if let Ok(guard) = installing_status_item().lock()
         && let Some(item) = guard.as_ref()
@@ -386,6 +398,7 @@ pub fn set_tray_installing(app: AppHandle, language: String, percent: u32) -> Re
 /// 트레이 메뉴를 일반 모드로 복원하고 저장된 설치 아이템을 해제한다.
 #[tauri::command]
 pub fn restore_tray_menu(app: AppHandle, language: String) -> Result<(), String> {
+    DOWNLOAD_PAUSED.store(false, Ordering::SeqCst);
     // 설치 아이템 참조 해제
     if let Ok(mut guard) = installing_status_item().lock() {
         *guard = None;
@@ -397,6 +410,12 @@ pub fn restore_tray_menu(app: AppHandle, language: String) -> Result<(), String>
         *guard = None;
     }
     set_tray_language(app, language)
+}
+
+/// 검색 창에서 설정 창을 연다. (날씨 기본 지역 안내 등) 열 탭은 프론트엔드가 localStorage로 넘긴다.
+#[tauri::command]
+pub fn open_settings_window(app: AppHandle) {
+    show_settings_window(&app);
 }
 
 #[tauri::command]

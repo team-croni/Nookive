@@ -302,10 +302,16 @@ pub fn start_model_watcher(app: AppHandle) {
                     let state = app.state::<crate::embedding::EmbeddingEngineState>();
                     crate::embedding::stop_embedding_server(state.inner());
                 }
-                let _ = crate::window::set_tray_install_required(app.clone(), "ko".to_string());
+                let _ = crate::window::set_tray_install_required(
+                    app.clone(),
+                    crate::window::current_tray_language(),
+                );
                 crate::window::show_installer_window(&app);
             } else if is_ready {
-                let _ = crate::window::restore_tray_menu(app.clone(), "ko".to_string());
+                let _ = crate::window::restore_tray_menu(
+                    app.clone(),
+                    crate::window::current_tray_language(),
+                );
             }
             previous = current;
         }

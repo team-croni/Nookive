@@ -7,6 +7,7 @@
   "code": {"placeholder": "依檔名、路徑或程式碼內容搜尋", "placeholderNoFiles": "搜尋資料夾中沒有程式碼檔案", "noResults": "沒有名稱、路徑或內容符合的程式碼。", "noFiles": "搜尋資料夾中沒有程式碼檔案。", "contentHint": "輸入 3 個以上字元時搜尋程式碼內容。", "indexing": "正在建立程式碼搜尋資料。完成前可能找不到部分內容。"},
   "completion": {"open": "開啟", "openApp": "開啟 {{app}}"},
   "calculator": {"copy": "拷貝", "copied": "已拷貝", "copyHint": "按 Enter 拷貝", "openApp": "開啟計算機"},
+  "weather": {"conditions": {"clear": "晴", "partlyCloudy": "多雲", "cloudy": "陰", "fog": "霧", "drizzle": "毛毛雨", "rain": "雨", "snow": "雪", "thunderstorm": "雷雨"}, "periods": {"now": "現在", "today": "今天", "tomorrow": "明天", "dayAfter": "後天", "week": "本週", "weekend": "本週末"}, "feelsLike": "體感 {{value}}", "humidity": "濕度 {{value}}%", "wind": "風速 {{value}}", "precipitation": "降雨機率 {{value}}%", "previousHours": "前幾小時", "nextHours": "後幾小時", "precipitationLabel": "降雨機率", "lowLabel": "最低氣溫", "highLabel": "最高氣溫", "localTime": "當地時間（{{offset}}）", "hourly": "逐時預報", "daily": "逐日預報", "openWeb": "在網頁上查看", "openWebHint": "按 Enter 在網頁上查看", "loading": "正在載入{{place}}的天氣…", "unavailable": "這段期間沒有預報", "needsLocation": {"title": "請選擇預設地區", "description": "未指定地區時，會顯示設定中所選地區的天氣。", "action": "打開設定", "hint": "按 Enter 打開設定"}, "error": {"title": "無法載入天氣", "description": "請檢查網路連線。"}, "attribution": "天氣資料：Open-Meteo · © OpenStreetMap"},
   "web": {"placeholder": "在網路上搜尋"},
   "modes": {"all": {"name": "全部搜尋"}, "web": {"chip": "網頁", "name": "網頁搜尋"}, "code": {"chip": "程式碼", "name": "程式碼搜尋"}}
 }

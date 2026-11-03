@@ -7,6 +7,7 @@
   "code": {"placeholder": "按文件名、路径或代码内容搜索", "placeholderNoFiles": "搜索文件夹中没有代码文件", "noResults": "没有名称、路径或内容匹配的代码。", "noFiles": "搜索文件夹中没有代码文件。", "contentHint": "输入 3 个或以上字符时搜索代码内容。", "indexing": "正在创建代码搜索数据。完成前可能找不到部分内容。"},
   "completion": {"open": "打开", "openApp": "打开 {{app}}"},
   "calculator": {"copy": "复制", "copied": "已复制", "copyHint": "按 Enter 复制", "openApp": "打开计算器"},
+  "weather": {"conditions": {"clear": "晴", "partlyCloudy": "多云", "cloudy": "阴", "fog": "雾", "drizzle": "毛毛雨", "rain": "雨", "snow": "雪", "thunderstorm": "雷雨"}, "periods": {"now": "现在", "today": "今天", "tomorrow": "明天", "dayAfter": "后天", "week": "本周", "weekend": "本周末"}, "feelsLike": "体感 {{value}}", "humidity": "湿度 {{value}}%", "wind": "风速 {{value}}", "precipitation": "降水概率 {{value}}%", "previousHours": "前几小时", "nextHours": "后几小时", "precipitationLabel": "降水概率", "lowLabel": "最低气温", "highLabel": "最高气温", "localTime": "当地时间（{{offset}}）", "hourly": "逐小时预报", "daily": "逐日预报", "openWeb": "在网页上查看", "openWebHint": "按 Enter 在网页上查看", "loading": "正在加载{{place}}的天气…", "unavailable": "此时段没有预报", "needsLocation": {"title": "请选择默认地区", "description": "不指定地区时，将显示设置中所选地区的天气。", "action": "打开设置", "hint": "按 Enter 打开设置"}, "error": {"title": "无法加载天气", "description": "请检查网络连接。"}, "attribution": "天气数据：Open-Meteo · © OpenStreetMap"},
   "web": {"placeholder": "在网上搜索"},
   "modes": {"all": {"name": "全部搜索"}, "web": {"chip": "网页", "name": "网页搜索"}, "code": {"chip": "代码", "name": "代码搜索"}}
 }

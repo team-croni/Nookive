@@ -20,6 +20,9 @@ const ALLOWED_FILES = new Set([
   'utils/webSearchEngines.ts',
   // 계산기가 알아듣는 한국어 단위 이름과 조사(킬로미터, 평, ~를 ~로). 화면 문구가 아니라 입력 해석 규칙이다.
   'features/search/utils/calculator.ts',
+  // 날씨 검색어와 지명을 알아보는 한국어·중국어·일본어 단어(날씨, 내일, ~구). 화면 문구가 아니라 입력 해석 규칙이다.
+  'features/search/utils/weatherQuery.ts',
+  'features/search/utils/weatherPlaces.ts',
 ]);
 
 const flatKeys = (value: unknown, prefix = ''): string[] =>
@@ -62,6 +65,22 @@ describe('translations', () => {
       const keys = new Set(flatKeys(readLocale(locale, namespace)));
       const missing = englishKeys.filter((key) => !keys.has(key));
       expect(missing, `${locale}/${namespace}.json is missing keys`).toEqual([]);
+    }
+  });
+
+  // {{value}} 같은 자리표시자가 빠지거나 이름이 다르면 그 언어에서만 값이 보이지 않는다.
+  it.each(NAMESPACES)('keeps the same placeholders as English (%s)', (namespace) => {
+    const placeholders = (text: unknown) =>
+      typeof text === 'string' ? [...text.matchAll(/\{\{\s*(\w+)\s*\}\}/g)].map((match) => match[1]).sort().join(',') : '';
+    const english = readLocale('en', namespace);
+    const valueAt = (root: unknown, key: string) =>
+      key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], root);
+    for (const locale of locales) {
+      const translated = readLocale(locale, namespace);
+      const mismatched = flatKeys(english).filter(
+        (key) => placeholders(valueAt(english, key)) !== placeholders(valueAt(translated, key)),
+      );
+      expect(mismatched, `${locale}/${namespace}.json has different placeholders`).toEqual([]);
     }
   });
 

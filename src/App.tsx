@@ -18,10 +18,12 @@ import { cycleSearchMode } from './features/search/utils/searchModes';
 import { pickInlineCompletion } from './features/search/utils/inlineCompletion';
 import { calculate, copyTextForCalculation } from './features/search/utils/calculator';
 import { CalculatorPreview, CalculatorRow } from './features/search/components/CalculatorResult';
+import { WeatherPreview, WeatherRow } from './features/search/components/WeatherResult';
+import { useWeather } from './features/search/hooks/useWeather';
 import { getInlineCompletionEnabled, subscribeInlineCompletionEnabled } from './utils/inlineCompletionPreference';
 import { searchClient } from './features/search/services/searchClient';
 import { rankQuery } from './features/search/services/rankQuery';
-import { openCodeFile, openFileInOS, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
+import { openCodeFile, openFileInOS, openSettingsWindow, revealFileInOS, hideDesktopWindow } from './utils/tauriBridge';
 import { getCodeEditor } from './utils/codeSearchPreference';
 import type { SearchResultItem } from './types/search';
 import './App.css';
@@ -55,8 +57,13 @@ export function App() {
   // 계산기·단위 변환: 결과가 있으면 목록 맨 위 줄(선택 번호 0)이 되고, 로컬 결과는 한 칸씩 밀린다.
   // 웹·코드 모드와 빈 검색어에서는 쓰지 않는다.
   const calculation = useMemo(() => (searchMode === 'all' ? calculate(query) : null), [searchMode, query]);
-  const listOffset = calculation ? 1 : 0;
+  // 날씨: "수원 날씨", "내일 날씨"처럼 물으면 계산 결과와 같은 자리에 보인다. 첫 답이 오기 전에는 줄을 두지 않고
+  // 지금 화면(로컬 결과, 웹 폴백)을 그대로 둔다.
+  const { result: weather, pending: isWeatherPending } = useWeather(query, searchMode === 'all' && !calculation);
+  const hasAnswerRow = calculation !== null || weather !== null;
+  const listOffset = hasAnswerRow ? 1 : 0;
   const isCalculationSelected = calculation !== null && selectedIndex === 0;
+  const isWeatherSelected = weather !== null && selectedIndex === 0;
   const resultIndex = selectedIndex - listOffset;
   const currentSelected = resultIndex >= 0 ? deferredResults[resultIndex] : undefined;
   const { previewQuery, previewSelected } = usePreviewSelection(query, currentSelected);
@@ -79,6 +86,27 @@ export function App() {
     return () => clearTimeout(timer);
   }, [copiedQuery]);
   const isCalculationCopied = copiedQuery !== null && copiedQuery === query;
+
+  // 날씨 줄은 답이 온 뒤에 생기므로, 그사이 아래 결과를 고르고 있었다면 같은 결과가 계속 선택되게 한 칸 옮긴다.
+  const hadWeatherRowRef = useRef(false);
+  useEffect(() => {
+    const hasWeatherRow = weather !== null;
+    if (hasWeatherRow === hadWeatherRowRef.current) return;
+    hadWeatherRowRef.current = hasWeatherRow;
+    if (selectedIndex > 0) setSelectedIndex(selectedIndex + (hasWeatherRow ? 1 : -1));
+    // 줄이 생기고 사라질 때만 맞춘다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weather !== null]);
+
+  // 날씨 줄의 Enter: 기본 지역이 없으면 설정을, 그 밖에는 웹 검색으로 자세한 예보를 연다.
+  const openWeather = () => {
+    void hideDesktopWindow();
+    if (weather?.status === 'needsLocation') {
+      void openSettingsWindow('searchOptions');
+    } else {
+      void openWebSearch(query);
+    }
+  };
 
   // PDF별로 "실제 매칭 페이지 + 검색어 발견 여부"를 기억한다.
   // 선택을 바꿔도 이미 확인된 PDF의 뱃지 상태(숨김/페이지)가 유지되도록
@@ -168,7 +196,7 @@ export function App() {
   // 앱 결과가 먼저 도착한 중간 렌더에서도 웹 폴백을 유지해 빈 화면을 방지한다.
   const keepWebFallbackDuringSearch =
     isWindowExpanded && isLoading && webFallbackWasVisible;
-  const showWebFallback = !calculation && (showsWebResults || (!showsCodeResults && (
+  const showWebFallback = !hasAnswerRow && (showsWebResults || (!showsCodeResults && (
     (orderedResults.length === 0 && (webMode || (isWindowExpanded && !isSettled)))
     || keepWebFallbackDuringSearch
   )));
@@ -238,7 +266,7 @@ export function App() {
   useEffect(() => subscribeInlineCompletionEnabled(setInlineCompletionEnabledState), []);
   const completion = useMemo(
     () =>
-      inlineCompletionEnabled && searchMode === 'all' && !calculation
+      inlineCompletionEnabled && searchMode === 'all' && !calculation && !weather && !isWeatherPending
         ? pickInlineCompletion({
           query,
           settledQuery: settledSearchMode === 'all' ? settledQuery : '',
@@ -249,7 +277,7 @@ export function App() {
             : [],
         })
         : null,
-    [inlineCompletionEnabled, calculation, query, searchMode, settledQuery, settledSearchMode, orderedResults],
+    [inlineCompletionEnabled, calculation, weather, isWeatherPending, query, searchMode, settledQuery, settledSearchMode, orderedResults],
   );
 
   // 선택 항목 열기 (Enter / 하단 열기 버튼)
@@ -258,6 +286,10 @@ export function App() {
     // 계산 결과가 첫 줄이면 Enter는 결과를 복사한다.
     if (calculation && idx === 0) {
       copyCalculation();
+      return;
+    }
+    if (weather && idx === 0) {
+      openWeather();
       return;
     }
     // 자동완성이 보이면 첫 줄은 그 앱이다. 검색이 끝나기 전에 Enter를 눌러도 보이는 앱을 연다.
@@ -391,7 +423,7 @@ export function App() {
               </div>
             ) : (
               <div className="search-body-split">
-                <div className={`results-pane${calculation ? ' results-pane-stack' : ''}`}>
+                <div className={`results-pane${hasAnswerRow ? ' results-pane-stack' : ''}`}>
                   {calculation && (
                     <CalculatorRow
                       result={calculation}
@@ -399,6 +431,14 @@ export function App() {
                       copied={isCalculationCopied}
                       onSelect={() => setSelectedIndex(0)}
                       onCopy={copyCalculation}
+                    />
+                  )}
+                  {weather && (
+                    <WeatherRow
+                      result={weather}
+                      isActive={isWeatherSelected}
+                      onSelect={() => setSelectedIndex(0)}
+                      onOpen={openWeather}
                     />
                   )}
                   {orderedResults.length > 0 ? (
@@ -413,7 +453,7 @@ export function App() {
                         resolvedQuery={settledQuery}
                       />
                     </div>
-                  ) : !calculation && (
+                  ) : !hasAnswerRow && (
                     <div className="search-status">{t('searching')}</div>
                   )}
                 </div>
@@ -421,6 +461,12 @@ export function App() {
                 <div className="preview-pane-wrapper">
                   {isCalculationSelected ? (
                     <CalculatorPreview result={calculation} copied={isCalculationCopied} onCopy={copyCalculation} />
+                  ) : isWeatherSelected ? (
+                    <WeatherPreview
+                      result={weather}
+                      onOpenWeb={openWeather}
+                      onOpenSettings={openWeather}
+                    />
                   ) : (
                   <PreviewPane
                     selectedItem={previewSelected}
@@ -439,9 +485,14 @@ export function App() {
           {/* 3. 앱 전체 하단 액션 단축키 바 (확장된 검색 화면에서만 노출) */}
           {hasQuery && isWindowExpanded && (
             <AppFooter
-              canOpen={showWebFallback ? webItemCount > 0 : isCalculationSelected || Boolean(currentSelected)}
+              canOpen={showWebFallback ? webItemCount > 0 : isCalculationSelected || isWeatherSelected || Boolean(currentSelected)}
               canCopyPath={!showWebFallback && Boolean(currentSelected)}
-              openLabel={showWebFallback ? t('footer.webOpen') : isCalculationSelected ? t('calculator.copy') : openLabelFor(currentSelected)}
+              openLabel={
+                showWebFallback ? t('footer.webOpen')
+                  : isCalculationSelected ? t('calculator.copy')
+                    : isWeatherSelected ? t(weather.status === 'needsLocation' ? 'weather.needsLocation.action' : 'footer.webOpen')
+                      : openLabelFor(currentSelected)
+              }
               onOpen={() => openSelectedAt(selectedIndex)}
               onCopyPath={handleCopyPath}
               modeHint={modeHint}

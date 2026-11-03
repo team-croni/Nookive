@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '../../../components/ui/Button/Button';
 import { openFileInOS } from '../../../utils/tauriBridge';
 import { formatCalculation, type Calculation } from '../utils/calculator';
+import rowStyles from './AnswerRow.module.css';
 import styles from './CalculatorResult.module.css';
 
 interface CalculatorRowProps {
@@ -20,18 +21,18 @@ export const CalculatorRow: React.FC<CalculatorRowProps> = ({ result, isActive, 
   const { t, i18n } = useTranslation('search');
   return (
     <div
-      className={`${styles.row} ${isActive ? styles.active : ''}`}
+      className={`${rowStyles.row} ${isActive ? rowStyles.active : ''}`}
       onClick={onSelect}
       onDoubleClick={onCopy}
     >
-      <span className={styles.icon} aria-hidden="true">
+      <span className={rowStyles.icon} aria-hidden="true">
         <Calculator size={18} />
       </span>
-      <div className={styles.text}>
-        <span className={styles.value}>= {formatCalculation(result, i18n.resolvedLanguage ?? i18n.language)}</span>
-        <span className={styles.interpretation}>{result.interpretation}</span>
+      <div className={rowStyles.text}>
+        <span className={rowStyles.value}>= {formatCalculation(result, i18n.resolvedLanguage ?? i18n.language)}</span>
+        <span className={rowStyles.interpretation}>{result.interpretation}</span>
       </div>
-      <span className={styles.hint}>
+      <span className={rowStyles.hint}>
         {copied ? (
           <>
             <Check size={13} aria-hidden="true" /> {t('calculator.copied')}

@@ -121,6 +121,23 @@ export async function showSearchWindow(): Promise<void> {
   }
 }
 
+/** 설정을 연 쪽이 보여줄 분류. 설정 창이 읽고 지운다. (다른 창끼리는 localStorage로 전한다) */
+export const SETTINGS_TAB_REQUEST_KEY = 'nookive.settingsTabRequest';
+
+/** 검색 창에서 설정 창 열기. tab을 주면 그 분류를 연다. */
+export async function openSettingsWindow(tab?: string): Promise<void> {
+  try {
+    if (tab) localStorage.setItem(SETTINGS_TAB_REQUEST_KEY, tab);
+  } catch {
+    // 분류를 넘기지 못해도 설정 창은 연다.
+  }
+  try {
+    await invoke('open_settings_window');
+  } catch (err) {
+    console.warn('[Tauri] open_settings_window 실패:', err);
+  }
+}
+
 /** 설정 창 숨기기 */
 export async function hideSettingsWindow(): Promise<void> {
   try {

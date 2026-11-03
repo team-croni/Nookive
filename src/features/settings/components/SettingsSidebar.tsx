@@ -44,7 +44,8 @@ export function SettingsSidebar<T extends string>({ items, active, onChange, ari
             onClick={() => onChange(id)}
           >
             <Icon size={15} aria-hidden="true" />
-            <span>{label}</span>
+            {/* data-label: 굵게 바뀌어도 폭이 같도록 굵은 글자 폭을 미리 잡는다. (SettingsApp.module.css) */}
+            <span data-label={label}>{label}</span>
           </button>
         ))}
       </div>
