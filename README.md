@@ -47,6 +47,8 @@ locally with EmbeddingGemma 2 and llama.cpp.
   identifier. Newly installed or removed apps show up within a few seconds.
   As you type, the top app's name completes inline (`c` → Claude); press
   Enter to open it. You can turn this off in Settings.
+- Quick math and unit conversions right in the search field (`12*7`,
+  `10 km in mi`, `100f in c`); press Enter to copy the result.
 - Exact terms and filenames alongside semantic ranking.
 
 PDF results are scanned in the background so a result can show the page where

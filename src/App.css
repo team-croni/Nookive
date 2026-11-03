@@ -75,6 +75,18 @@
   overflow: hidden;
 }
 
+/* 계산 결과 줄이 있으면 그 아래에 결과 목록을 쌓는다. */
+.results-pane-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.results-pane-list {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
 /* 우측 파일 미리보기 */
 .preview-pane-wrapper {
   flex: 12;

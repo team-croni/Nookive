@@ -16,6 +16,8 @@ import { openWebSearch } from './features/search/services/webSearchClient';
 import { feedbackClient } from './features/search/services/feedbackClient';
 import { cycleSearchMode } from './features/search/utils/searchModes';
 import { pickInlineCompletion } from './features/search/utils/inlineCompletion';
+import { calculate, copyTextForCalculation } from './features/search/utils/calculator';
+import { CalculatorPreview, CalculatorRow } from './features/search/components/CalculatorResult';
 import { getInlineCompletionEnabled, subscribeInlineCompletionEnabled } from './utils/inlineCompletionPreference';
 import { searchClient } from './features/search/services/searchClient';
 import { rankQuery } from './features/search/services/rankQuery';
@@ -29,7 +31,7 @@ import { useCodeEditor } from './hooks/useCodeEditor';
 
 export function App() {
   useTheme();
-  const { t } = useTranslation('search');
+  const { t, i18n } = useTranslation('search');
   const {
     query,
     setQuery,
@@ -50,8 +52,33 @@ export function App() {
     deferredResults,
   } = useSearchResults();
 
-  const currentSelected = deferredResults[selectedIndex];
+  // 계산기·단위 변환: 결과가 있으면 목록 맨 위 줄(선택 번호 0)이 되고, 로컬 결과는 한 칸씩 밀린다.
+  // 웹·코드 모드와 빈 검색어에서는 쓰지 않는다.
+  const calculation = useMemo(() => (searchMode === 'all' ? calculate(query) : null), [searchMode, query]);
+  const listOffset = calculation ? 1 : 0;
+  const isCalculationSelected = calculation !== null && selectedIndex === 0;
+  const resultIndex = selectedIndex - listOffset;
+  const currentSelected = resultIndex >= 0 ? deferredResults[resultIndex] : undefined;
   const { previewQuery, previewSelected } = usePreviewSelection(query, currentSelected);
+  // 결과 목록은 계산 줄을 모르므로 목록 안의 번호로 바꿔 넘긴다. (ResultItem memo를 위해 참조를 고정)
+  const selectResultIndex = useCallback(
+    (index: number) => setSelectedIndex(index + listOffset),
+    [listOffset, setSelectedIndex],
+  );
+
+  // Enter·⌘C·더블클릭으로 계산 결과를 복사하고 잠깐 "복사됨"을 보여준다. (창은 닫지 않는다)
+  const [copiedQuery, setCopiedQuery] = useState<string | null>(null);
+  const copyCalculation = () => {
+    if (!calculation) return;
+    void navigator.clipboard.writeText(copyTextForCalculation(calculation, i18n.resolvedLanguage ?? i18n.language));
+    setCopiedQuery(query);
+  };
+  useEffect(() => {
+    if (copiedQuery === null) return;
+    const timer = setTimeout(() => setCopiedQuery(null), 1500);
+    return () => clearTimeout(timer);
+  }, [copiedQuery]);
+  const isCalculationCopied = copiedQuery !== null && copiedQuery === query;
 
   // PDF별로 "실제 매칭 페이지 + 검색어 발견 여부"를 기억한다.
   // 선택을 바꿔도 이미 확인된 PDF의 뱃지 상태(숨김/페이지)가 유지되도록
@@ -141,10 +168,10 @@ export function App() {
   // 앱 결과가 먼저 도착한 중간 렌더에서도 웹 폴백을 유지해 빈 화면을 방지한다.
   const keepWebFallbackDuringSearch =
     isWindowExpanded && isLoading && webFallbackWasVisible;
-  const showWebFallback = showsWebResults || (!showsCodeResults && (
+  const showWebFallback = !calculation && (showsWebResults || (!showsCodeResults && (
     (orderedResults.length === 0 && (webMode || (isWindowExpanded && !isSettled)))
     || keepWebFallbackDuringSearch
-  ));
+  )));
 
   // 웹 폴백에서 새 로컬 검색으로 전환할 때, 앱 결과가 확정될 때까지
   // 웹 폴백을 유지할 수 있도록 마지막 표시 상태를 기억한다.
@@ -211,7 +238,7 @@ export function App() {
   useEffect(() => subscribeInlineCompletionEnabled(setInlineCompletionEnabledState), []);
   const completion = useMemo(
     () =>
-      inlineCompletionEnabled && searchMode === 'all'
+      inlineCompletionEnabled && searchMode === 'all' && !calculation
         ? pickInlineCompletion({
           query,
           settledQuery: settledSearchMode === 'all' ? settledQuery : '',
@@ -222,12 +249,17 @@ export function App() {
             : [],
         })
         : null,
-    [inlineCompletionEnabled, query, searchMode, settledQuery, settledSearchMode, orderedResults],
+    [inlineCompletionEnabled, calculation, query, searchMode, settledQuery, settledSearchMode, orderedResults],
   );
 
   // 선택 항목 열기 (Enter / 하단 열기 버튼)
   // 열린 앱이 포커스를 가져가 blur가 발생할 때까지 기다리지 않고 창을 바로 숨긴다.
   const openSelectedAt = (idx: number) => {
+    // 계산 결과가 첫 줄이면 Enter는 결과를 복사한다.
+    if (calculation && idx === 0) {
+      copyCalculation();
+      return;
+    }
     // 자동완성이 보이면 첫 줄은 그 앱이다. 검색이 끝나기 전에 Enter를 눌러도 보이는 앱을 연다.
     if (idx === 0 && completion) {
       void hideDesktopWindow();
@@ -241,7 +273,7 @@ export function App() {
       void openWebSearch(target);
       return;
     }
-    const selected = deferredResults[idx];
+    const selected = deferredResults[idx - listOffset];
     if (!selected) return;
     void hideDesktopWindow();
     handleOpenItem(selected);
@@ -249,7 +281,10 @@ export function App() {
 
   // 키보드 네비게이션 등록
   useKeyboardNav({
-    itemCount: showWebFallback ? webItemCount : deferredResults.length,
+    // 계산 줄은 한 칸으로 센다. 결과가 오기 전이라도 자동완성이 보이면 Enter가 동작하도록 한 칸은 둔다.
+    itemCount: showWebFallback
+      ? webItemCount
+      : Math.max(deferredResults.length + listOffset, completion ? 1 : 0),
     selectedIndex,
     setSelectedIndex,
     onEnter: openSelectedAt,
@@ -292,6 +327,10 @@ export function App() {
   }, []);
 
   const handleCopyPath = () => {
+    if (isCalculationSelected) {
+      copyCalculation();
+      return;
+    }
     if (currentSelected) {
       navigator.clipboard.writeText(currentSelected.file.path);
     }
@@ -351,23 +390,37 @@ export function App() {
               </div>
             ) : (
               <div className="search-body-split">
-                <div className="results-pane">
-                  {orderedResults.length > 0 ? (
-                    <ResultList
-                      results={deferredResults}
-                      query={query}
-                      selectedIndex={selectedIndex}
-                      onSelectIndex={setSelectedIndex}
-                      onItemOpen={handleOpenItem}
-                      resolvedPdfPages={resolvedPdfPages}
-                      resolvedQuery={settledQuery}
+                <div className={`results-pane${calculation ? ' results-pane-stack' : ''}`}>
+                  {calculation && (
+                    <CalculatorRow
+                      result={calculation}
+                      isActive={isCalculationSelected}
+                      copied={isCalculationCopied}
+                      onSelect={() => setSelectedIndex(0)}
+                      onCopy={copyCalculation}
                     />
-                  ) : (
+                  )}
+                  {orderedResults.length > 0 ? (
+                    <div className="results-pane-list">
+                      <ResultList
+                        results={deferredResults}
+                        query={query}
+                        selectedIndex={resultIndex}
+                        onSelectIndex={selectResultIndex}
+                        onItemOpen={handleOpenItem}
+                        resolvedPdfPages={resolvedPdfPages}
+                        resolvedQuery={settledQuery}
+                      />
+                    </div>
+                  ) : !calculation && (
                     <div className="search-status">{t('searching')}</div>
                   )}
                 </div>
 
                 <div className="preview-pane-wrapper">
+                  {isCalculationSelected ? (
+                    <CalculatorPreview result={calculation} copied={isCalculationCopied} onCopy={copyCalculation} />
+                  ) : (
                   <PreviewPane
                     selectedItem={previewSelected}
                     query={previewQuery}
@@ -376,6 +429,7 @@ export function App() {
                     onRevealFile={revealFileInOS}
                     onPdfPageResolved={handlePdfPageResolved}
                   />
+                  )}
                 </div>
               </div>
             )
@@ -384,9 +438,9 @@ export function App() {
           {/* 3. 앱 전체 하단 액션 단축키 바 (확장된 검색 화면에서만 노출) */}
           {hasQuery && isWindowExpanded && (
             <AppFooter
-              canOpen={showWebFallback ? webItemCount > 0 : Boolean(currentSelected)}
+              canOpen={showWebFallback ? webItemCount > 0 : isCalculationSelected || Boolean(currentSelected)}
               canCopyPath={!showWebFallback && Boolean(currentSelected)}
-              openLabel={showWebFallback ? t('footer.webOpen') : openLabelFor(currentSelected)}
+              openLabel={showWebFallback ? t('footer.webOpen') : isCalculationSelected ? t('calculator.copy') : openLabelFor(currentSelected)}
               onOpen={() => openSelectedAt(selectedIndex)}
               onCopyPath={handleCopyPath}
               modeHint={modeHint}

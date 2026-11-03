@@ -6,6 +6,7 @@
   "footer": {"webOpen": "Ouvrir sur le web"},
   "code": {"placeholder": "Rechercher du code par nom de fichier, chemin ou contenu", "placeholderNoFiles": "Aucun fichier de code dans vos dossiers de recherche", "noResults": "Aucun code ne correspond à ce nom, chemin ou contenu.", "noFiles": "Aucun fichier de code dans vos dossiers de recherche.", "contentHint": "Le contenu du code est recherché à partir de 3 caractères.", "indexing": "Création des données de recherche du code. Une partie du contenu peut manquer jusqu'à la fin."},
   "completion": {"open": "Ouvrir", "openApp": "Ouvrir {{app}}"},
+  "calculator": {"copy": "Copier", "copied": "Copié", "copyHint": "Entrée pour copier", "openApp": "Ouvrir Calculette"},
   "web": {"placeholder": "Rechercher sur le web"},
   "modes": {"all": {"name": "Tout rechercher"}, "web": {"chip": "Web", "name": "Recherche web"}, "code": {"chip": "Code", "name": "Recherche de code"}}
 }
