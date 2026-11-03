@@ -44,10 +44,17 @@ export function isPdfFile(ext: string): boolean {
   return PDF_EXTS.has(ext.toLowerCase());
 }
 
-export type FileSection = 'applications' | 'folders' | 'documents' | 'images' | 'video' | 'audio' | 'code';
+/** 시스템 설정 화면인지 (Rust settings_panes.rs가 앱 목록에 함께 담는다) */
+export function isSettingsPane(ext: string): boolean {
+  const normalized = ext.toLowerCase();
+  return normalized === 'appex' || normalized === 'prefpane';
+}
+
+export type FileSection = 'applications' | 'settings' | 'folders' | 'documents' | 'images' | 'video' | 'audio' | 'code';
 
 export const FILE_SECTION_ORDER: FileSection[] = [
   'applications',
+  'settings',
   'folders',
   'documents',
   'images',
@@ -59,6 +66,8 @@ export const FILE_SECTION_ORDER: FileSection[] = [
 export function getFileSection(ext: string): FileSection {
   const normalized = ext.toLowerCase();
   if (normalized === 'app') return 'applications';
+  // 시스템 설정 화면(.appex)과 다른 회사의 설정 화면(.prefPane)
+  if (isSettingsPane(normalized)) return 'settings';
   if (normalized === 'folder') return 'folders';
   if (VIDEO_EXTS.has(normalized)) return 'video';
   if (AUDIO_EXTS.has(normalized)) return 'audio';

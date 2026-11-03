@@ -6,12 +6,7 @@ import { Badge } from '../../../components/ui/Badge/Badge';
 import { Button } from '../../../components/ui/Button/Button';
 import { HighlightText } from '../../../components/ui/HighlightText/HighlightText';
 import { Clock, HardDrive } from 'lucide-react';
-import {
-  isImageFile,
-  isVideoFile,
-  isAudioFile,
-  isPdfFile,
-} from '../../../utils/fileType';
+import { isImageFile, isVideoFile, isAudioFile, isPdfFile, isSettingsPane } from '../../../utils/fileType';
 import { ApplicationIcon } from '../../../components/ui/ApplicationIcon';
 import { FolderIcon } from '../../../components/ui/FolderIcon';
 import { checkFileAccess, getFileSrc } from '../../../utils/tauriBridge';
@@ -100,6 +95,8 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
   const isAudio = isAudioFile(file.extension);
   const isPdf = isPdfFile(file.extension);
   const isApplication = file.kind === 'application' || selectedItem.category === 'application';
+  // 시스템 설정 화면도 앱처럼 보이되, 종류 문구와 배지는 "시스템 설정"으로 보이고 Finder 버튼은 두지 않는다.
+  const isSettings = isApplication && isSettingsPane(file.extension);
   const isFolder = file.kind === 'folder' || file.extension.toLowerCase() === 'folder';
   // 코드 검색 결과는 선택했을 때 파일 앞부분을 읽어 보여준다.
   const isCode = selectedItem.category === 'code';
@@ -239,7 +236,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
               {file.name}
             </span>
             <span className={styles.applicationPreviewType}>
-              macOS {t('file.application', { ns: 'common' })}
+              {isSettings ? t('file.systemSettings', { ns: 'common' }) : `macOS ${t('file.application', { ns: 'common' })}`}
             </span>
           </div>
         )}
@@ -271,7 +268,7 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
             </h3>
           </div>
           <Badge variant="file">
-            {isApplication ? 'APP' : isFolder ? 'FOLDER' : file.extension.toUpperCase()}
+            {isSettings ? 'SETTINGS' : isApplication ? 'APP' : isFolder ? 'FOLDER' : file.extension.toUpperCase()}
           </Badge>
         </div>
         <p className={styles.filePath} title={file.path}>{file.path}</p>
@@ -280,7 +277,9 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
           {isApplication || isFolder ? (
             // 앱과 폴더는 크기와 수정 시각 대신 종류만 보여준다.
             <span className={styles.metaItem}>
-              {isApplication ? t('file.installedApp', { ns: 'common' }) : t('file.folder', { ns: 'common' })}
+              {isSettings
+                ? t('file.systemSettings', { ns: 'common' })
+                : isApplication ? t('file.installedApp', { ns: 'common' }) : t('file.folder', { ns: 'common' })}
             </span>
           ) : (
             <>
@@ -313,9 +312,11 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
           <Button variant="primary" size="xs" onClick={() => onOpenItem?.(selectedItem)}>
             <span>{openLabel ?? t('actions.open', { ns: 'common' })}</span>
           </Button>
-          <Button variant="secondary" size="xs" onClick={() => onRevealFile?.(file.path)}>
-            <span>{t('file.finder', { ns: 'common' })}</span>
-          </Button>
+          {!isSettings && (
+            <Button variant="secondary" size="xs" onClick={() => onRevealFile?.(file.path)}>
+              <span>{t('file.finder', { ns: 'common' })}</span>
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 {
   "actions": {"open": "開啟", "openIn": "在 {{app}} 中開啟", "cancel": "取消", "close": "關閉", "remove": "移除", "copyPath": "複製路徑", "refresh": "重新整理", "stop": "停止", "start": "建立索引", "details": "詳細資訊", "enabled": "開啟", "disabled": "關閉"},
   "fileTypes": {"document": "文件", "image": "圖片", "video": "影片", "audio": "音訊", "code": "程式碼"},
-  "file": {"application": "應用程式", "folder": "資料夾", "page": "第 {{count}} 頁", "timestamp": "時間戳 {{value}}", "finder": "在 Finder 中顯示", "installedApp": "已安裝的應用程式", "pageOf": "第 {{page}}/{{total}} 頁"},
+  "file": {"settings": "設定", "systemSettings": "系統設定", "application": "應用程式", "folder": "資料夾", "page": "第 {{count}} 頁", "timestamp": "時間戳 {{value}}", "finder": "在 Finder 中顯示", "installedApp": "已安裝的應用程式", "pageOf": "第 {{page}}/{{total}} 頁"},
   "language": {"label": "語言", "korean": "한국어", "english": "English", "japanese": "日本語", "chineseSimplified": "简体中文", "chineseTraditional": "繁體中文", "spanish": "Español", "french": "Français", "german": "Deutsch", "portuguese": "Português (Brasil)"}
 }

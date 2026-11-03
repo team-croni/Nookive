@@ -12,8 +12,7 @@ use crate::models::{ApplicationChunk, FolderFile, FolderSearchResult};
 
 /// 설정된 검색 루트 안의 디렉터리는 내용을 임베딩하지 않고 이름/경로 메타데이터만
 /// 검색한다. 파일 색인과 동일한 디렉터리 제외 규칙을 사용해 결과 수를 제한한다.
-#[tauri::command]
-pub fn list_indexed_folders(app: AppHandle) -> Result<Vec<FolderSearchResult>, String> {
+fn indexed_folders(app: AppHandle) -> Result<Vec<FolderSearchResult>, String> {
     let manifest = load_manifest(&app)?;
     let mut paths: HashSet<String> = manifest.directories.into_iter().collect();
 
@@ -73,8 +72,7 @@ pub fn list_indexed_folders(app: AppHandle) -> Result<Vec<FolderSearchResult>, S
 }
 
 /// macOS Finder가 사용하는 실제 폴더 아이콘을 PNG data URL로 반환한다.
-#[tauri::command]
-pub fn get_folder_icon(path: String) -> Option<String> {
+fn folder_icon(path: String) -> Option<String> {
     #[cfg(not(target_os = "macos"))]
     {
         let _ = path;
@@ -117,4 +115,21 @@ pub fn get_folder_icon(path: String) -> Option<String> {
         let encoded = base64::engine::general_purpose::STANDARD.encode(bytes?);
         Some(format!("data:image/png;base64,{encoded}"))
     }
+}
+
+// Tauri v2는 async가 아닌 커맨드를 메인 스레드에서 실행한다. 아래 커맨드는 plutil·sips를 실행하거나
+// 폴더를 훑어 오래 걸리므로, 메인 스레드(화면)를 막지 않게 블로킹 작업 스레드에서 실행한다.
+#[tauri::command]
+pub async fn get_folder_icon(path: String) -> Option<String> {
+    tauri::async_runtime::spawn_blocking(move || folder_icon(path))
+        .await
+        .ok()
+        .flatten()
+}
+
+#[tauri::command]
+pub async fn list_indexed_folders(app: AppHandle) -> Result<Vec<FolderSearchResult>, String> {
+    tauri::async_runtime::spawn_blocking(move || indexed_folders(app))
+        .await
+        .map_err(|e| format!("폴더 목록 스레드 실패: {e}"))?
 }

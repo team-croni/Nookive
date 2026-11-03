@@ -1,6 +1,6 @@
 {
   "actions": {"open": "Abrir", "openIn": "Abrir en {{app}}", "cancel": "Cancelar", "close": "Cerrar", "remove": "Eliminar", "copyPath": "Copiar ruta", "refresh": "Actualizar", "stop": "Detener", "start": "Crear índice", "details": "Detalles", "enabled": "Activado", "disabled": "Desactivado"},
   "fileTypes": {"document": "Documentos", "image": "Imágenes", "video": "Vídeos", "audio": "Audio", "code": "Código"},
-  "file": {"application": "Aplicación", "folder": "Carpeta", "page": "Página {{count}}", "timestamp": "Marca de tiempo {{value}}", "finder": "Mostrar en Finder", "installedApp": "App instalada", "pageOf": "Página {{page}}/{{total}}"},
+  "file": {"settings": "Ajustes", "systemSettings": "Ajustes del Sistema", "application": "Aplicación", "folder": "Carpeta", "page": "Página {{count}}", "timestamp": "Marca de tiempo {{value}}", "finder": "Mostrar en Finder", "installedApp": "App instalada", "pageOf": "Página {{page}}/{{total}}"},
   "language": {"label": "Idioma", "korean": "한국어", "english": "English", "japanese": "日本語", "chineseSimplified": "简体中文", "chineseTraditional": "繁體中文", "spanish": "Español", "french": "Français", "german": "Deutsch", "portuguese": "Português (Brasil)"}
 }

@@ -48,6 +48,20 @@ const records = [
   app('카카오톡', 'com.kakao.KakaoTalkMac', 'KakaoTalk', ['KakaoTalk']),
   // macOS의 "나의 찾기"는 이름 가운데 공백이 줄바꿈 없는 공백(U+00A0)이다.
   app('나의\u00a0찾기', 'com.apple.findmy', 'FindMy', ['Find My']),
+  // 시스템 설정 화면은 앱과 같은 모양으로 오고 확장자(appex)로 "설정" 묶음이 된다.
+  {
+    ...app('개인정보 보호 및 보안', 'com.apple.settings.PrivacySecurity.extension', 'x', ['Privacy & Security', 'Privacy']),
+    id: 'settings:/System/Library/ExtensionKit/Extensions/SecurityPrivacyExtension.appex',
+    file: {
+      ...app('개인정보 보호 및 보안', '', 'x', ['Privacy & Security', 'Privacy']).file,
+      path: '/System/Library/ExtensionKit/Extensions/SecurityPrivacyExtension.appex',
+      extension: 'appex',
+    },
+  },
+  {
+    ...app('Wi\u2011Fi', 'com.apple.wifi-settings-extension', 'x', ['Wi-Fi']),
+    file: { ...app('Wi\u2011Fi', '', 'x').file, path: '/System/Library/ExtensionKit/Extensions/Wi-Fi.appex', extension: 'appex' },
+  },
   file('studio-booking.md', 'md', 'The photo studio is booked for March.', UNRELATED),
   file('receipt.png', 'png', '[사진 이미지] 사물/객체: 문서 서류. Vision: document', UNRELATED),
 ];
@@ -85,6 +99,16 @@ describe('application names', () => {
   it('matches both the localized name and the Info.plist name', () => {
     expect(search('카카오톡')).toEqual(['카카오톡']);
     expect(search('kakaotalk')).toEqual(['카카오톡']);
+  });
+
+  it('finds System Settings panes by localized and English names', () => {
+    for (const query of ['개인정보', '개인정보 보호 및 보안', 'privacy']) {
+      expect(search(query), query).toEqual(['개인정보 보호 및 보안']);
+    }
+    expect(search('wi-fi')).toEqual(['Wi\u2011Fi']);
+    expect(search('wifi')).toEqual(['Wi\u2011Fi']);
+    // 설정 확장의 내부 파일명("…Extension.appex")으로는 찾지 않는다.
+    expect(search('extension')).toEqual([]);
   });
 
   it('treats non-breaking spaces in names as spaces', () => {

@@ -25,6 +25,7 @@ const MIN_STD = 0.02;
 // 값은 EmbeddingGemma 2 기준으로 관측한 관련/비관련 분포 사이에 맞췄다.
 const MIN_SEMANTIC_SIMILARITY: Record<FileSection, number> = {
   applications: 0.69,
+  settings: 0.69,
   folders: 0.69,
   documents: 0.69,
   code: 0.69,
@@ -144,11 +145,19 @@ function searchableNames(item: SearchResultItem): string[] {
     const name = nfcName(alternate).toLowerCase();
     if (!names.includes(name)) names.push(name);
   }
-  if (item.file.kind === 'application') {
+  // 번들 파일명은 앱(.app)만 쓴다. 시스템 설정 화면의 파일명("SecurityPrivacyExtension.appex")은 내부 이름이다.
+  if (item.file.kind === 'application' && /\.app$/i.test(item.file.path)) {
     const bundleName = nfcName(item.file.path.split('/').pop() ?? '')
       .replace(/\.app$/i, '')
       .toLowerCase();
     if (bundleName && !names.includes(bundleName)) names.push(bundleName);
+  }
+  // 앱·설정 이름의 하이픈은 빼고 치는 경우가 많다. ("wifi" → Wi-Fi) 하이픈을 뺀 이름도 이름으로 본다.
+  if (item.file.kind === 'application') {
+    for (const name of [...names]) {
+      const joined = name.replace(/-/g, '');
+      if (joined !== name && !names.includes(joined)) names.push(joined);
+    }
   }
   return names;
 }
