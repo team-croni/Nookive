@@ -7,7 +7,7 @@ set -euo pipefail
 DEMO=/Users/Shared/NookiveDemo
 STORYBOARD="$DEMO/storyboard.applescript"
 OUT_DIR="$DEMO/recordings"
-DURATION=${DURATION:-40}
+DURATION=${DURATION:-55}
 mkdir -p "$OUT_DIR"
 TAKE="$OUT_DIR/take-$(date +%Y%m%d-%H%M%S).mov"
 

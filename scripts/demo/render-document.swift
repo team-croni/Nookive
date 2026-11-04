@@ -56,12 +56,16 @@ func attributed(_ text: String, _ font: CTFont, _ color: [Double], lineHeight: D
   CFAttributedStringSetAttribute(string, range, kCTFontAttributeName, font)
   CFAttributedStringSetAttribute(string, range, kCTForegroundColorAttributeName, rgb(color))
   if let lineHeight {
+    // 포인터가 문단 스타일을 만드는 동안 유효하도록 withUnsafeBytes 안에서 만든다.
     var height = CGFloat(lineHeight)
-    let settings = [
-      CTParagraphStyleSetting(spec: .minimumLineHeight, valueSize: MemoryLayout<CGFloat>.size, value: &height),
-      CTParagraphStyleSetting(spec: .maximumLineHeight, valueSize: MemoryLayout<CGFloat>.size, value: &height),
-    ]
-    CFAttributedStringSetAttribute(string, range, kCTParagraphStyleAttributeName, CTParagraphStyleCreate(settings, settings.count))
+    let style = withUnsafeBytes(of: &height) { bytes -> CTParagraphStyle in
+      let settings = [
+        CTParagraphStyleSetting(spec: .minimumLineHeight, valueSize: bytes.count, value: bytes.baseAddress!),
+        CTParagraphStyleSetting(spec: .maximumLineHeight, valueSize: bytes.count, value: bytes.baseAddress!),
+      ]
+      return CTParagraphStyleCreate(settings, settings.count)
+    }
+    CFAttributedStringSetAttribute(string, range, kCTParagraphStyleAttributeName, style)
   }
   return string
 }

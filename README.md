@@ -1,32 +1,42 @@
-# Nookive
-
 <p align="center">
-  <img src="public/nookive-wordmark.svg" alt="Nookive" width="360">
+  <img src="src-tauri/icons/128x128@2x.png" alt="" width="112">
 </p>
 
-**Describe it. Find it.**
+<h1 align="center">Nookive</h1>
 
 <p align="center">
-  <img src="docs/assets/nookive-demo.gif" alt="Nookive demo: launching an app, finding the right PDF page from a question, finding photos by what is in them, jumping to a moment in a podcast, and searching in Korean" width="800">
+  <strong>Every nook of your Mac, one search away.</strong><br>
+  Type what you remember, not what you named it. Nookive finds the PDF page,
+  the photo, or the moment in a recording, on-device with EmbeddingGemma 2.
 </p>
 
-Maintained by [Croni](https://github.com/team-croni). Source code and releases
-are hosted at [team-croni/Nookive](https://github.com/team-croni/Nookive).
+<p align="center">
+  <a href="https://github.com/team-croni/Nookive/releases/latest"><strong>Download for macOS</strong></a>
+  ·
+  <a href="#build-from-source">Build from source</a>
+  ·
+  <a href="docs/README.md">Docs</a>
+</p>
 
-This is an open-source project for macOS. It is not distributed through the
-Apple App Store and release builds are not Apple-notarized.
+<p align="center">
+  Apple Silicon · macOS 14+ · No account, and your files never leave your Mac.
+</p>
 
-[Download Nookive for macOS (Apple Silicon)](https://github.com/team-croni/Nookive/releases) · [View all releases](https://github.com/team-croni/Nookive/releases)
+<p align="center">
+  <a href="https://github.com/team-croni/Nookive/releases/latest"><img src="https://img.shields.io/github/v/release/team-croni/Nookive?label=release&color=3b82f6" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/platform-macOS%2014%2B-111827?logo=apple" alt="Platform: macOS 14+">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/team-croni/Nookive?color=22c55e" alt="License: MIT"></a>
+</p>
 
-Nookive is an open-source, on-device semantic search app for macOS. Search
-your documents, images, recordings, and videos by describing what you
-remember instead of guessing a filename. Nookive runs the embedding pipeline
-locally with EmbeddingGemma 2 and llama.cpp.
+<p align="center">
+  <img src="docs/assets/nookive-demo.gif" alt="Nookive demo: launching an app, finding the right PDF page from a question, finding photos by what is in them, jumping to a moment in a podcast, answering weather, time zone, currency, and date questions, and searching in Korean" width="800">
+</p>
 
-> Your indexed content stays on your Mac. Nookive does not require an account
-> or a hosted AI service. Model downloads, web suggestions/web-search
-> actions (Google by default), weather and world-time place lookups, and daily exchange rates are network operations;
-> they are separate from local indexing.
+Nookive is an open-source launcher and semantic search app for macOS,
+maintained by [Croni](https://github.com/team-croni). Search your documents,
+images, recordings, and videos by what is in them, and open apps, System
+Settings panes, or quick answers from the same search field. The embedding
+pipeline runs locally with EmbeddingGemma 2 and llama.cpp.
 
 ## What it can find
 
@@ -83,8 +93,10 @@ additional model or platform requirements.
 
 ## Install a release
 
+Nookive is not distributed through the Apple App Store.
 Download the latest macOS Apple Silicon DMG from [GitHub Releases](https://github.com/team-croni/Nookive/releases), open the DMG,
-and move Nookive to Applications. Until Apple Developer signing and
+and move Nookive to Applications. Release builds are not Apple-notarized yet:
+until Apple Developer signing and
 notarization are added, a downloaded release may show a macOS security warning;
 users may need to use Control-click → Open or approve it in Privacy & Security.
 On first launch, Nookive opens the in-app installer when the required search
@@ -171,6 +183,11 @@ Keychain, or CI secret storage for those values.
 
 ## Privacy and data handling
 
+> Your indexed content stays on your Mac. Nookive does not require an account
+> or a hosted AI service. Model downloads, web suggestions/web-search
+> actions (Google by default), weather and world-time place lookups, and daily
+> exchange rates are network operations; they are separate from local indexing.
+
 Nookive reads file contents only from folders selected by the user and stores
 its local index in the application data directory. It also scans the standard
 macOS application folders for installed app names and bundle identifiers; app
@@ -217,9 +234,15 @@ The demo above uses made-up documents and recordings created by
 [Crossmodal-3600](https://google.github.io/crossmodal-3600/) and are licensed
 under [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/):
 [sunset over the sea](https://www.flickr.com/photos/mckaysavage/7012759923)
-by McKay Savage and
+by McKay Savage,
 [evening beach](https://www.flickr.com/photos/eager/5686015449/) by
-準建築人手札網站 Forgemind ArchiMedia.
+準建築人手札網站 Forgemind ArchiMedia,
+[rocky shore at sunset](https://www.flickr.com/photos/filipkowski_roman/14748152841)
+by Roman Filipkowski,
+[beach and boat](https://www.flickr.com/photos/90329428@N07/8207553244) by
+TrailmixHikes, and
+[seaside slide at sunset](https://www.flickr.com/photos/r00s/9599614920) by
+Rosa Menkman.
 
 ## License
 
