@@ -12,7 +12,7 @@ export function AboutSection() {
   const [version, setVersion] = useState<string>('');
 
   useEffect(() => {
-    void getVersion().then(setVersion).catch(() => setVersion('0.1.5'));
+    void getVersion().then(setVersion).catch(() => setVersion('0.1.6'));
   }, []);
 
   const openLink = (url: string) => {
