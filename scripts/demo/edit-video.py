@@ -22,31 +22,40 @@ RX, RY, RW, RH = 808, 545, 1840, 1150
 
 # (원본 시작, 끝, 배속)
 SEGMENTS = [
-    (1.35, 4.0, 1.0),    # 창 등장, sys -> System Information
-    (4.0, 5.4, 3.0),     # 대기 + 전체 선택
-    (5.4, 7.7, 1.8),     # 긴 질문 입력
-    (7.7, 12.9, 1.0),    # PDF p.3, ↓ 2024
-    (12.9, 15.4, 1.8),   # 전체 선택 + sunset 입력
-    (15.4, 19.5, 1.0),   # 사진, ↓
-    (19.5, 21.7, 1.8),   # apollo 입력
-    (21.7, 25.2, 1.0),   # 오디오 0:10 재생
-    (25.2, 26.4, 2.0),   # 전체 선택
-    (26.4, 30.9, 1.0),   # Q3 마케팅 예산
+    (1.35, 5.0, 1.0),    # 창 등장, cal -> Calculator
+    (5.0, 5.5, 2.0),     # 전체 선택
+    (5.5, 8.0, 1.8),     # 긴 질문 입력
+    (8.0, 13.6, 1.0),    # PDF p.3, ↓ 2024
+    (13.6, 15.4, 1.8),   # 전체 선택 + sunset 입력
+    (15.4, 19.6, 1.0),   # 사진, ↓
+    (19.6, 22.0, 1.8),   # apollo 입력
+    (22.0, 25.6, 1.0),   # 오디오 0:10 재생
+    (25.6, 27.3, 1.6),   # tokyo weather 입력
+    (27.3, 30.0, 1.0),   # 날씨
+    (30.0, 31.4, 1.4),   # 3pm PST in KST 입력
+    (31.4, 33.4, 1.0),   # 시간대 변환
+    (33.4, 34.9, 1.4),   # 100 usd in krw 입력
+    (34.9, 36.8, 1.0),   # 환율
+    (36.8, 38.4, 1.4),   # 100 days from today 입력
+    (38.4, 40.4, 1.0),   # 날짜
+    (40.4, 42.4, 1.4),   # Q3 마케팅 예산 입력
+    (42.4, 44.9, 1.0),   # 한국어로 찾은 영어 문서
 ]
 
 FULL = (RX + RW / 2, RY + RH / 2, 1.0)
 PREVIEW = (2084, 1090, 1.55)  # 미리보기 패널 (중심 x, y, 배율)
 # (원본 시각, 카메라) - 사이는 ease-in-out 보간. ↓로 선택을 옮기기 전에 빠져나와 목록이 보이게 한다.
 KEYS = [
-    (0.0, FULL), (8.0, FULL), (8.8, PREVIEW), (10.4, PREVIEW), (11.1, FULL),
+    (0.0, FULL), (8.1, FULL), (8.9, PREVIEW), (10.2, PREVIEW), (10.9, FULL),
 ]
 
 CAPTIONS = [
-    (1.35, 5.4, 'Launch apps in a few keystrokes'),
-    (5.4, 12.9, 'Ask in plain language — it opens the right page'),
-    (12.9, 19.5, "Find photos by what's in them"),
-    (19.5, 25.2, 'Jump to the moment it was said'),
-    (25.2, 31.0, 'Search in any language'),
+    (1.35, 5.5, 'Launch apps in a few keystrokes'),
+    (5.5, 13.6, 'Ask in plain language — it opens the right page'),
+    (13.6, 19.6, "Find photos by what's in them"),
+    (19.6, 25.6, 'Jump to the moment it was said'),
+    (25.6, 40.4, 'Weather, time zones, currency, and dates'),
+    (40.4, 45.0, 'Search in any language'),
 ]
 
 FADE_IN, FADE_OUT, CAPTION_FADE = 0.4, 0.5, 0.3

@@ -29,8 +29,9 @@ end selectQuery
 tell application "System Events" to key code 49 using option down
 delay 1.2
 
--- 2. 몇 글자로 앱 찾기
-typeText("sys", 0.16)
+-- 2. 몇 글자로 앱 찾기 (이름이 줄 안에서 자동 완성된다). /Applications는 모든 계정이 함께 쓰므로
+--    메인 계정에 설치한 앱이 걸리지 않는 검색어를 쓴다. ("saf"는 INISAFE 같은 앱도 잡힌다)
+typeText("cal", 0.16)
 delay 1.8
 
 -- 3. 질문하듯 문서 찾기 (PDF 3페이지로 이동), 방향키로 작년 보고서도 확인
@@ -52,13 +53,28 @@ selectQuery()
 typeText("apollo 11 moon landing", 0.06)
 delay 4.5
 
--- 6. 한국어로 영어 문서 찾기. "Q3"로 시작하면 입력 도중에도 결과가 비지 않아
+-- 6. 빠른 답: 날씨, 시간대, 환율, 날짜. 각 장면은 짧게 보여 준다.
+--    날씨와 환율은 네트워크를 쓰므로 record.sh의 리허설에서 미리 캐시를 데운다.
+selectQuery()
+typeText("tokyo weather", 0.06)
+delay 2.8
+selectQuery()
+typeText("3pm PST in KST", 0.06)
+delay 2.2
+selectQuery()
+typeText("100 usd in krw", 0.06)
+delay 2.0
+selectQuery()
+typeText("100 days from today", 0.06)
+delay 2.0
+
+-- 7. 한국어로 영어 문서 찾기. "Q3"로 시작하면 입력 도중에도 결과가 비지 않아
 --    웹 검색 화면이 끼어들지 않는다. ("마케팅"만 입력한 순간에는 영어 문서와 일치하는 결과가 없다)
 selectQuery()
 typeText("Q3 마케팅 예산", 0.16)
-delay 3.2
+delay 2.6
 
--- 7. 닫기 (첫 ESC는 검색어 지우기, 두 번째 ESC는 창 숨기기)
+-- 8. 닫기 (첫 ESC는 검색어 지우기, 두 번째 ESC는 창 숨기기)
 tell application "System Events" to key code 53
 delay 0.6
 tell application "System Events" to key code 53

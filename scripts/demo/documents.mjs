@@ -1,5 +1,5 @@
 // scripts/demo/documents.mjs
-// 시연 영상용 PDF 내용. 가상의 회사 "Fernway Labs"의 연차보고서와 임대차 계약서다.
+// 시연 영상용 PDF 내용. 가상의 회사 "Fernway Labs"의 보고서, 임대차 계약서, 인보이스, 매뉴얼 등이다.
 // render-document.swift가 이 구조를 실제 문서처럼 그린다.
 
 const accent = [0.15, 0.39, 0.92];
@@ -180,8 +180,118 @@ const lease = {
   ],
 };
 
+// 아래 문서는 검색 결과 목록이 비어 보이지 않도록 둔다. "sales", "budget" 같은 질문에 함께 걸린다.
+const quarterly = {
+  header: "Fernway Labs · Q3 2025 Quarterly Update",
+  accent,
+  pages: [
+    {
+      blocks: [
+        { kind: "eyebrow", text: "Quarterly Update" },
+        { kind: "title", text: "Q3 2025 at a glance" },
+        { kind: "subtitle", text: "Results for July through September 2025, shared with all employees." },
+        {
+          kind: "kpis",
+          kpis: [
+            { label: "Revenue", value: "$47.1M", delta: "+15% YoY" },
+            { label: "New customers", value: "2,140", delta: "+18% YoY" },
+            { label: "Overseas share", value: "27%", delta: "+4 pts" },
+            { label: "Churn", value: "1.9%", delta: "−0.3 pts" },
+          ],
+        },
+        { kind: "heading", text: "Sales" },
+        { kind: "paragraph", text: "Sales grew in every region this quarter. The reseller program in Europe signed 31 new partners, and the self-serve plan now brings in a third of new accounts." },
+        { kind: "heading", text: "Marketing" },
+        { kind: "paragraph", text: "The \"Open Late\" fall campaign launched on September 2. Spend stayed within the approved Q3 marketing budget, and cost per sign-up came in at $34." },
+      ],
+    },
+  ],
+};
+
+const invoice = {
+  header: "Northwind Studio · Invoice #2026-0418",
+  accent: [0.85, 0.42, 0.18],
+  pages: [
+    {
+      blocks: [
+        { kind: "eyebrow", text: "Invoice" },
+        { kind: "title", text: "Invoice #2026-0418" },
+        { kind: "subtitle", text: "Northwind Studio, billed to Fernway Labs. Due within 30 days." },
+        {
+          kind: "facts",
+          items: ["Issued|April 18, 2026", "Due|May 18, 2026", "Project|Website redesign, phase 2", "Total due|$12,800.00"],
+        },
+        {
+          kind: "table",
+          columns: ["Item", "Hours", "Rate", "Amount"],
+          rows: [
+            ["Design system update", "40", "$120", "$4,800"],
+            ["Landing page build", "50", "$120", "$6,000"],
+            ["Accessibility review", "16", "$125", "$2,000"],
+          ],
+        },
+        { kind: "paragraph", text: "Please pay by bank transfer and include the invoice number as the reference. Late payments are charged 1.5% per month." },
+      ],
+    },
+  ],
+};
+
+const espressoManual = {
+  header: "Brava One Espresso Machine · User Manual",
+  accent: [0.45, 0.3, 0.2],
+  pages: [
+    {
+      blocks: [
+        { kind: "eyebrow", text: "User Manual" },
+        { kind: "title", text: "Brava One Espresso Machine" },
+        { kind: "subtitle", text: "Read these instructions before first use and keep them for later." },
+        { kind: "heading", text: "Making an espresso" },
+        {
+          kind: "bullets",
+          items: [
+            "Fill the water tank and wait until the ready light stops blinking.",
+            "Use 18 g of finely ground coffee and tamp it evenly.",
+            "Press the single-cup button. A good shot takes 25 to 30 seconds.",
+          ],
+        },
+      ],
+    },
+    {
+      blocks: [
+        { kind: "heading", text: "Descaling" },
+        { kind: "callout", text: "Descale the machine every 3 months, or when the orange light turns on." },
+        { kind: "paragraph", text: "Mix one sachet of descaler with 1 liter of water, run it through the steam wand and the group head, then rinse twice with clean water." },
+        { kind: "heading", text: "Troubleshooting" },
+        { kind: "paragraph", text: "If coffee runs too fast, grind finer. If it drips slowly or not at all, grind coarser or tamp more lightly." },
+      ],
+    },
+  ],
+};
+
+const travelInsurance = {
+  header: "Bluepeak Travel Insurance · Policy Summary",
+  accent: [0.13, 0.55, 0.42],
+  pages: [
+    {
+      blocks: [
+        { kind: "eyebrow", text: "Policy Summary" },
+        { kind: "title", text: "Travel Insurance for Lisbon, May 2026" },
+        { kind: "facts", items: ["Insured|Alex Morgan", "Trip|May 12 – May 16, 2026", "Medical cover|Up to $250,000", "Baggage|Up to $2,000"] },
+        { kind: "heading", text: "Flight delays" },
+        { kind: "paragraph", text: "If your flight is delayed by more than 6 hours, you can claim up to $300 for meals and a hotel. Keep your receipts and the airline's delay confirmation." },
+        { kind: "heading", text: "Making a claim" },
+        { kind: "paragraph", text: "Submit claims online within 30 days of returning home." },
+      ],
+    },
+  ],
+};
+
 export const documents = {
   "Reports/Annual Report 2025.pdf": report2025,
   "Reports/Annual Report 2024.pdf": report2024,
+  "Reports/Q3 2025 Quarterly Update.pdf": quarterly,
   "Contracts/Apartment Lease.pdf": lease,
+  "Finance/Invoice 2026-0418.pdf": invoice,
+  "Manuals/Espresso Machine Manual.pdf": espressoManual,
+  "Travel/Travel Insurance Policy.pdf": travelInsurance,
 };
