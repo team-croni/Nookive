@@ -11,22 +11,33 @@ pub struct NativePdfPage {
     pub pixels: Vec<u8>,
 }
 
+// Tauri v2는 async가 아닌 커맨드를 메인 스레드에서 실행한다. 큰 PDF 페이지 그리기와 파일 읽기는 오래 걸려
+// 그동안 화면이 멈추므로 async 커맨드로 두고 블로킹 작업 스레드에서 실행한다. (CoreGraphics는 다른 스레드에서 써도 된다)
 #[tauri::command]
-pub fn render_pdf_page_native(
+pub async fn render_pdf_page_native(
     path: String,
     page_number: usize,
     scale: f64,
 ) -> Result<tauri::ipc::Response, String> {
+    let bytes = tauri::async_runtime::spawn_blocking(move || {
+        render_pdf_page_bytes(&path, page_number, scale)
+    })
+    .await
+    .map_err(|e| format!("PDF 렌더 작업 실패: {e}"))??;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
+fn render_pdf_page_bytes(path: &str, page_number: usize, scale: f64) -> Result<Vec<u8>, String> {
     #[cfg(target_os = "macos")]
     {
-        let page = render_pdf_page_core_graphics(&resolve_home(&path), page_number, scale)?;
+        let page = render_pdf_page_core_graphics(&resolve_home(path), page_number, scale)?;
         // base64 인코딩/디코딩 비용을 없애기 위해 [width u32 LE][height u32 LE][RGBA]로
         // 원시 바이트를 그대로 전송한다.
         let mut bytes = Vec::with_capacity(8 + page.pixels.len());
         bytes.extend_from_slice(&(page.width as u32).to_le_bytes());
         bytes.extend_from_slice(&(page.height as u32).to_le_bytes());
         bytes.extend_from_slice(&page.pixels);
-        return Ok(tauri::ipc::Response::new(bytes));
+        Ok(bytes)
     }
     #[cfg(not(target_os = "macos"))]
     {
@@ -219,11 +230,16 @@ fn render_pdf_page_core_graphics(
 }
 
 /// PDF 등 미리보기용: 로컬 파일을 raw 바이트로 읽어 IPC로 반환
+/// (색인 작업도 파일마다 부르므로 메인 스레드를 막지 않게 블로킹 작업 스레드에서 읽는다)
 #[tauri::command]
-pub fn read_file_bytes(path: String) -> Result<tauri::ipc::Response, String> {
-    let resolved_path = resolve_home(&path);
-    let bytes = std::fs::read(&resolved_path)
-        .map_err(|e| format!("파일 읽기 실패 ({}): {}", resolved_path, e))?;
+pub async fn read_file_bytes(path: String) -> Result<tauri::ipc::Response, String> {
+    let bytes = tauri::async_runtime::spawn_blocking(move || {
+        let resolved_path = resolve_home(&path);
+        std::fs::read(&resolved_path)
+            .map_err(|e| format!("파일 읽기 실패 ({}): {}", resolved_path, e))
+    })
+    .await
+    .map_err(|e| format!("파일 읽기 작업 실패: {e}"))??;
     Ok(tauri::ipc::Response::new(bytes))
 }
 

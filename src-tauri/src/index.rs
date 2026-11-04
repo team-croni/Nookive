@@ -194,9 +194,13 @@ pub fn clear_index_error(app: AppHandle) {
     clear_last_index_error(&app);
 }
 
+/// 검색 데이터 전체를 읽는다. 크면 오래 걸려 메인 스레드(화면)를 막지 않게 블로킹 작업 스레드에서 읽는다.
+/// (저장 쪽은 파일을 통째로 바꿔치기하므로 저장 중에 읽어도 반쯤 쓰인 파일을 읽지 않는다)
 #[tauri::command]
-pub fn load_runtime_index(app: AppHandle) -> Result<Vec<serde_json::Value>, String> {
-    runtime::load_runtime_index(app)
+pub async fn load_runtime_index(app: AppHandle) -> Result<Vec<serde_json::Value>, String> {
+    tauri::async_runtime::spawn_blocking(move || runtime::load_runtime_index(app))
+        .await
+        .map_err(|e| format!("runtime 인덱스 읽기 작업 실패: {e}"))?
 }
 
 #[tauri::command]

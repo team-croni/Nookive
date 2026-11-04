@@ -1,6 +1,6 @@
 ---
 date: 2026-11-04
-version: 2.9.0
+version: 2.9.1
 ---
 
 # System Architecture Specification
@@ -66,7 +66,10 @@ flowchart TB
 - **스레드**: Tauri v2는 `async`가 아닌 커맨드를 메인 스레드에서 실행해, 오래 걸리는 커맨드가 그동안 화면을 멈춘다. 앱·폴더 목록
   (`list_applications`, `list_indexed_folders`)과 아이콘(`get_application_icon`, `get_folder_icon`, `plutil`·`sips`를 실행)은
   `async` 커맨드로 두고 `spawn_blocking`에서 실행한다. (알파벳 한 글자로 앱이 많이 나올 때 아이콘을 처음 받는 동안 화면이
-  잠깐 멈추던 문제) 네트워크 커맨드(날씨, 환율, 웹 자동완성)도 같은 방식이다.
+  잠깐 멈추던 문제) 파일 읽기(`read_file_bytes`, 미리보기와 색인이 쓴다), PDF 페이지 그리기(`render_pdf_page_native`,
+  CoreGraphics), 검색 데이터 읽기(`load_runtime_index`)와 네트워크 커맨드(날씨, 환율, 웹 자동완성)도 같은 방식이다.
+  상태를 바꾸는 커맨드(`sync_index_manifest`, `reset_index`, `save_search_feedback` 등)는 메인 스레드에서 차례로 실행되는 덕분에
+  순서가 지켜지므로, 잠금 없이 옮기지 않는다. 창·트레이를 다루는 커맨드는 AppKit이 메인 스레드를 요구해 그대로 둔다.
 
 ### 2.3. AI 추론 및 벡터 엔진 (멀티모달)
 
